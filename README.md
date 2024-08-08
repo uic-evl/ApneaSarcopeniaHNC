@@ -6,7 +6,7 @@ The path to the backend code is:
 /var/www/withings
 
 After making any changes to the code on that server, run the following command:  
-## gunicorn systemctl restart`
+"gunicorn systemctl restart"
 
 Here is the link to the Django admin panel for managing users of the web application and their privileges:  
 https://hnc.evl.uic.edu/admin/
@@ -21,8 +21,8 @@ You can log in to this panel with the username and password provided in the prev
 After logging in to the authentication panel, you will have two options: Connect to Withings and Connect to Fitbit. After selecting either option, you must authenticate with your desired Withings or Fitbit account, which should already be registered.
 
 After connecting to both wearable devices, you can run the frontend code using the following commands:  
-## npm i 
-## npm run dev
+"npm i"
+"npm run dev"
 
 The frontend of the web application is the main interface, displaying various diagrams based on data received from Withings and Fitbit.
 
