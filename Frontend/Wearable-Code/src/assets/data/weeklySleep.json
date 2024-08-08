@@ -1,0 +1,9 @@
+[
+  { "time": "saturday", "deep": 5, "light": 2, "rem": 1, "awake": 2 },
+  { "time": "sunday", "deep": 3, "light": 1, "rem": 3, "awake": 3 },
+  { "time": "monday", "deep": 2, "light": 2, "rem": 2, "awake": 1 },
+  { "time": "tuesday", "deep": 4, "light": 1, "rem": 2, "awake": 3 },
+  { "time": "wednesday", "deep": 2, "light": 3, "rem": 1, "awake": 3 },
+  { "time": "thursday", "deep": 4, "light": 1, "rem": 1, "awake": 1 },
+  { "time": "friday", "deep": 2, "light": 2, "rem": 2, "awake": 1 }
+]

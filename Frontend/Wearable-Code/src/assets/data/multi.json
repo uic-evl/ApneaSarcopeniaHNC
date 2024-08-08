@@ -1,0 +1,41 @@
+[
+  {
+    "title": "SleepStages",
+    "type": "stacked",
+    "data": [
+      { "day": "Monday", "deep": 5, "light": 2, "rem": 1, "wake": 2 },
+      { "day": "Tuesday", "deep": 3, "light": 1, "rem": 3, "wake": 3 },
+      { "day": "Wednesday", "deep": 2, "light": 2, "rem": 2, "wake": 1 },
+      { "day": "Thursday", "deep": 4, "light": 1, "rem": 2, "wake": 3 },
+      { "day": "Friday", "deep": 2, "light": 3, "rem": 1, "wake": 3 },
+      { "day": "Saturday", "deep": 4, "light": 1, "rem": 1, "wake": 1 },
+      { "day": "Sunday", "deep": 2, "light": 2, "rem": 2, "wake": 1 }
+    ]
+  },
+  {
+    "title": "Fat",
+    "color": "#b91c1c",
+    "data": [
+      { "percentage": 20, "day": "Monday" },
+      { "percentage": 20.2, "day": "Tuesday" },
+      { "percentage": 19.8, "day": "Wednesday" },
+      { "percentage": 20.1, "day": "Thursday" },
+      { "percentage": 20.3, "day": "Friday" },
+      { "percentage": 20.0, "day": "Saturday" },
+      { "percentage": 20.1, "day": "Sunday" }
+    ]
+  },
+  {
+    "title": "Muscle",
+    "color": "#00BCD4",
+    "data": [
+      { "percentage": 40, "day": "Monday" },
+      { "percentage": 40.1, "day": "Tuesday" },
+      { "percentage": 40.2, "day": "Wednesday" },
+      { "percentage": 39.8, "day": "Thursday" },
+      { "percentage": 40.0, "day": "Friday" },
+      { "percentage": 40.1, "day": "Saturday" },
+      { "percentage": 40.2, "day": "Sunday" }
+    ]
+  }
+]
