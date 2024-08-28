@@ -8,6 +8,8 @@ The backend server is:
 hnc.evl.uic.edu
 You need your own credentials to connect to this server.
 
+(how to set up django - https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu )
+
 The path to the backend code is:  
 /var/www/withings
 
