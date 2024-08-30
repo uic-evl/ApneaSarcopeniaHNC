@@ -1,0 +1,41 @@
+{% extends "common/_base.html" %}
+{% load static %}
+
+{% block content %}
+    <style>
+        .grid-wrapper {
+            margin: 0;
+            padding: 0;
+            display: grid;
+            height: calc(100% - 56px);
+            grid-template-columns: 2.5fr 9fr;
+            grid-template-rows: 1fr;
+        }
+
+        html,
+        body {
+            position: fixed;
+            width: 100%;
+            background-color: #d7faf8;
+        }
+    </style>
+
+    <div class="grid-wrapper container-fluid">
+        {% block extra_css %}
+            <link rel="stylesheet" href="{% static 'custom/main.css' %}"/>
+        {% endblock %}
+        <div class="main">
+            {% if not error %}
+            <div class="col-left m-3">
+                <h4 class="section-title">Welcome. you should connect to service from menu</h4>
+                <h6 class="section-title">please note all provided data will be used as statistic in future</h6>
+            </div>
+            {% endif %}
+            {% if error %}
+            <div class="col-right m-3">
+                <h4 class="section-title" style="color: red">{{ error }}</h4>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
