@@ -1,0 +1,272 @@
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'custom/main.css' %}"/>
+    <!-- Include Moment.js for date handling -->
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <!-- Include Chart.js adapter for Moment.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+{% endblock %}
+
+<div class="main">
+    <div class="left-col">
+        <div class="grid-item activity">
+            <div class="section-title"><h6>Weight </h6><h6 id="nightDate" style="text-align: center;"></h6></div>
+            <div class="activity-grid">
+                <canvas id="weightChart" width="600" height="300"></canvas>
+            </div>
+        </div>
+        <div class="grid-item body-weight-fat">
+            <h6 class="section-title">Body Weight</h6>
+        </div>
+    </div>
+    <div class="right-col">
+        <div class="grid-item activity">
+            <div class="section-title"><h6>Fat Free Mass </h6><h6 id="nightDate" style="text-align: center;"></h6></div>
+            <div class="activity-grid">
+                <canvas id="fatFreeMassChart" width="600" height="300"></canvas>
+            </div>
+        </div>
+        <div class="grid-item body-weight-fat">
+            <h6 class="section-title">Body Fat Free Mass</h6>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fetch_data_from_withings_measure() {
+        const formData = new FormData();
+        formData.append('weight_date_to', "{{ weight_date_to }}")
+        formData.append('weight_date_from', "{{ weight_date_from }}")
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+        const options = {
+            method: 'POST',
+            body: formData,
+        }
+        fetch('{% url 'website:ajax-fetch-weight-from-withings-measure' %}', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data:', data);
+                weight_chart(data)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function fetch_fat_free_mass_from_withings_measure() {
+        const formData = new FormData();
+        formData.append('date', "2024-03-01")
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+        const options = {
+            method: 'POST',
+            body: formData,
+        }
+        fetch('{% url 'website:ajax-fetch-fat-free-mass-from-withings-measure' %}', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Process the response data
+                console.log('Data:', data);
+                fat_free_mass_chart(data)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
+    function fetch_fat_ratio_from_withings_measure() {
+        const formData = new FormData();
+        formData.append('date', "2024-03-01")
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+        const options = {
+            method: 'POST',
+            body: formData,
+        }
+        fetch('{% url 'website:ajax-fetch-fat-ratio-from-withings-measure' %}', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Process the response data
+                console.log('Data:', data);
+                fat_free_mass_chart(data)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
+    function fetch_fat_mass_weight_from_withings_measure() {
+        const formData = new FormData();
+        formData.append('date', "2024-03-01")
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+        const options = {
+            method: 'POST',
+            body: formData,
+        }
+        fetch('{% url 'website:ajax-fetch-fat-mass-weight-from-withings-measure' %}', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Process the response data
+                console.log('Data:', data);
+                fat_free_mass_chart(data)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
+    function fetch_muscle_mass_from_withings_measure() {
+        const formData = new FormData();
+        formData.append('date', "2024-03-01")
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+        const options = {
+            method: 'POST',
+            body: formData,
+        }
+        fetch('{% url 'website:ajax-fetch-muscle-mass-from-withings-measure' %}', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Process the response data
+                console.log('Data:', data);
+                fat_free_mass_chart(data)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
+    function fetch_bone_mass_from_withings_measure() {
+        const formData = new FormData();
+        formData.append('date', "2024-03-01")
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}')
+        const options = {
+            method: 'POST',
+            body: formData,
+        }
+        fetch('{% url 'website:ajax-fetch-bone-mass-from-withings-measure' %}', options)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Process the response data
+                console.log('Data:', data);
+                fat_free_mass_chart(data)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
+    fetch_data_from_withings_measure()
+    fetch_fat_free_mass_from_withings_measure()
+    fetch_fat_ratio_from_withings_measure()
+    fetch_fat_mass_weight_from_withings_measure()
+    fetch_muscle_mass_from_withings_measure()
+    fetch_bone_mass_from_withings_measure()
+
+    function weight_chart(response) {
+        // Extract timestamps and measurement values
+        const timestamps = response.body.measuregrps.map(grp => grp.date * 1000); // Convert to milliseconds
+        const values = response.body.measuregrps.map(grp => {
+            // Check if type is weight and unit is kilograms
+            if (grp.measures[0].type === 1 && grp.measures[0].unit === -3) {
+                // Convert value to kilograms
+                return grp.measures[0].value / 1000;
+            } else {
+                return grp.measures[0].value;
+            }
+        });
+
+        // Create a new Chart.js instance
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [{
+                    label: 'Measurement Values',
+                    data: values,
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day' // Adjust the time scale as needed
+                        }
+                    },
+                    y: {
+                        // Add any specific configurations for the y-axis here
+                    }
+                }
+            }
+        });
+    }
+
+    function fat_free_mass_chart(response) {
+        // Extracting data from the API response
+        const measureGroups = response.body.measuregrps;
+        const dates = measureGroups.map(grp => new Date(grp.date * 1000)); // Convert UNIX timestamp to JavaScript Date object
+        const values = measureGroups.map(grp => grp.measures[0].value);
+
+        // Creating a line chart using Chart.js
+        const ctx = document.getElementById('fatFreeMassChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Measured Values',
+                    data: values,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+

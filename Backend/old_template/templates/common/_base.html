@@ -1,0 +1,38 @@
+{% load i18n %}
+{% load static %}
+{% autoescape on %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <title>Health Dashboard</title>
+        <link
+                rel="shortcut icon"
+                href="{% static 'favicon.ico' %}"
+                type="image/x-icon"
+        />
+        <link
+                href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+                rel="stylesheet"
+        />
+        <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}"/>
+        <link
+                rel="stylesheet"
+                href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+        />
+        <link rel="stylesheet" href="{% static 'css/typeahead.css' %}"/>
+        <script defer src="{% static 'fontawesome/js/all.min.js' %}"></script>
+        <script src="{% static 'bootstrap/js/jquery.min.js' %}"></script>
+        <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'js/typeahead.bundle.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'custom/base.css' %}"/>
+        {% block extra_css %}{% endblock %}
+    </head>
+
+    <body>
+    {% include "common/_navbar.html" %} {% block content %} {% endblock %}
+    </body>
+    </html>
+{% endautoescape %}

@@ -1,0 +1,119 @@
+{% load static %}
+{% block extra_css %}
+    <!-- Include Date Range Picker CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+{% endblock %}
+{% load account_custom_tag %}
+<style>
+    .patients-info-table {
+        display: table;
+    }
+
+    .search-form-group {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        margin-bottom: 1rem;
+    }
+
+    .search-form-group .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+
+    .search-form-group .submit-button {
+        margin-left: 1rem;
+    }
+</style>
+
+<div class="menu d-flex flex-column">
+    <div class="px-3">
+        <form id="global-config-form" method="post" {% if request.path == '/fitbit/' %}
+              action="{% url 'website:fitbit' %}" {% else %} action="{% url 'website:witings' %}" {% endif %}>
+            {% csrf_token %}
+            {% if request.user.is_superuser %}
+                <div class="search-form-group">
+                    <div class="form-group">
+                        <label for="global-search">Choose patient</label>
+                        <select class="form-control" name="patient_id" id="global-search">
+                            {% for user in request.user|get_all_users %}
+                                {% if user.user_profile.first_name and user.user_profile.last_name %}
+                                    <option {% if patient_id == user.id|stringformat:"i" %} selected {% endif %}
+                                                                                            value="{{ user.id }}">{{ user.user_profile.first_name }} {{ user.user_profile.last_name }}</option>
+                                {% else %}
+                                    <option {% if patient_id == user.id|stringformat:"i" %} selected {% endif %}
+                                                                                            value="{{ user.id }}">user
+                                        id: {{ user.id }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            {% endif %}
+            {% if request.path == '/fitbit/' %}
+                <div class="form-group">
+                    <label for="sleep_date">Sleep date</label>
+                    <input type="date" class="form-control" id="sleep_date" name="sleep_date" value="{{ sleep_date }}">
+                </div>
+                <div class="form-group">
+                    <label for="spo2_date_from">Spo2 date from</label>
+                    <input type="date" class="form-control" id="spo2_date_from" name="spo2_date_from"
+                           value="{{ spo2_date_from }}">
+                </div>
+                <div class="form-group">
+                    <label for="spo2_date_to">Spo2 date to</label>
+                    <input type="date" class="form-control" id="spo2_date_to" name="spo2_date_to"
+                           value="{{ spo2_date_to }}">
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="weight_date_range">Date Range: weight</label>
+                    <input type="text" id="weight_date_range" name="weight_date_range" value="">
+                </div>
+                <!-- Include Moment.js -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+                <!-- Include Date Range Picker JS -->
+                <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+                <script>
+                  // Initialize the date range picker
+                  $(function() {
+                    $('#weight_date_range').daterangepicker({
+                      opens: 'left' // Position the calendar to the left of the input
+                    });
+                  });
+                </script>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">filter</button>
+        </form>
+
+        <div class="mt-3" id="patients-info">
+            <table class="card patients-info-table table table-light"
+                   id="patient-details">
+                <thead>
+                <tr>
+                    <th colspan="2" class="m-0 p-0">
+                        <h6 class="m-2 text-center"><b>Patient Details</b></h6>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="py-0">
+                    <th class="text-right py-1" scope="row">Name</th>
+                    <td id="patient--name"
+                        class="text-capitalize py-1">{{ patient_id|get_patient:'first_name' }} {{ patient_id|get_patient:'last_name' }}</td>
+                </tr>
+                <tr class="py-0">
+                    <th class="text-right py-1" scope="row">Age</th>
+                    <td id="patient--age" class="text-capitalize py-1">{{ patient_id|get_patient:'age' }}</td>
+                </tr>
+                <tr class="py-0">
+                    <th class="text-right py-1" scope="row">Sex</th>
+                    <td id="patient--sex" class="text-capitalize py-1">{{ patient_id|get_patient:'sex' }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
