@@ -35,3 +35,5 @@ pip-selfcheck.json
 Backend/credential.txt
 Backend/heshmati_heds_wordpress_credential.txt
 **/__pycache__/
+
+# *.env
