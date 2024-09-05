@@ -18,7 +18,7 @@ The connection between our backend and frontend is with Rest API, and all APIs a
 You can add more APIs if you need them. All data related to APIs can be found on Fitbit and Withings developer API documents on their websites.
 
 After making any changes to the code on that server, run the following command:  
-"gunicorn systemctl restart"
+"sudo systemctl restart gunicorn"
 
 Here is the link to the Django admin panel for managing users of the web application and their privileges:  
 https://hnc.evl.uic.edu/admin/
