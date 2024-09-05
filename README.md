@@ -2,8 +2,9 @@
 Steps to set up the project in order:
 
 1. Install the Fitbit and Withings apps on your mobile phone and create accounts in them.
-2. Use the devices to generate real data.
-3. Check if the backend server is up to receive data from the devices through OAuth 2.0 protocol and API.
+2. Add the devices to the mobile apps
+3. Use the devices to generate real data.
+4. Check if the backend server is up to receive data from the devices through OAuth 2.0 protocol and API.
 The backend server is:  
 hnc.evl.uic.edu
 You need your own credentials to connect to this server.
@@ -19,6 +20,9 @@ You can add more APIs if you need them. All data related to APIs can be found on
 
 After making any changes to the code on that server, run the following command:  
 "sudo systemctl restart gunicorn"
+
+If you get gunicorn not found error, install gunicorn
+"sudo apt install gunicorn"
 
 Here is the link to the Django admin panel for managing users of the web application and their privileges:  
 https://hnc.evl.uic.edu/admin/
