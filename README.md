@@ -42,3 +42,10 @@ After connecting to both wearable devices, you can run the frontend code using t
 The web application's front end is the main interface, displaying various diagrams based on data from Withings and Fitbit.
 
 The first three diagrams are from Withings and display weight and body composition data. The remaining three diagrams are from Fitbit and show sleep, activity, and other factors like SpO2, heart rate, etc.
+
+
+fitbit developer 
+https://dev.fitbit.com/login
+
+withings developer
+https://developer.withings.com
