@@ -127,7 +127,8 @@ export default function LineChart({
 
   const [yMin, yMax] = d3.extent(combinedDatasets, (d) => {
     const value = d[yAxisProperty];
-    if (Number(value) == NaN) return value;
+    // if (Number(value) == NaN) return value;
+    if (isNaN(Number(value))) return value;
     return Number(value);
   });
 
@@ -286,7 +287,8 @@ export default function LineChart({
 
     const [min, max] = d3.extent(accumulatedStackedDataset, (d) => {
       const value = d[yAxisProperty];
-      if (Number(value) == NaN) return value;
+      // if (Number(value) == NaN) return value;
+      if (isNaN(Number(value))) return value;
       return Number(value);
     });
 
