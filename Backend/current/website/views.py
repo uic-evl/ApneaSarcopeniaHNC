@@ -74,7 +74,7 @@ class ServiceApiView(APIView):
                     return JsonResponse(json_response_body)
             except:
                 return JsonResponse(
-                    create_json('post', 'Data received', 'Unsuccessful', 'The value of request_data has not been sent')
+                    create_json('post', 'Data received', 'Unsuccessful', f'The value of {request_data} has not been sent')
                     )
 
             try:
@@ -128,13 +128,13 @@ class ServiceApiView(APIView):
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     try:
                         period = front_input['period']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of period has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {period} has not been sent')
 
                             )
                     return fitbit_fetch_heart_rate_time_series_by_date(user, date, period)
@@ -144,13 +144,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
 
                             )
                     return fitbit_fetch_heart_rate_time_series_by_date_range(user, date_from, date_to)
@@ -160,7 +160,7 @@ class ServiceApiView(APIView):
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     return fitbit_fetch_spO2_summary_by_date(user, date)
 
@@ -169,13 +169,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_spO2_summary_by_date_range(user, date_from, date_to)
 
@@ -184,7 +184,7 @@ class ServiceApiView(APIView):
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     return fitbit_fetch_spO2_intraday_by_date(user, date)
 
@@ -193,13 +193,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_spO2_intraday_by_interval(user, date_from, date_to)
 
@@ -208,7 +208,7 @@ class ServiceApiView(APIView):
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     return fitbit_fetch_sleep_log_by_date(user, date)
 
@@ -217,13 +217,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_sleep_log_by_date_range(user, date_from, date_to)
 
@@ -232,19 +232,19 @@ class ServiceApiView(APIView):
                         resource = front_input['resource']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of resource has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {resource} has not been sent')
                             )
                     try:
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     try:
                         period = front_input['period']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of period has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {period} has not been sent')
                             )
                     return fitbit_fetch_body_time_series_by_date(user, resource, date, period)
 
@@ -260,13 +260,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_body_time_series_by_date_range(user, resource, date_from, date_to)
 
@@ -275,19 +275,19 @@ class ServiceApiView(APIView):
                         resource = front_input['resource']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of resource has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {resource} has not been sent')
                             )
                     try:
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     try:
                         period = front_input['period']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of period has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {period} has not been sent')
                             )
                     return fitbit_fetch_activity_time_series_by_date(user, resource, date, period)
 
@@ -296,19 +296,19 @@ class ServiceApiView(APIView):
                         resource = front_input['resource']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of resource has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {resource} has not been sent')
                             )
                     try:
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_activity_time_series_by_date_range(user, resource, date_from, date_to)
 
@@ -318,7 +318,7 @@ class ServiceApiView(APIView):
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     return fitbit_fetch_breathing_rate_summary_by_date(user, date)
 
@@ -327,13 +327,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_breathing_rate_summary_by_interval(user, date_from, date_to)
 
@@ -342,7 +342,7 @@ class ServiceApiView(APIView):
                         date = front_input['date']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date} has not been sent')
                             )
                     return fitbit_fetch_breathing_rate_intraday_by_date(user, date)
 
@@ -351,13 +351,13 @@ class ServiceApiView(APIView):
                         date_from = front_input['date_from']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_from has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_from} has not been sent')
                             )
                     try:
                         date_to = front_input['date_to']
                     except:
                         return JsonResponse(
-                            create_json('post', 'Data received', 'Unsuccessful', 'The value of date_to has not been sent')
+                            create_json('post', 'Data received', 'Unsuccessful', f'The value of {date_to} has not been sent')
                             )
                     return fitbit_fetch_breathing_rate_intraday_by_interval(user, date_from, date_to)
 
@@ -390,7 +390,7 @@ class ServiceApiView(APIView):
             except Exception as e:
                 custom_log(e)
                 return JsonResponse(
-                    create_json('post', 'Data received', 'Unsuccessful', 'The value of patient_id has not been sent')
+                    create_json('post', 'Data received', 'Unsuccessful', f'The value of {patient_id} has not been sent')
 
                     )
 
