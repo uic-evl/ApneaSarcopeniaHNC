@@ -111,7 +111,7 @@ export default function SleepStepsChart() {
 
       setSleepScores(scores);
     } catch (error) {
-      throw new Error("Failed to fetch weight data");
+      throw new Error(error);
     }
   };
 
@@ -160,7 +160,7 @@ export default function SleepStepsChart() {
 
       setSteps(steps);
     } catch (error) {
-      throw new Error("Failed to fetch weight data");
+      throw new Error(error);
     }
   };
 

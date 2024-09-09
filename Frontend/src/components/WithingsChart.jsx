@@ -111,7 +111,7 @@ export default function WithingsCharts() {
         filterDataSince(weights, DATE_SINCE_TIMESTAMP, "date")?.reverse()
       );
     } catch (error) {
-      throw new Error("Failed to fetch weight data");
+      throw new Error(error);
     }
   };
 
