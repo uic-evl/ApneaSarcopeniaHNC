@@ -21,9 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-api/data/ep129/sample1/eegData.parquet
-api/data/ep129/sample2/eegData.parquet
-api/data/ep187/sample1/eegData.parquet
-*.parquet
+
 
 .env
