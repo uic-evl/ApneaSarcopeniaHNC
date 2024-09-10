@@ -10,7 +10,7 @@ export const getWeight = async (additionalAttributes = {}) => {
     patient_id: PATIENT_ID,
     ...additionalAttributes,
   });
-
+  console.log(response)
   return response.data.body.measuregrps;
 };
 
@@ -20,7 +20,7 @@ export const getHeight = async (additionalAttributes = {}) => {
     patient_id: PATIENT_ID,
     ...additionalAttributes,
   });
-
+  console.log(response)
   return response.data.body.measuregrps;
 };
 

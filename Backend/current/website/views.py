@@ -101,12 +101,12 @@ class ServiceApiView(APIView):
                     if not has_user_active_token(user):
                         return JsonResponse(
                             create_json('post', 'Data received', 'Unsuccessful', 
-                                        f'The waiting token for the patient with ID {patient_id} has expired')
+                                        f'The Withings token for the patient with ID {patient_id} has expired')
                             )
                 else:
                     return JsonResponse(
                         create_json('post', 'Data received', 'Unsuccessful', 
-                                    f'The waiting token for the patient with ID {patient_id} does not exist')
+                                    f'The Withings token for the patient with ID {patient_id} does not exist')
                         )
 
                 if fitbit_has_user_token(user):
