@@ -49,3 +49,21 @@ https://dev.fitbit.com/login
 
 withings developer
 https://developer.withings.com
+
+
+## How to run on your local machine (Tested on Mac)
+May not work on Windows
+
+1. Go to `Backend` folder
+2. Create a virtual environment with `python3 -m venv venv`
+3. Activate the virtual environment with
+   for mac `source venv/bin/activate`
+4. Run `pip install -r requirements.txt` to install all dependencies (only the first time running the project)
+5. (if new package is installed) update requirements.txt `pip freeze > requirements.txt`
+6. Make migration `python3 manage.py migrate`
+7. Create a superuser so you can login `python3 manage.py createsuperuser`
+8. run dev server `python3 manage.py runserver`
+9. Go to the development URL
+10. If you get "port is already in use" error
+    `sudo lsof -i tcp:8000` to see what process is running and note the PID
+    `sudo kill -9 <PID>`
