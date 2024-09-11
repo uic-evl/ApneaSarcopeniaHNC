@@ -26,6 +26,7 @@ export const getSleepLog = async (additionalAttributes = {}) => {
     ...additionalAttributes,
   });
 
+  console.log(response)
   return response.data.sleep;
 };
 
