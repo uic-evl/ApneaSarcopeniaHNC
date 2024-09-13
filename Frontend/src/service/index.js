@@ -1,6 +1,6 @@
 import axios from "axios";
 
 export const baseApi = axios.create({
-  // baseURL: "https://withings.a-fathollahi.com/api/service/",
+  // baseURL: "http://localhost:8000/",
   baseURL: "https://hnc.evl.uic.edu/api/service/"
 });
