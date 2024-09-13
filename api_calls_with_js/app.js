@@ -26,7 +26,7 @@ async function main() {
   body.append("code", code); // The authorization code we just received
   body.append("grant_type", "authorization_code");
   body.append("code_verifier", code_verifier);
-  //   body.append("redirect_uri", redirect_uri);
+  body.append("redirect_uri", redirect_uri);
 
   // Make the POST request to exchange the code for an access token
   fetch(tokenUrl, {
