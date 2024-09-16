@@ -4,48 +4,60 @@ async function main() {
   const authorizationUrl = "https://www.fitbit.com/oauth2/authorize";
   const tokenUrl = "https://api.fitbit.com/oauth2/token";
   const scope =
-    "activity heartrate nutrition oxygen_saturation respiratory_rate settings sleep temperature weight";
+    "activity heartrate nutrition oxygen_saturation respiratory_rate settings sleep temperature weight profile"; // Scopes for Fitbit API
   const redirect_uri = "http://localhost:5500/api_calls_with_js/index.html";
-  const code_verifier = generateRandomString();
 
-  var challenge = await challenge_from_verifier(code_verifier);
+  let code_verifier = localStorage.getItem("code_verifier");
+  let challenge = localStorage.getItem("challenge");
+
+  // If code_verifier and challenge don't exist, generate and store them in local storage
+  if (!code_verifier || !challenge) {
+    code_verifier = generateRandomString();
+    localStorage.setItem("code_verifier", code_verifier);
+
+    challenge = await challenge_from_verifier(code_verifier);
+    localStorage.setItem("challenge", challenge);
+  }
 
   const fullUrl = `${authorizationUrl}?client_id=${client_id}&response_type=code&scope=${scope}&redirect_uri=${redirect_uri}&code_challenge_method=S256&code_challenge=${challenge}`;
 
-  // update the link in the HTML
+  // Update the link in the HTML
   document.getElementById("auth_link").href = fullUrl;
 
-  console.log(code_verifier, challenge);
-
   const code = new URLSearchParams(window.location.search).get("code"); // Get the authorization code from the URL
-  console.log(code);
 
-  // Prepare the body for the POST request
-  const body = new URLSearchParams();
-  body.append("client_id", client_id);
-  body.append("code", code); // The authorization code we just received
-  body.append("grant_type", "authorization_code");
-  body.append("code_verifier", code_verifier);
-  body.append("redirect_uri", redirect_uri);
+  // If we have a code, proceed to exchange it for an access token
+  if (code) {
+    console.log(code);
+    // Prepare the body for the POST request
+    const body = new URLSearchParams();
+    body.append("client_id", client_id);
+    body.append("code", code); // The authorization code we just received
+    body.append("grant_type", "authorization_code");
+    body.append("code_verifier", code_verifier);
+    body.append("redirect_uri", redirect_uri);
 
-  // Make the POST request to exchange the code for an access token
-  fetch(tokenUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: body.toString(), // The body must be URL-encoded
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.access_token) {
-        console.log("Access Token:", data.access_token); // Use this access token for subsequent API requests
-        fetchFitbitData(data.access_token); // Function to fetch Fitbit data using the access token
-      } else {
-        console.error("Error fetching access token:", data);
-      }
+    // Make the POST request to exchange the code for an access token
+    fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(), // The body must be URL-encoded
     })
-    .catch((error) => console.error("Error during token exchange:", error));
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.access_token) {
+          console.log("Access Token:", data.access_token);
+          // TODO: Store the access token in the local storage as well
+          localStorage.setItem("access_token", code_verifier);
+          fetchFitbitData(data.access_token); // Function to fetch Fitbit data using the access token
+        } else {
+          console.error("Error fetching access token:", data);
+        }
+      })
+      .catch((error) => console.error("Error during token exchange:", error));
+  }
 }
 
 function fetchFitbitData(accessToken) {
@@ -55,12 +67,18 @@ function fetchFitbitData(accessToken) {
       Authorization: "Bearer " + accessToken, // Bearer token for authentication
     },
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       console.log("Fitbit Profile Data:", data);
-      // Do something with the data, e.g., display it on the page
     })
-    .catch((error) => console.error("Error fetching Fitbit data:", error));
+    .catch((error) => {
+      console.error("Error fetching Fitbit data:", error);
+    });
 }
 
 function dec2hex(dec) {
