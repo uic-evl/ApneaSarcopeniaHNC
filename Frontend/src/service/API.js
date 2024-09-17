@@ -1,5 +1,5 @@
 import moment from "moment";
-
+import { useNavigate } from "react-router-dom";
 function getTimeIntervalSinceToday(months){
     const today = moment().format('YYYY-MM-DD');
     const startDate = moment().subtract(months,'months').format('YYYY-MM-DD');
@@ -7,7 +7,20 @@ function getTimeIntervalSinceToday(months){
 }
 
 function toTimestamp(a){
-return moment(a.dateOfSleep).unix() * 1000;
+    return moment(a.dateOfSleep).unix() * 1000;
+}
+
+//https://developer.withings.com/api-reference#tag/measure/operation/measure-getmeas
+const withingsKeys = {
+    'weight': 1,//kg
+    'height': 4,//meter
+    'fat_free_mass': 5,//kg
+    'fat_ratio': 6,//%
+    'fat_mass_weight': 8,//kg
+    'spo2': 54,//%
+    'muscle_mass': 76,//kg
+    'bone_mass': 88,//kg
+
 }
 
 export default class API {
@@ -19,7 +32,7 @@ export default class API {
         this.fitbitCookieName = fitbitCookieName;
         this.withingsCookieName = withingsCookieName;
         this.readTokens();
-
+        this.navigate = useNavigate();
         //endpoint url is the backend location e.g. http://localhost:<port you ran flask api on?
         // this.fitbitAPI = axios.create({
         //     baseURL: 'https://api.fitbit.com/1/user/',
@@ -47,6 +60,7 @@ export default class API {
     }
 
     async makeQuery(url,method,token,parameters,errorCallback,successCallback){
+        //todo: figure out how to handle expired token codes
         const pText = new URLSearchParams();
         if(parameters){
             for(const [key,value] of Object.entries(parameters)){
@@ -54,11 +68,11 @@ export default class API {
             }
             url = url+'?'+pText.toString();
         }
-
-        return fetch(url, {
+        var stuff = {
             method: method,
             headers: this.makeHeader(token),
-        })
+        }
+        return fetch(url, stuff)
         .then((response) => {
             if (!response.ok) {
                 throw new Error(`Error fetching: ${response.status}`);
@@ -79,6 +93,75 @@ export default class API {
             }
             return null;
         });
+    }
+
+    async makeWithingsRequest(parameters,successCallback,errorCallback){
+        //todo: handle expired codes
+        const token = this.withingsToken;
+        const url = 'https://wbsapi.withings.net/measure';
+        const pText = new URLSearchParams();
+        for(const [key,value] of Object.entries(parameters)){
+            pText.append(key,value);
+        }
+        var stuff = {
+            method: 'POST',
+            headers: this.makeHeader(token),
+            body: pText,
+        }
+        return fetch(url, stuff)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Error fetching withings: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if(successCallback){
+                    successCallback(data);
+                }
+                if(data.status === 401){
+                    this.resetWithingsToken();
+                }
+                return data.body.measuregrps;
+            })
+            .catch((error) => {
+                if (errorCallback){
+                    errorCallback(error);
+                } else{
+                    console.error("Error fetching withings",url, error);
+                }
+                return null;
+            });
+    }
+
+    //todo: figure out refresh tokens
+    resetWithingsToken(){
+        localStorage.removeItem(this.withingsCookieName);
+        this.navigate('/')
+    }
+
+    resetFitbitToken(){
+        localStorage.removeItem(this.fitbitCookieName);
+        this.navigate('/')
+    }
+
+    async fetchWithingsEntry(item,startDate,endDate){
+        const entry  = {
+            "action": "getmeas",
+            "category": "1",  //  1 for real measures, 2 for user objectives.
+        }
+        
+        const key = withingsKeys[item.toLowerCase()];
+        if(key === undefined){
+            console.log('invalid key',item);
+            return null
+        }
+        entry['meastype'] = key
+        if(startDate && endDate){
+            entry['startdate'] = startDate;
+            entry['endDate'] = endDate;
+        }
+        return this.makeWithingsRequest(entry);
     }
 
     async fetchFitbitProfile(){
@@ -146,6 +229,8 @@ export default class API {
         }
         return null
     }
+
+
     
 
     getParamList(pObj){

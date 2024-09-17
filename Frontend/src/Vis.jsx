@@ -177,9 +177,9 @@ export default function Vis() {
       </Sider>
       <Layout>
         <Content>
-          {/* <WithingsCharts /> */}
-          <SleepLogsCharts />
-          <SleepStepsChart />
+          <WithingsCharts />
+          {/* <SleepLogsCharts />
+          <SleepStepsChart /> */}
         </Content>
       </Layout>
     </Layout>
