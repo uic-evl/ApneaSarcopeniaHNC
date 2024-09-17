@@ -20,20 +20,34 @@ import LineChart from "@src/features/lineChart";
 
 // constants
 import { DATE_ORDERS } from "@src/features/lineChart/config/constants";
+import API from "../service/API.js";
 
 const CHART_TYPES = Object.freeze({
   logs: "logs",
   heartRate: "heartRate",
   spo2: "spo2",
 });
-
+//this isn't three years ago
 const threeYearsAgo = moment().subtract(3, "months");
 
 const timeFormat = "YY MMM DD";
 
+function toTimestamp(a){
+  return moment(a.dateOfSleep).unix() * 1000;
+}
+
+function getTimeIntervalSinceToday(months){
+  const today = moment().format('YYYY-MM-DD');
+  const startDate = moment().subtract(months,'months').format('YYYY-MM-DD');
+  return [startDate,today];
+}
 export default function SleepStagesChart({ onItemSelect }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
+  var sleepLoading = false;
+  var hrLoading = false;
+  var spo2Loading = false;
+
   const [error, setError] = useState(null);
   const [sleepLog, setSleepLog] = useState([]);
   const [heartRate, setHeartRate] = useState([]);
@@ -44,151 +58,62 @@ export default function SleepStagesChart({ onItemSelect }) {
     [CHART_TYPES.spo2]: CHART_TYPES.spo2,
   });
 
-  useEffect(() => {
-    getRequests();
-  }, []);
+  const api = new API('fitbit-token','whithings-token');
 
-  const getRequests = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await Promise.all([
-        getSleepLogRequest(),
-        getHeartRateRequest(),
-        getSpo2Request(),
-      ]);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+  async function getSleep(){
+    if (sleepLoading){ return }
+    sleepLoading = true;
+    const tempSleep = await api.getSleepSince(7);
+    if(tempSleep!==null){
+      setSleepLog(tempSleep);
+    } else{
+      setSleepLog(null);
     }
-  };
+    sleepLoading=false;
+  }
 
-  const getSleepLogRequest = async () => {
-    try {
-      const logs = await getAllSleepLogs();
-
-      setSleepLog(logs.reverse());
-    } catch (error) {
-      throw new Error("Failed to fetch weight data");
-    }
-  };
-
-  const getHeartRateRequest = async () => {
-    try {
-      const heartRates = await getAllHeartRates();
-
-      setHeartRate(heartRates.reverse());
-    } catch (error) {
-      throw new Error("Failed to fetch weight data");
-    }
-  };
-
-  const getSpo2Request = async () => {
-    try {
-      const spo2Result = await getAllSpo2();
-
-      setSpo2(spo2Result.reverse());
-    } catch (error) {
-      throw new Error("Failed to fetch weight data");
-    }
-  };
-
-  const getAllSleepLogs = async () => {
-    const today = moment();
-
-    let currentStartDate = threeYearsAgo;
-    let logs = [];
-
-    while (currentStartDate.isBefore(today)) {
-      const currentEndDate = moment.min(
-        currentStartDate.clone().add(3, "months"),
-        today
-      );
-
-      const response = await getSleepLog({
-        date_from: currentStartDate.format("YYYY-MM-DD"),
-        date_to: currentEndDate.format("YYYY-MM-DD"),
-      });
-
-      logs = logs.concat(response);
-
-      currentStartDate = currentEndDate.add(1, "day");
-    }
-
-    return logs
-      .map((log) => ({
-        ...log,
-        timestamp: moment(log.dateOfSleep).unix() * 1000,
-      }))
-      .sort((a, b) => a.timestamp - b.timestamp);
-  };
-
-  const getAllHeartRates = async () => {
-    const today = moment();
-
-    let currentStartDate = threeYearsAgo;
-    let rates = [];
-
-    while (currentStartDate.isBefore(today)) {
-      const currentEndDate = moment.min(
-        currentStartDate.clone().add(3, "months"),
-        today
-      );
-
-      const response = await getHeartRate({
-        date_from: currentStartDate.format("YYYY-MM-DD"),
-        date_to: currentEndDate.format("YYYY-MM-DD"),
-      });
-
-      rates = rates.concat(response);
-
-      currentStartDate = currentEndDate.add(1, "day");
-    }
-
-    return rates
-      .filter((rate) => rate.value.restingHeartRate !== undefined)
+  async function getHeartRate(){
+    if (hrLoading){ return }
+    hrLoading= true;
+    const [start,stop] = getTimeIntervalSinceToday(3);
+    const tempHRData = await api.fetchFitbitHeartRate(start,stop);
+    if(tempHRData !== null){
+      const rates = tempHRData['activities-heart'].filter((rate) => rate.value.restingHeartRate !== undefined)
       .map((rate) => ({
         ...rate,
-        timestamp: moment(rate.dateTime).unix() * 1000,
+        timestamp: toTimestamp(rate.dateTime),
         time: moment(rate.dateTime).format(timeFormat),
         number: rate.value.restingHeartRate,
       }))
       .sort((a, b) => a.timestamp - b.timestamp);
-  };
-
-  const getAllSpo2 = async () => {
-    const today = moment();
-
-    let currentStartDate = threeYearsAgo;
-    let result = [];
-
-    while (currentStartDate.isBefore(today)) {
-      const currentEndDate = moment.min(
-        currentStartDate.clone().add(3, "months"),
-        today
-      );
-
-      const response = await getSpo2({
-        date_from: currentStartDate.format("YYYY-MM-DD"),
-        date_to: currentEndDate.format("YYYY-MM-DD"),
-      });
-
-      result = result.concat(response);
-
-      currentStartDate = currentEndDate.add(1, "day");
+      setHeartRate(rates)
     }
+    hrLoading=false;
+  }
 
-    return result
-      .map((item) => ({
-        ...item,
-        timestamp: moment(item.dateTime).unix() * 1000,
-        time: moment(item.dateTime).format(timeFormat),
-        number: item.value.avg,
-      }))
-      .sort((a, b) => a.timestamp - b.timestamp);
-  };
+  async function getSPO2(){
+    if(spo2Loading){ return }
+    spo2Loading = true;
+    const [start,stop] = getTimeIntervalSinceToday(3);
+    const tempSPO2 = await api.fetchFitbitSpO2(start,stop);
+    if(tempSPO2 !== null){
+      const result = tempSPO2.map((item) => ({
+          ...item,
+          timestamp: toTimestamp(item.dateTime),
+          time: moment(item.dateTime).format(timeFormat),
+          number: item.value.avg,
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+      setSpo2(result);
+    }
+    spo2Loading=false;
+  }
+
+  useEffect(() => {
+    getSleep();
+    getHeartRate();
+    getSPO2();
+  }, []);
 
   const toggleCalendarOpen = () => {
     setIsCalendarOpen((prevState) => !prevState);
@@ -312,9 +237,9 @@ export default function SleepStagesChart({ onItemSelect }) {
     return false;
   }, [selectedItems, convertedLogs]);
 
-  if (loading) {
+  if (sleepLoading) {
     return (
-      <Spin spinning={loading} tip="Loading...">
+      <Spin spinning={true} tip="Loading...">
         <Card className="relative mx-6 mt-5 h-96"></Card>
       </Spin>
     );
@@ -384,7 +309,7 @@ export default function SleepStagesChart({ onItemSelect }) {
             colors: ["#154ba6", "#3f8dff", "#7ec4ff", "#e73360"],
             customYMin: 0,
             dateFormat: timeFormat,
-            dateOrder: DATE_ORDERS.descending,
+            dateOrder: DATE_ORDERS.ascending,
           }}
         />
       )}

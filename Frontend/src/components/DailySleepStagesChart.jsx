@@ -15,44 +15,31 @@ const levelMapping = {
   deep: 60,
 };
 
+import API from "../service/API.js";
+
 export default function DailySleepStagesChart({ selectedItem }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sleepLog, setSleepLog] = useState([]);
 
+  const api = new API('fitbit-token','whithings-token');
+
+  async function fetchSleep(date){
+    const tempSleep = await api.fetchFitbitSleepLogByDate(date);
+    if(tempSleep !== null){
+      setSleepLog(tempSleep.sleep?.[0].levels.data);
+    } else{
+      setSleepLog([])
+    }
+  }
   useEffect(() => {
     if (selectedItem?.time) {
-      getRequests();
+      fetchSleep(selectedItem.time);
+    } else{
+      setSleepLog([]);
     }
   }, [selectedItem?.time]);
 
-  const getRequests = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await Promise.all([getDailySleepLogRequest()]);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getDailySleepLogRequest = async () => {
-    try {
-      const logs = await getDailySleepLog({ date: selectedItem.time });
-
-      if (logs === 404) {
-        setSleepLog([]);
-        return;
-      }
-
-      setSleepLog(logs);
-    } catch (error) {
-      throw new Error("Failed to fetch weight data");
-    }
-  };
 
   const convertedLogs = useMemo(() => {
     const result = [];
