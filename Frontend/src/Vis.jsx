@@ -178,8 +178,8 @@ export default function Vis() {
       <Layout>
         <Content>
           <WithingsCharts />
-          {/* <SleepLogsCharts />
-          <SleepStepsChart /> */}
+          <SleepLogsCharts />
+          <SleepStepsChart />
         </Content>
       </Layout>
     </Layout>
