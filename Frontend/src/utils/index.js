@@ -75,9 +75,10 @@ export const calculateAverageProperty = (array, property) => {
 
 export const summarizeDataDaily = (data, key) => {
   if (!data) return [];
-
+  // console.log(data);
   const dateMap = data.reduce((acc, curr) => {
-    const dateKey = curr.formattedDate.split(" ")[0];
+    // console.log(curr);
+    const dateKey = curr.formattedDate?.split(" ")[0];
     if (!acc[dateKey]) {
       acc[dateKey] = { total: 0, count: 0, originalRecord: curr };
     }
