@@ -74,47 +74,57 @@ export const calculateAverageProperty = (array, property) => {
 };
 
 export const summarizeDataDaily = (data, key) => {
-  if (!data) return [];
+  try{
+    if (!data) return [];
 
-  const dateMap = data.reduce((acc, curr) => {
-    const dateKey = curr.formattedDate.split(" ")[0];
-    if (!acc[dateKey]) {
-      acc[dateKey] = { total: 0, count: 0, originalRecord: curr };
-    }
-    acc[dateKey].total += curr[key];
-    acc[dateKey].count += 1;
-    return acc;
-  }, {});
+    const dateMap = data.reduce((acc, curr) => {
+      const dateKey = curr.formattedDate.split(" ")[0];
+      if (!acc[dateKey]) {
+        acc[dateKey] = { total: 0, count: 0, originalRecord: curr };
+      }
+      acc[dateKey].total += curr[key];
+      acc[dateKey].count += 1;
+      return acc;
+    }, {});
 
-  return Object.entries(dateMap).map(
-    ([date, { total, count, originalRecord }]) => ({
-      [key]: total / count,
-      date: originalRecord.date,
-      formattedDate: date + " 00:00:00",
-    })
-  );
+    return Object.entries(dateMap).map(
+      ([date, { total, count, originalRecord }]) => ({
+        [key]: total / count,
+        date: originalRecord.date,
+        formattedDate: date + " 00:00:00",
+      })
+    );
+  }
+  catch(error){
+    console.log(error,data,key);
+  }
 };
 
 export const summarizeDataMonthly = (data, key) => {
-  if (!data) return [];
+  try{
+    if (!data) return [];
 
-  const dateMap = data.reduce((acc, curr) => {
-    const monthKey = moment(curr.formattedDate).format("YYYY-MM");
-    if (!acc[monthKey]) {
-      acc[monthKey] = { total: 0, count: 0, originalRecord: curr };
-    }
-    acc[monthKey].total += curr[key];
-    acc[monthKey].count += 1;
-    return acc;
-  }, {});
+    const dateMap = data.reduce((acc, curr) => {
+      const monthKey = moment(curr.formattedDate).format("YYYY-MM");
+      if (!acc[monthKey]) {
+        acc[monthKey] = { total: 0, count: 0, originalRecord: curr };
+      }
+      acc[monthKey].total += curr[key];
+      acc[monthKey].count += 1;
+      return acc;
+    }, {});
 
-  return Object.entries(dateMap).map(
-    ([month, { total, count, originalRecord }]) => ({
-      [key]: total / count,
-      date: originalRecord.date,
-      formattedDate: month + "-01 00:00:00",
-    })
-  );
+    return Object.entries(dateMap).map(
+      ([month, { total, count, originalRecord }]) => ({
+        [key]: total / count,
+        date: originalRecord.date,
+        formattedDate: month + "-01 00:00:00",
+      })
+    );
+  } catch(error){
+    console.log(error,data,key)
+  }
+  
 };
 
 export const convertPercentageToDecimal = (percentage) => {
