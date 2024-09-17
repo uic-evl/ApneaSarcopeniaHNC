@@ -43,6 +43,8 @@ import monthlySleepScoreAndSteps from "@src/assets/data/monthlySleepScoreAndStep
 
 const { Header, Content, Footer, Sider } = Layout;
 
+import API from './service/API.js';
+
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -52,61 +54,124 @@ function getItem(label, key, icon, children) {
   };
 }
 
-const items = [
-  getItem("Option 1", "1", <PieChartOutlined />),
-  getItem("Option 2", "2", <DesktopOutlined />),
-  getItem("User", "sub1", <UserOutlined />, [
-    getItem("Tom", "3"),
-    getItem("Bill", "4"),
-    getItem("Alex", "5"),
-  ]),
-  getItem("Team", "sub2", <TeamOutlined />, [
-    getItem("Team 1", "6"),
-    getItem("Team 2", "8"),
-  ]),
-  getItem("Files", "9", <FileOutlined />),
-];
+function capitalizeFirstLetter(string) {
+  string = string.toLowerCase();
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function calcBMI(height,weight,heightUnit,weightUnit){
+  //unit considerations https://dev.fitbit.com/build/reference/web-api/developer-guide/application-design/#Localization
+  if (heightUnit === 'en_US') {
+    height = height*.0254;
+  }
+  if (weightUnit === 'en_US'){
+    weight = weight*.4535924;
+  } else if (weightUnit === 'en_GB') {
+    weight = weight*6350293;
+  }
+  var BMI = Math.round(weight / Math.pow(height, 2) );
+  return BMI;
+}
+
+function inchesToFeetString(height){
+  if (height === undefined || height === ''){ return '0'}
+  const ft = Math.round(height/12);
+  const inch = height - (12*ft);
+  return ft.toFixed() + "'" + inch.toFixed() + '"';
+}
+
+// const items = [
+//   getItem("Option 1", "1", <PieChartOutlined />),
+//   getItem("Option 2", "2", <DesktopOutlined />),
+//   getItem("User", "sub1", <UserOutlined />, [
+//     getItem("Tom", "3"),
+//     getItem("Bill", "4"),
+//     getItem("Alex", "5"),
+//   ]),
+//   getItem("Team", "sub2", <TeamOutlined />, [
+//     getItem("Team 1", "6"),
+//     getItem("Team 2", "8"),
+//   ]),
+//   getItem("Files", "9", <FileOutlined />),
+// ];
 
 export default function Vis() {
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  console.log('here')
+
+  const api = new API('fitbit-token','whithings-token');
+
+  const [fitbitProfile, setFitbitProfile] = useState();
+  const [bmi, setBMI] = useState(0);
+
+  async function fetchProfile(){
+    if (fitbitProfile === undefined) {
+      const data = await api.fetchFitbitProfile();
+      console.log('data fetched',data.user);
+      setFitbitProfile(data.user);
+      if (data && data !== null) {
+        //relevant data: age, gender, sfullName, weight, weightUnit
+        setFitbitProfile(data.user);
+        
+      }
+    }
+  }
+
+  useEffect(()=>{
+    fetchProfile();
+  },[]);
+
+  useEffect(()=>{
+    if(fitbitProfile){
+      const height = fitbitProfile['height'];
+      const weight = fitbitProfile['weight'];
+      if (height && weight) {
+        const beemeye = calcBMI(height,weight,fitbitProfile['heightUnit'],fitbitProfile['weightUnit'])
+        setBMI(beemeye);
+      } else {
+        console.log('error in bmi',height,weight,fitbitProfile);
+        setBMI(0);
+      }
+    } else{
+      setBMI(0);
+    }
+    
+  },[fitbitProfile]);
+
+  function notUndefined(obj,key){
+    if(obj === undefined){ return 'Missing' }
+    return obj[key]? obj[key] : 'Invalid Key'
+  }
+
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider>
         <div className="demo-logo-vertical" />
         <Title>Patient Reported Outcome</Title>
-        <Title className="pb-0">Patient’s ID</Title>
-        <SubTitle>Patient’s Data</SubTitle>
+        <Title className="pb-0">{notUndefined(fitbitProfile,'fullName')}</Title>
+        {/* <SubTitle>Patient’s Data</SubTitle> */}
         <InfoItem>
-          <Label>First Name</Label>
-          <Value>Nasibeh</Value>
-        </InfoItem>
-        <InfoItem>
-          <Label> Last Name</Label>
-          <Value> Heshmati</Value>
-        </InfoItem>
-        <InfoItem>
-          <Label>Sex</Label>
-          <Value>Female</Value>
+          <Label>Gender</Label>
+          <Value>{capitalizeFirstLetter(notUndefined(fitbitProfile,'gender'))}</Value>
         </InfoItem>
         <InfoItem>
           <Label>Age</Label>
-          <Value>29</Value>
+          <Value>{notUndefined(fitbitProfile,'age')}</Value>
         </InfoItem>
         <InfoItem>
-          <Label>Current BMI</Label>
-          <Value> 20.0</Value>
+          <Label>BMI</Label>
+          <Value>{bmi.toFixed(1)}</Value>
         </InfoItem>
         <InfoItem>
-          <Label> Current Weight</Label>
-          <Value> 115 lbs</Value>
+          <Label>Weight</Label>
+          <Value>{notUndefined(fitbitProfile,'weight')}</Value>
         </InfoItem>
         <InfoItem>
           <Label> Height</Label>
-          <Value> 5.31 ft</Value>
+          <Value>{inchesToFeetString(notUndefined(fitbitProfile,'height'))}</Value>
         </InfoItem>
         <Title className="mt-8">Treatment Information</Title>
       </Sider>

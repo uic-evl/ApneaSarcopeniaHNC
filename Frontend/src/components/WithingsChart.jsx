@@ -42,6 +42,7 @@ import {
 
 // constants
 import { DATE_PERIODS } from "@src/constants";
+import API from "@src/service/API";
 
 const DATE_SINCE_TIMESTAMP = 1716409800000;
 
@@ -67,34 +68,11 @@ export default function WithingsCharts() {
   const [datePeriod, setDatePeriod] = useState(DATE_PERIODS.all);
   const [datePickerKey, setDatePickerKey] = useState(0);
 
-  useEffect(() => {
-    getRequests();
-  }, []);
+  const api = new API('fitbit-token','whithings-token');
 
-  const getRequests = async () => {
-    setLoading(true);
-    setError(null);
-
+  async function fetchWeight(){
     try {
-      await Promise.all([
-        getWeightRequest(),
-        getHeightRequest(),
-        getBoneMassRequest(),
-        getFatRatioRequest(),
-        getMuscleRequest(),
-        getFatMassWeightRequest(),
-      ]);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getWeightRequest = async () => {
-    try {
-      const measures = await getWeight();
-
+      const measures = await api.fetchWithingsEntry('weight');
       const weights = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
 
@@ -113,11 +91,11 @@ export default function WithingsCharts() {
     } catch (error) {
       throw new Error(error);
     }
-  };
+  }
 
-  const getHeightRequest = async () => {
+  async function fetchHeight(){
     try {
-      const measures = await getHeight();
+      const measures = await api.fetchWithingsEntry('height');
       let height = null;
 
       if (measures?.length) {
@@ -130,12 +108,16 @@ export default function WithingsCharts() {
     } catch (error) {
       throw new Error("Failed to fetch height data");
     }
-  };
+  }
+  
+  async function fetchBoneMass(){
+    const temp = await api.fetchWithingsEntry('bone_mass');
+    if(temp !== null && temp !== undefined){
+      setBoneMass(temp);
+    }
 
-  const getBoneMassRequest = async () => {
     try {
-      const measures = await getBoneMass();
-
+      const measures = await api.fetchWithingsEntry('bone_mass');
       const bone = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
 
@@ -154,11 +136,11 @@ export default function WithingsCharts() {
     } catch (error) {
       throw new Error("Failed to fetch bone mass data");
     }
-  };
+  }
 
-  const getFatRatioRequest = async () => {
+  async function fetchFatRatio(){
     try {
-      const measures = await getFatRatio();
+      const measures = await api.fetchWithingsEntry('fat_ratio');
 
       const fatRatio = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
@@ -178,11 +160,11 @@ export default function WithingsCharts() {
     } catch (error) {
       throw new Error("Failed to fetch bone mass data");
     }
-  };
+  }
 
-  const getMuscleRequest = async () => {
+  async function fetchMuscle(){
     try {
-      const measures = await getMuscle();
+      const measures = await api.fetchWithingsEntry('muscle_mass');
 
       const muscle = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
@@ -202,11 +184,11 @@ export default function WithingsCharts() {
     } catch (error) {
       throw new Error("Failed to fetch bone mass data");
     }
-  };
+  }
 
-  const getFatMassWeightRequest = async () => {
+  async function fetchFatMassWeight(){
     try {
-      const measures = await getFatMassWeight();
+      const measures = await api.fetchWithingsEntry('fat_mass_weight');
 
       const fatMassWeights = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
@@ -224,7 +206,33 @@ export default function WithingsCharts() {
     } catch (error) {
       throw new Error("Failed to fetch bone mass data");
     }
+  }
+
+  useEffect(() => {
+    getRequests();
+  }, []);
+
+
+  const getRequests = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await Promise.all([
+        fetchWeight(),
+        fetchHeight(),
+        fetchBoneMass(),
+        fetchFatRatio(),
+        fetchMuscle(),
+        fetchFatMassWeight(),
+      ]);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const weightsFilteredByTime = useMemo(() => {
     if (dateRange.date_from === null || dateRange.date_to === null) {

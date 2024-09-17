@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import * as env from "./env.js";
 import './index.css';
+import API from "./service/API.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -41,23 +42,22 @@ export default function Login() {
 
   const handleFbLogoutClick = () => {
     localStorage.removeItem('fitbit-token');
+    localStorage.removeItem('fitbit-refresh-token');
     localStorage.removeItem('fitbit-code');
-    localStorage.removeItem('verifier');
-    localStorage.removeItem('challenge');
     setFitbitCode(null);
     setFitbitToken(null);
   }
 
   const handleWthLogoutClick = () => {
     localStorage.removeItem('whithings-token');
+    localStorage.removeItem('whithings-refresh-token');
     localStorage.removeItem('whithings-code');
-    localStorage.removeItem('verifier');
-    localStorage.removeItem('challenge');
     setWhithingsCode(null);
     setWhithingsToken(null);
   }
 
-  async function fetchFitbitToken(code){
+  async function fetchFitbitToken(code,force=false){
+    if ((!force && fitbitToken !== null) || fitbitCode === null){ return }
     // Prepare the body for the POST request
     const body = new URLSearchParams();
     body.append("client_id", env.FITBIT_CLIENT_ID);
@@ -95,8 +95,9 @@ export default function Login() {
       });
   }
 
-  async function fetchWhithingsToken(code){
+  async function fetchWhithingsToken(code,force=false){
     // Prepare the body for the POST request
+    if ((!force && whithingsToken !== null) || whithingsCode === null){ return }
     const body = new URLSearchParams();
     body.append("client_id", env.WHITHINGS_CLIENT_ID);
     body.append("code", code); // The authorization code we just received
@@ -140,10 +141,11 @@ export default function Login() {
       });
   }
 
+  
+
   useEffect(()=>{
     console.log('fibit code',fitbitCode,localStorage.getItem('fitbit-code'))
     if(fitbitCode !== null && fitbitCode !== undefined) {
-      console.log('fetching',fitbitCode)
       fetchFitbitToken(fitbitCode);
     }
   },[fitbitCode])
@@ -151,10 +153,10 @@ export default function Login() {
   useEffect(()=>{
     console.log('withings code',whithingsCode,localStorage.getItem('whithings-code'))
     if(whithingsCode !== null && whithingsCode !== undefined) {
-      console.log('fetching',whithingsCode)
       fetchWhithingsToken(whithingsCode);
     }
   },[whithingsCode])
+
   useEffect(()=>{
     if ( localStorage.getItem('fitbit-token') !== null && localStorage.getItem('whithings-token')!== null){
       navigate('/vis');

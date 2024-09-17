@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import Vis from './Vis.jsx'
 import './index.css'
 import Login from './Login.jsx';
-import FitbitLogin from './FitbitLogin.jsx';
 import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import Oauth2Login from './Oauth2Login.jsx';
 

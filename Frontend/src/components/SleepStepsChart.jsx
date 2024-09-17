@@ -26,6 +26,7 @@ import ActivitySummary from "@src/components/ActivitySummary";
 
 // constants
 import { DATE_PERIODS } from "@src/constants";
+import API from "../service/API.js";
 
 // utils
 import {
@@ -42,6 +43,7 @@ const CHART_TYPES = Object.freeze({
   sleepScores: "sleepScores",
 });
 
+
 const todayTimestamp = moment().startOf("day").unix() * 1000;
 const nowTimestamp = moment().unix() * 1000;
 const weekAgoTimestamp = moment().subtract(7, "days").unix() * 1000;
@@ -49,7 +51,8 @@ const monthAgoTimestamp = moment().subtract(1, "months").unix() * 1000;
 const yearAgoTimestamp = moment().subtract(1, "years").unix() * 1000;
 
 export default function SleepStepsChart() {
-  const [loading, setLoading] = useState(true);
+  var sleepLoading = false;
+  var stepsLoading = false;
   const [error, setError] = useState(null);
   const [sleepScores, setSleepScores] = useState(null);
   const [steps, setSteps] = useState(null);
@@ -64,22 +67,60 @@ export default function SleepStepsChart() {
     [CHART_TYPES.sleepScores]: CHART_TYPES.sleepScores,
   });
 
+  const api = new API('fitbit-token','whithings-token');
+
+  async function getSleep(){
+    sleepLoading = true;
+    const tempSleep = await api.getSleepSince(3);
+    console.log('sleep response',tempSleep);
+    if(tempSleep!==null){
+      const scores = tempSleep.map((log) => {
+        const date = moment(log.dateOfSleep).unix() * 1000;
+
+        return {
+          number: log.efficiency,
+          date,
+          formattedDate: convertTimestampToDateString(date / 1000),
+        };
+      });
+      setSleepScores(scores);
+    } else{
+      setSleepScores(null);
+    }
+    sleepLoading=false;
+  }
+
+  async function getSteps(){
+    stepsLoading = true;
+    setSteps(null);
+    const temp = await api.getStepsSince(3);
+    console.log('steps response',temp)
+    if(temp !== null){
+      const tempSteps = temp.map((log) => {
+        const date = moment(log.dateTime, "").unix() * 1000;
+        return {
+          number: Number(log.value),
+          date,
+          formattedDate: convertTimestampToDateString(date / 1000),
+        };
+      });
+      setSteps(tempSteps)
+    } else{
+      setSteps(null)
+    }
+    stepsLoading = false;
+  }
+
+  async function fetchData(){
+    getSleep();
+    getSteps();
+  }
+
   useEffect(() => {
-    getRequests();
+    fetchData();
+    // getRequests();
   }, []);
 
-  const getRequests = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await Promise.all([getSleepLogRequest(), getStepsRequest()]);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getTime = (date, daysCount) => {
     if (daysCount <= 1) {
@@ -93,75 +134,6 @@ export default function SleepStepsChart() {
     }
 
     return moment(date).format("ddd");
-  };
-
-  const getSleepLogRequest = async () => {
-    try {
-      const logs = await getAllSleepLogs();
-
-      const scores = logs.map((log) => {
-        const date = moment(log.dateOfSleep).unix() * 1000;
-
-        return {
-          number: log.efficiency,
-          date,
-          formattedDate: convertTimestampToDateString(date / 1000),
-        };
-      });
-
-      setSleepScores(scores);
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
-
-  const getAllSleepLogs = async () => {
-    const threeYearsAgo = moment().subtract(3, "years");
-    const today = moment();
-
-    let currentStartDate = threeYearsAgo;
-    let logs = [];
-
-    while (currentStartDate.isBefore(today)) {
-      const currentEndDate = moment.min(
-        currentStartDate.clone().add(3, "months"),
-        today
-      );
-
-      const response = await getSleepLog({
-        date_from: currentStartDate.format("YYYY-MM-DD"),
-        date_to: currentEndDate.format("YYYY-MM-DD"),
-      });
-
-      logs = logs.concat(response);
-
-      currentStartDate = currentEndDate.add(1, "day");
-    }
-
-    return logs.reverse();
-  };
-
-  const getStepsRequest = async () => {
-    try {
-      const logs = await getSteps({
-        date_from: moment().subtract(3, "month").format("YYYY-MM-DD"),
-        date_to: moment().format("YYYY-MM-DD"),
-      });
-
-      const steps = logs.map((log) => {
-        const date = moment(log.dateTime, "").unix() * 1000;
-
-        return {
-          number: Number(log.value),
-          date,
-          formattedDate: convertTimestampToDateString(date / 1000),
-        };
-      });
-
-      setSteps(steps);
-    } catch (error) {
-      throw new Error(error);
-    }
   };
 
   const sleepScoresFilteredByTime = useMemo(() => {
@@ -374,15 +346,16 @@ export default function SleepStepsChart() {
     return false;
   }, [selectedItems, steps, sleepScores]);
 
-  if (loading) {
+  if (sleepLoading || stepsLoading){
     return (
-      <Spin spinning={loading} tip="Loading...">
+      <Spin spinning={true} tip="Loading...">
         <Card className="relative mx-6 mt-5 h-96"></Card>
       </Spin>
     );
   }
 
-  if (error) {
+  if (!sleepLoading && !stepsLoading && (sleepScores === null || steps === null)) {
+    
     return (
       <Card className="relative mx-6 mt-5">
         <Alert
@@ -392,7 +365,7 @@ export default function SleepStepsChart() {
           description={error}
           type="error"
           action={
-            <Button onClick={getRequests} size="middle" danger>
+            <Button onClick={fetchData} size="middle" danger>
               Retry
             </Button>
           }
