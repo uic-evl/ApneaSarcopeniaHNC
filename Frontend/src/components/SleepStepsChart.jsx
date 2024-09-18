@@ -16,10 +16,7 @@ import tw from "tailwind-styled-components";
 import LineChart from "@src/features/lineChart";
 
 // fake data
-import monthlySleepScoreAndSteps from "@src/assets/data/monthlySleepScoreAndSteps.json";
-
-// services
-import { getSleepLog, getSteps } from "@src/service/fitbit";
+// import monthlySleepScoreAndSteps from "@src/assets/data/monthlySleepScoreAndSteps.json";
 
 // components
 import ActivitySummary from "@src/components/ActivitySummary";
@@ -70,45 +67,54 @@ export default function SleepStepsChart() {
   const api = new API('fitbit-token','whithings-token');
 
   async function getSleep(){
-    sleepLoading = true;
-    const tempSleep = await api.getSleepSince(3);
-    console.log('sleep response',tempSleep);
-    if(tempSleep!==null){
-      const scores = tempSleep.map((log) => {
-        const date = moment(log.dateOfSleep).unix() * 1000;
+    if(sleepLoading){return}
+    try{
+      sleepLoading = true;
+      const tempSleep = await api.getSleepSince(3);
+      if(tempSleep!==null){
+        const scores = tempSleep.map((log) => {
+          const date = moment(log.dateOfSleep).unix() * 1000;
 
-        return {
-          number: log.efficiency,
-          date,
-          formattedDate: convertTimestampToDateString(date / 1000),
-        };
-      });
-      setSleepScores(scores);
-    } else{
-      setSleepScores(null);
+          return {
+            number: log.efficiency,
+            date,
+            formattedDate: convertTimestampToDateString(date / 1000),
+          };
+        });
+        setSleepScores(scores);
+      } else{
+        setSleepScores(null);
+      }
+      sleepLoading=false;
     }
-    sleepLoading=false;
+    catch(error){
+      setError(error.message);
+    }
   }
 
   async function getSteps(){
-    stepsLoading = true;
-    setSteps(null);
-    const temp = await api.getStepsSince(3);
-    console.log('steps response',temp)
-    if(temp !== null){
-      const tempSteps = temp.map((log) => {
-        const date = moment(log.dateTime, "").unix() * 1000;
-        return {
-          number: Number(log.value),
-          date,
-          formattedDate: convertTimestampToDateString(date / 1000),
-        };
-      });
-      setSteps(tempSteps)
-    } else{
-      setSteps(null)
+    if(stepsLoading){return}
+    try{
+      stepsLoading = true;
+      const temp = await api.getStepsSince(3);
+      if(temp !== null){
+        const tempSteps = temp.map((log) => {
+          const date = moment(log.dateTime, "").unix() * 1000;
+          return {
+            number: Number(log.value),
+            date,
+            formattedDate: convertTimestampToDateString(date / 1000),
+          };
+        });
+        setSteps(tempSteps)
+      } else{
+        setSteps(null)
+      }
+      stepsLoading = false;
+    } catch(error){
+      setError(error.message);
     }
-    stepsLoading = false;
+    
   }
 
   async function fetchData(){

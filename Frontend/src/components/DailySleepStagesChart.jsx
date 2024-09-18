@@ -5,9 +5,6 @@ import tw from "tailwind-styled-components";
 // components
 import DayAnalysis from "@src/components/DayAnalysis";
 
-// services
-import { getDailySleepLog } from "@src/service/fitbit";
-
 const levelMapping = {
   wake: 100,
   rem: 80,

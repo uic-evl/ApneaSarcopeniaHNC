@@ -21,7 +21,7 @@ import {
 } from "@ant-design/icons";
 
 // features
-import LineChart from "@features/lineChart";
+// import LineChart from "@features/lineChart";
 
 // components
 import SleepStagesChart from "@src/components/SleepStagesChart";
@@ -33,13 +33,13 @@ import DailySleepStagesChart from "@src/components/DailySleepStagesChart";
 import SleepLogsCharts from "@src/components/SleepLogsCharts";
 
 // fake data
-import weeklyBMI from "@src/assets/data/weeklyBMI.json";
-import monthlyBMI from "@src/assets/data/monthlyBMI.json";
-import multi from "@src/assets/data/multi.json";
-import weeklySleep from "@src/assets/data/weeklySleep.json";
-import monthlySleep from "@src/assets/data/monthlySleep.json";
-import daySleep from "@src/assets/data/daySleep.json";
-import monthlySleepScoreAndSteps from "@src/assets/data/monthlySleepScoreAndSteps.json";
+// import weeklyBMI from "@src/assets/data/weeklyBMI.json";
+// import monthlyBMI from "@src/assets/data/monthlyBMI.json";
+// import multi from "@src/assets/data/multi.json";
+// import weeklySleep from "@src/assets/data/weeklySleep.json";
+// import monthlySleep from "@src/assets/data/monthlySleep.json";
+// import daySleep from "@src/assets/data/daySleep.json";
+// import monthlySleepScoreAndSteps from "@src/assets/data/monthlySleepScoreAndSteps.json";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -109,7 +109,7 @@ export default function Vis() {
   async function fetchProfile(){
     if (fitbitProfile === undefined) {
       const data = await api.fetchFitbitProfile();
-      console.log('data fetched',data.user);
+      // console.log('data fetched',data.user);
       setFitbitProfile(data.user);
       if (data && data !== null) {
         //relevant data: age, gender, sfullName, weight, weightUnit
@@ -174,6 +174,13 @@ export default function Vis() {
           <Value>{inchesToFeetString(notUndefined(fitbitProfile,'height'))}</Value>
         </InfoItem>
         <Title className="mt-8">Treatment Information</Title>
+        <Flex align='center' justify='center'>
+          <Button onClick={() => api.logOut()} danger>
+            {'Log Out'}
+          </Button>
+        </Flex>
+        
+
       </Sider>
       <Layout>
         <Content>

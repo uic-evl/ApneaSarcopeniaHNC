@@ -8,11 +8,8 @@ import { CalendarOutlined } from "@ant-design/icons";
 import StackedBarChart from "@features/stackedBarChart";
 
 // fake data
-import weeklySleep from "@src/assets/data/weeklySleep.json";
-import multiFakeData from "@src/assets/data/multi.json";
-
-// services
-import { getHeartRate, getSleepLog, getSpo2 } from "@src/service/fitbit";
+// import weeklySleep from "@src/assets/data/weeklySleep.json";
+// import multiFakeData from "@src/assets/data/multi.json";
 
 // components
 import ActivitySummary from "./ActivitySummary";
@@ -62,57 +59,70 @@ export default function SleepStagesChart({ onItemSelect }) {
 
   async function getSleep(){
     if (sleepLoading){ return }
-    sleepLoading = true;
-    const tempSleep = await api.getSleepSince(7);
-    if(tempSleep!==null){
+    try{
+      sleepLoading = true;
+      const tempSleep = await api.getSleepSince(7);
       setSleepLog(tempSleep);
-    } else{
-      setSleepLog(null);
+    } catch(error){
+      setError(error.message);
     }
     sleepLoading=false;
   }
 
   async function getHeartRate(){
     if (hrLoading){ return }
-    hrLoading= true;
-    const [start,stop] = getTimeIntervalSinceToday(3);
-    const tempHRData = await api.fetchFitbitHeartRate(start,stop);
-    if(tempHRData !== null){
-      const rates = tempHRData['activities-heart'].filter((rate) => rate.value.restingHeartRate !== undefined)
-      .map((rate) => ({
-        ...rate,
-        timestamp: toTimestamp(rate.dateTime),
-        time: moment(rate.dateTime).format(timeFormat),
-        number: rate.value.restingHeartRate,
-      }))
-      .sort((a, b) => a.timestamp - b.timestamp);
-      setHeartRate(rates)
+    try{
+      hrLoading= true;
+      const [start,stop] = getTimeIntervalSinceToday(3);
+      const tempHRData = await api.fetchFitbitHeartRate(start,stop);
+      if(tempHRData !== null){
+        const rates = tempHRData['activities-heart'].filter((rate) => rate.value.restingHeartRate !== undefined)
+        .map((rate) => ({
+          ...rate,
+          timestamp: toTimestamp(rate.dateTime),
+          time: moment(rate.dateTime).format(timeFormat),
+          number: rate.value.restingHeartRate,
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+        setHeartRate(rates)
+      }
+    } catch(error){
+      setError(error.message);
     }
+    
     hrLoading=false;
   }
 
   async function getSPO2(){
     if(spo2Loading){ return }
-    spo2Loading = true;
-    const [start,stop] = getTimeIntervalSinceToday(3);
-    const tempSPO2 = await api.fetchFitbitSpO2(start,stop);
-    if(tempSPO2 !== null){
-      const result = tempSPO2.map((item) => ({
-          ...item,
-          timestamp: toTimestamp(item.dateTime),
-          time: moment(item.dateTime).format(timeFormat),
-          number: item.value.avg,
-        }))
-        .sort((a, b) => a.timestamp - b.timestamp);
-      setSpo2(result);
+    try{
+      spo2Loading = true;
+      const [start,stop] = getTimeIntervalSinceToday(3);
+      const tempSPO2 = await api.fetchFitbitSpO2(start,stop);
+      if(tempSPO2 !== null){
+        const result = tempSPO2.map((item) => ({
+            ...item,
+            timestamp: toTimestamp(item.dateTime),
+            time: moment(item.dateTime).format(timeFormat),
+            number: item.value.avg,
+          }))
+          .sort((a, b) => a.timestamp - b.timestamp);
+        setSpo2(result);
+      }
+    } catch(error){
+      setError(error.message);
     }
     spo2Loading=false;
   }
 
-  useEffect(() => {
+  async function getRequests(){
     getSleep();
     getHeartRate();
     getSPO2();
+  }
+
+  useEffect(() => {
+    getRequests();
   }, []);
 
   const toggleCalendarOpen = () => {
