@@ -1,7 +1,7 @@
 import { Progress } from "antd";
 
 // fake data
-import daySleep from "@src/assets/data/daySleep.json";
+// import daySleep from "@src/assets/data/daySleep.json";
 import tw from "tailwind-styled-components";
 
 // features

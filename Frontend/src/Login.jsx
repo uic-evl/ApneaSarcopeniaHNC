@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
+import {Button} from 'antd';
 import * as env from "./env.js";
 import './index.css';
 import API from "./service/API.js";
@@ -42,7 +42,7 @@ export default function Login() {
 
   const handleFbLogoutClick = () => {
     localStorage.removeItem('fitbit-token');
-    localStorage.removeItem('fitbit-refresh-token');
+    localStorage.removeItem('fitbit-token-refresh');
     localStorage.removeItem('fitbit-code');
     setFitbitCode(null);
     setFitbitToken(null);
@@ -50,7 +50,7 @@ export default function Login() {
 
   const handleWthLogoutClick = () => {
     localStorage.removeItem('whithings-token');
-    localStorage.removeItem('whithings-refresh-token');
+    localStorage.removeItem('whithings-token-refresh');
     localStorage.removeItem('whithings-code');
     setWhithingsCode(null);
     setWhithingsToken(null);
@@ -79,7 +79,13 @@ export default function Login() {
           console.log("Fitbit Access Token:", data);
           // TODO: Store the access token in the local storage as well
           localStorage.setItem("fitbit-token", data.access_token);
-          localStorage.setItem('fitbit-refresh-token',data.refresh_token);
+          localStorage.setItem('fitbit-token-refresh',data.refresh_token);
+
+          //save when token expires
+          const currTime = new Date().getTime() / 1000;
+          const expireTime =  currTime + data.expires_in;
+          localStorage.setItem('fitbit-token-expires',expireTime);
+
           setFitbitToken(data.access_token); // Function to fetch Fitbit data using the access token
         } else {
           console.error("Error fetching access token:", data);
@@ -123,10 +129,16 @@ export default function Login() {
         if (data.body.access_token) {
           const atoken = data.body.access_token;
           console.log("Whiting Access Token:", atoken);
+
           // TODO: Store the access token in the local storage as well
           localStorage.setItem("whithings-token", atoken);
-          localStorage.setItem("whithings-refresh-token",data.body.refresh_token);
-          setWhithingsToken(atoken); // Function to fetch Fitbit data using the access token
+          localStorage.setItem("whithings-token-refresh",data.body.refresh_token);
+
+          //save when the token expires
+          const currTime = new Date().getTime() / 1000;
+          const expireTime =  currTime + data.body.expires_in;
+          localStorage.setItem('whithings-token-expires',expireTime);
+          setWhithingsToken(atoken); 
         } else {
           console.error("Error fetching access token:", data);
         }
@@ -151,47 +163,51 @@ export default function Login() {
   },[fitbitCode])
 
   useEffect(()=>{
-    console.log('withings code',whithingsCode,localStorage.getItem('whithings-code'))
+    console.log('withings code',whithingsCode,localStorage.getItem('whithings-code'),localStorage.getItem('whithings-token'))
     if(whithingsCode !== null && whithingsCode !== undefined) {
       fetchWhithingsToken(whithingsCode);
     }
   },[whithingsCode])
 
-  useEffect(()=>{
+  // useEffect(()=>{
+  //   if ( localStorage.getItem('fitbit-token') !== null && localStorage.getItem('whithings-token')!== null){
+  //     navigate('/vis');
+  //   }
+  // },[fitbitToken, whithingsToken])
+
+  const fitbitLoggedIn = localStorage.getItem('fitbit-token') !== null;
+  const withingsLoggedIn = localStorage.getItem('whithings-token') !== null;
+
+  function enter(){
     if ( localStorage.getItem('fitbit-token') !== null && localStorage.getItem('whithings-token')!== null){
       navigate('/vis');
     }
-  },[fitbitToken, whithingsToken])
+  }
 
 
   return (
-    <div className="root">
-        <div className="btn-container">
-          <button className="btn btn-primary" onClick={handleFitbitClick} target={"_"}>
-            {'log in with FitBit'}
-          </button>
-        </div>
-        <div className="btn-container">
-          <button className="btn btn-primary" onClick={handleWithingsClick} target={"_"}>
-            {'log in with Whithings'}
-          </button>
-        </div>
-        <div className="btn-container">
-          <button className="btn btn-primary" onClick={handleFbLogoutClick}>
+    <div className="root" style={{display: 'flex',alignItems: 'center',justifyContent: 'center',height: '100vh',width: '100vw'}}>
+        {!fitbitLoggedIn? 
+          <Button onClick={handleFitbitClick}>
+              {'Log in with FitBit'}
+          </Button> :
+          <Button onClick={handleFbLogoutClick}>
             {'Log Out FB'}
-          </button>
-        </div>
-        <div className="btn-container">
-          <button className="btn btn-primary" onClick={handleWthLogoutClick}>
+          </Button>
+        }
+        {!withingsLoggedIn?
+          <Button onClick={handleWithingsClick}>
+            {'Log in with Whithings'}
+          </Button> :
+          
+          <Button onClick={handleWthLogoutClick}>
             {'Log Out Whithings'}
-          </button>
-        </div>
-        <div>
-        {whithingsCode}
-        {fitbitCode}
-        {fitbitToken}
-        {whithingsToken}
-        </div>
+          </Button>
+        }
+        
+        <Button onClick={enter}>
+          {'Enter'}
+        </Button>
         
     </div>
   );

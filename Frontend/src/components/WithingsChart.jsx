@@ -19,15 +19,6 @@ import BMIChart from "@src/components/BMIChart";
 import BoneFatMuscleChart from "@src/components/BoneFatMuscleChart";
 import ScatterChart from "@src/components/ScatterChart";
 
-// services
-import {
-  getBoneMass,
-  getFatMassWeight,
-  getFatRatio,
-  getHeight,
-  getMuscle,
-  getWeight,
-} from "@src/service/withings";
 
 // utils
 import {
@@ -111,10 +102,6 @@ export default function WithingsCharts() {
   }
   
   async function fetchBoneMass(){
-    const temp = await api.fetchWithingsEntry('bone_mass');
-    if(temp !== null && temp !== undefined){
-      setBoneMass(temp);
-    }
 
     try {
       const measures = await api.fetchWithingsEntry('bone_mass');
@@ -199,9 +186,9 @@ export default function WithingsCharts() {
           formattedDate: convertTimestampToDateString(measure.date),
         };
       });
-
+      const temp = filterDataSince(fatMassWeights, DATE_SINCE_TIMESTAMP, "date").reverse();
       setFatMassWeight(
-        filterDataSince(fatMassWeights, DATE_SINCE_TIMESTAMP, "date").reverse()
+        temp
       );
     } catch (error) {
       throw new Error("Failed to fetch bone mass data");
@@ -250,7 +237,6 @@ export default function WithingsCharts() {
     if (dateRange.date_from === null || dateRange.date_to === null) {
       return boneMass;
     }
-
     return boneMass?.filter((bone) => {
       const { date } = bone;
 
