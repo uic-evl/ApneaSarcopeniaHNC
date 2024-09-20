@@ -17,7 +17,7 @@ export default function XAxis({ xScale, labelsCount, height }) {
   }, [xScale]);
 
   return (
-    <g transform={`translate(0,${height / 2})`}>
+    <g transform={`translate(0,${height*.9})`}>
       {ticks.map(({ value, xOffset }) => (
         <g
           key={value}

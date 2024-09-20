@@ -61,9 +61,8 @@ export default function WithingsCharts() {
 
   const api = new API('fitbit-token','whithings-token');
 
-  async function fetchWeight(){
+  function formatWeight(measures){
     try {
-      const measures = await api.fetchWithingsEntry('weight');
       const weights = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
 
@@ -84,9 +83,8 @@ export default function WithingsCharts() {
     }
   }
 
-  async function fetchHeight(){
+  function formatHeight(measures){
     try {
-      const measures = await api.fetchWithingsEntry('height');
       let height = null;
 
       if (measures?.length) {
@@ -101,10 +99,9 @@ export default function WithingsCharts() {
     }
   }
   
-  async function fetchBoneMass(){
+  function formatBoneMass(measures){
 
     try {
-      const measures = await api.fetchWithingsEntry('bone_mass');
       const bone = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
 
@@ -125,9 +122,8 @@ export default function WithingsCharts() {
     }
   }
 
-  async function fetchFatRatio(){
+  function formatFatRatio(measures){
     try {
-      const measures = await api.fetchWithingsEntry('fat_ratio');
 
       const fatRatio = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
@@ -149,9 +145,8 @@ export default function WithingsCharts() {
     }
   }
 
-  async function fetchMuscle(){
+  async function formatMuscle(measures){
     try {
-      const measures = await api.fetchWithingsEntry('muscle_mass');
 
       const muscle = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
@@ -173,13 +168,11 @@ export default function WithingsCharts() {
     }
   }
 
-  async function fetchFatMassWeight(){
+  function formatFatMassWeight(measures){
     try {
-      const measures = await api.fetchWithingsEntry('fat_mass_weight');
 
       const fatMassWeights = measures.map((measure) => {
         const { value, unit } = measure.measures?.[0];
-
         return {
           fatMassWeight: calculateValueByUnit(value, unit),
           date: measure.date * 1000,
@@ -205,14 +198,22 @@ export default function WithingsCharts() {
     setError(null);
 
     try {
-      await Promise.all([
-        fetchWeight(),
-        fetchHeight(),
-        fetchBoneMass(),
-        fetchFatRatio(),
-        fetchMuscle(),
-        fetchFatMassWeight(),
-      ]);
+        const results = await api.fetchWithingsBatchEntry(['weight','height','bone_mass','fat_ratio','muscle_mass','fat_mass_weight']);
+        console.log('results',results)
+        formatWeight(results['weight']);
+        formatHeight(results['height']);
+        formatBoneMass(results['bone_mass']);
+        formatFatRatio(results['fat_ratio']);
+        formatFatMassWeight(results['fat_mass_weight']);
+        formatMuscle(results['muscle_mass']);
+      // await Promise.all([
+      //   fetchWeight(),
+      //   fetchHeight(),
+      //   fetchBoneMass(),
+      //   fetchFatRatio(),
+      //   fetchMuscle(),
+      //   fetchFatMassWeight(),
+      // ]);
     } catch (error) {
       setError(error.message);
     } finally {

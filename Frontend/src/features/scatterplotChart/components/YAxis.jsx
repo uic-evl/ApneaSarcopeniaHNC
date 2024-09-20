@@ -14,7 +14,7 @@ export default function YAxis({ yScale, labelsCount, width }) {
   }, [yScale]);
 
   return (
-    <g transform={`translate(${width / 2 + 7},0)`}>
+    <g transform={`translate(${ 7},0)`}>
       {ticks.map(({ value, yOffset }) => (
         <g
           key={value}

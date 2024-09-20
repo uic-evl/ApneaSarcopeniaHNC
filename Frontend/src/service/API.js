@@ -69,10 +69,9 @@ export default class API {
 
     async makeFitbitQuery(url,parameters,errorCallback,successCallback){
         //todo: figure out how to handle expired token codes
+        await this.refreshFitbitToken();
         const token = localStorage.getItem(this.fitbitCookieName);
-        if (this.isFitbitExpired()){
-            await this.refreshFitbitToken()
-        }
+
         const pText = new URLSearchParams();
         if(parameters){
             for(const [key,value] of Object.entries(parameters)){
@@ -132,13 +131,13 @@ export default class API {
 
     async makeWithingsRequest(parameters,successCallback,errorCallback){
         //todo: handle expired codes
+        await this.refreshWhithingsToken()
+
         const token = localStorage.getItem(this.withingsCookieName);
         if(token === null){
             console.log('withings token missing');
         }
-        if (this.isWithingsExpired()){
-            await this.refreshWhithingsToken()
-        }
+        
         const url = 'https://wbsapi.withings.net/measure';
         const pText = new URLSearchParams();
         for(const [key,value] of Object.entries(parameters)){
@@ -160,9 +159,9 @@ export default class API {
                 if(successCallback){
                     successCallback(data);
                 }
-                if(data.status === 401){
-                    this.resetWithingsToken();
-                }
+                // if(data.status === 401){
+                //     this.resetWithingsToken();
+                // }
                 return data.body.measuregrps;
             })
             .catch((error) => {
@@ -226,6 +225,17 @@ export default class API {
         return this.makeWithingsRequest(entry);
     }
 
+    async fetchWithingsBatchEntry(items,startDate,endDate){
+        //attempt at fixing the refresh problem
+        await this.refreshWhithingsToken();
+        let res = {}
+        for(const item of items){
+            const result = await this.fetchWithingsEntry(item,startDate,endDate);
+            res[item] = result
+        }
+        return res
+    }
+
     async fetchFitbitProfile(){
         return this.makeFitbitQuery("https://api.fitbit.com/1/user/-/profile.json")
     }
@@ -285,12 +295,36 @@ export default class API {
         return null
     }
 
+    delay = (delayInms) => {
+        return new Promise(resolve => setTimeout(resolve, delayInms));
+    };
+
+    async waitForFitbitRefresh(){
+        while(sessionStorage.getItem('refreshing-fitbit')==='true'){
+            this.delay(100); 
+        }
+        return true;
+    }
+
+    async waitForWithingsRefresh(){
+        while(sessionStorage.getItem('refreshing-withings')==='true'){
+            this.delay(100); 
+        }
+        return true;
+    }
+
     async refreshWhithingsToken(){
         // Prepare the body for the POST request
+        if (!this.isWithingsExpired()){ return }
+
+        if (sessionStorage.getItem('refreshing-withings') === 'true'){ 
+            await this.waitForWithingsRefresh();
+            return 
+        }
         const token = localStorage.getItem(this.withingsCookieName+'-refresh');
-        if (token === null){ refreshWithingsToken() }
-        if (sessionStorage.getItem('refreshing-withings') === true){ return }
-        sessionStorage.setItem('refreshing-withings',true)
+        sessionStorage.setItem('refreshing-withings',true);
+
+
         const body = new URLSearchParams();
         body.append("client_id", env.WHITHINGS_CLIENT_ID);
         body.append("grant_type", "refresh_token");
@@ -329,21 +363,24 @@ export default class API {
             } else {
               console.error("Error refreshing withings access token:", data);
               sessionStorage.setItem('refreshing-withings',false);
-              this.resetWithingsToken();
+            //   this.resetWithingsToken();
             }
             
           })
           .catch((error) => {
             console.error("Error during withing token refresh:", error);
             sessionStorage.setItem('refreshing-withings',false);
-            this.resetWithingsToken();
+            // this.resetWithingsToken();
           });
       }
 
       async refreshFitbitToken(){
+        if (!this.isFitbitExpired()){ return }
+        if (sessionStorage.getItem('refreshing-fitbit') === 'true'){ 
+            await this.waitForFitbitRefresh();
+            return 
+        }
         const token = localStorage.getItem(this.fitbitCookieName+'-refresh');
-        if (token === null){ resetFitbitToken() }
-        if (sessionStorage.getItem('refreshing-fitbit') === true){ return }
         sessionStorage.setItem('refreshing-fitbit',true);
         const body = new URLSearchParams();
         body.append("client_id", env.FITBIT_CLIENT_ID);
