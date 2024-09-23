@@ -23,7 +23,7 @@ import ActivitySummary from "@src/components/ActivitySummary";
 
 // constants
 import { DATE_PERIODS } from "@src/constants";
-import API from "../service/API.js";
+import { FitbitAPI } from "../service/API.js";
 
 // utils
 import {
@@ -64,7 +64,7 @@ export default function SleepStepsChart() {
     [CHART_TYPES.sleepScores]: CHART_TYPES.sleepScores,
   });
 
-  const api = new API('fitbit-token','whithings-token');
+  const api = new FitbitAPI('fitbit-token');
 
   async function getSleep(){
     if(sleepLoading){return}
@@ -388,13 +388,13 @@ export default function SleepStepsChart() {
           value={datePeriod}
           onChange={handlePeriodSelection}
         >
-          {Object.keys(DATE_PERIODS).map((period) => (
-            <Radio.Button key={period} value={period}>
+          {Object.keys(DATE_PERIODS).map((period,i) => (
+            <Radio.Button key={period+i+'something'} value={period}>
               {capitalizeFirstLetter(period)}
             </Radio.Button>
           ))}
         </Radio.Group>
-        <RangePicker key={datePickerKey} onChange={handleRangePicker} />
+        <RangePicker key={datePickerKey+'no'} onChange={handleRangePicker} />
       </Flex>
       <Flex align="center" justify="space-between" className="gap-8 mx-24">
         <ActivitySummary

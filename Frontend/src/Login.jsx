@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {Button} from 'antd';
 import * as env from "./env.js";
 import './index.css';
-import API from "./service/API.js";
+import {FitbitAPI,WithingsAPI} from "./service/API.js";
 
 export default function Login() {
   const navigate = useNavigate();

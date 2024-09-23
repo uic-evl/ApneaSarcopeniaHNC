@@ -22,10 +22,7 @@ import ScatterChart from "@src/components/ScatterChart";
 
 // utils
 import {
-  calculateAverageProperty,
-  calculateValueByUnit,
   capitalizeFirstLetter,
-  convertTimestampToDateString,
   filterDataSince,
   summarizeDataDaily,
   summarizeDataMonthly,
@@ -33,7 +30,7 @@ import {
 
 // constants
 import { DATE_PERIODS } from "@src/constants";
-import API from "@src/service/API";
+import { WithingsAPI } from "@src/service/API";
 
 const DATE_SINCE_TIMESTAMP = 1716409800000;
 
@@ -46,12 +43,14 @@ const yearAgoTimestamp = moment().subtract(1, "years").unix() * 1000;
 export default function WithingsCharts() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
   const [height, setHeight] = useState(null);
   const [weights, setWeights] = useState(null);
   const [boneMass, setBoneMass] = useState(null);
   const [fatRatio, setFatRatio] = useState(null);
   const [muscle, setMuscle] = useState(null);
   const [fatMassWeight, setFatMassWeight] = useState(null);
+
   const [dateRange, setDateRange] = useState({
     date_from: null,
     date_to: null,
@@ -59,22 +58,10 @@ export default function WithingsCharts() {
   const [datePeriod, setDatePeriod] = useState(DATE_PERIODS.all);
   const [datePickerKey, setDatePickerKey] = useState(0);
 
-  const api = new API('fitbit-token','whithings-token');
+  const api = new WithingsAPI('whithings-token');
 
-  function formatWeight(measures){
+  function formatWeight(weights){
     try {
-      const weights = measures.map((measure) => {
-        const { value, unit } = measure.measures?.[0];
-
-        const weight = calculateValueByUnit(value, unit);
-
-        return {
-          weight,
-          date: measure.date * 1000,
-          formattedDate: convertTimestampToDateString(measure.date),
-        };
-      });
-
       setWeights(
         filterDataSince(weights, DATE_SINCE_TIMESTAMP, "date")?.reverse()
       );
@@ -83,37 +70,16 @@ export default function WithingsCharts() {
     }
   }
 
-  function formatHeight(measures){
+  function formatHeight(height){
     try {
-      let height = null;
-
-      if (measures?.length) {
-        const measure = measures?.[0]?.measures?.[0];
-
-        height = calculateValueByUnit(measure.value, measure.unit);
-      }
-
       setHeight(height);
     } catch (error) {
       throw new Error("Failed to fetch height data");
     }
   }
   
-  function formatBoneMass(measures){
-
+  function formatBoneMass(bone){
     try {
-      const bone = measures.map((measure) => {
-        const { value, unit } = measure.measures?.[0];
-
-        const bone = calculateValueByUnit(value, unit);
-
-        return {
-          bone,
-          date: measure.date * 1000,
-          formattedDate: convertTimestampToDateString(measure.date),
-        };
-      });
-
       setBoneMass(
         filterDataSince(bone, DATE_SINCE_TIMESTAMP, "date").reverse()
       );
@@ -122,21 +88,8 @@ export default function WithingsCharts() {
     }
   }
 
-  function formatFatRatio(measures){
+  function formatFatRatio(fatRatio){
     try {
-
-      const fatRatio = measures.map((measure) => {
-        const { value, unit } = measure.measures?.[0];
-
-        const fatRatio = calculateValueByUnit(value, unit);
-
-        return {
-          fatRatio,
-          date: measure.date * 1000,
-          formattedDate: convertTimestampToDateString(measure.date),
-        };
-      });
-
       setFatRatio(
         filterDataSince(fatRatio, DATE_SINCE_TIMESTAMP, "date").reverse()
       );
@@ -145,20 +98,8 @@ export default function WithingsCharts() {
     }
   }
 
-  async function formatMuscle(measures){
+  async function formatMuscle(muscle){
     try {
-
-      const muscle = measures.map((measure) => {
-        const { value, unit } = measure.measures?.[0];
-
-        const muscle = calculateValueByUnit(value, unit);
-
-        return {
-          muscle,
-          date: measure.date * 1000,
-          formattedDate: convertTimestampToDateString(measure.date),
-        };
-      });
 
       setMuscle(
         filterDataSince(muscle, DATE_SINCE_TIMESTAMP, "date").reverse()
@@ -168,17 +109,9 @@ export default function WithingsCharts() {
     }
   }
 
-  function formatFatMassWeight(measures){
+  function formatFatMassWeight(fatMassWeights){
     try {
 
-      const fatMassWeights = measures.map((measure) => {
-        const { value, unit } = measure.measures?.[0];
-        return {
-          fatMassWeight: calculateValueByUnit(value, unit),
-          date: measure.date * 1000,
-          formattedDate: convertTimestampToDateString(measure.date),
-        };
-      });
       const temp = filterDataSince(fatMassWeights, DATE_SINCE_TIMESTAMP, "date").reverse();
       setFatMassWeight(
         temp
@@ -206,14 +139,6 @@ export default function WithingsCharts() {
         formatFatRatio(results['fat_ratio']);
         formatFatMassWeight(results['fat_mass_weight']);
         formatMuscle(results['muscle_mass']);
-      // await Promise.all([
-      //   fetchWeight(),
-      //   fetchHeight(),
-      //   fetchBoneMass(),
-      //   fetchFatRatio(),
-      //   fetchMuscle(),
-      //   fetchFatMassWeight(),
-      // ]);
     } catch (error) {
       setError(error.message);
     } finally {

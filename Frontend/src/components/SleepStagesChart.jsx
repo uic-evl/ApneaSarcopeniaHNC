@@ -17,7 +17,7 @@ import LineChart from "@src/features/lineChart";
 
 // constants
 import { DATE_ORDERS } from "@src/features/lineChart/config/constants";
-import API from "../service/API.js";
+import { FitbitAPI } from "../service/API.js";
 
 const CHART_TYPES = Object.freeze({
   logs: "logs",
@@ -55,7 +55,7 @@ export default function SleepStagesChart({ onItemSelect }) {
     [CHART_TYPES.spo2]: CHART_TYPES.spo2,
   });
 
-  const api = new API('fitbit-token','whithings-token');
+  const api = new FitbitAPI('fitbit-token');
 
   async function getSleep(){
     if (sleepLoading){ return }

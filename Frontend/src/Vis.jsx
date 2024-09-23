@@ -43,7 +43,7 @@ import SleepLogsCharts from "@src/components/SleepLogsCharts";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-import API from './service/API.js';
+import {WithingsAPI,FitbitAPI} from './service/API.js';
 
 function getItem(label, key, icon, children) {
   return {
@@ -101,14 +101,15 @@ export default function Vis() {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const api = new API('fitbit-token','whithings-token');
+  const fitbitAPI = new FitbitAPI('fitbit-token');
+  const withingsAPI = new WithingsAPI('withings-token');
 
   const [fitbitProfile, setFitbitProfile] = useState();
   const [bmi, setBMI] = useState(0);
 
   async function fetchProfile(){
     if (fitbitProfile === undefined) {
-      const data = await api.fetchFitbitProfile();
+      const data = await fitbitAPI.fetchFitbitProfile();
       // console.log('data fetched',data.user);
       setFitbitProfile(data.user);
       if (data && data !== null) {
@@ -145,6 +146,12 @@ export default function Vis() {
     return obj[key]? obj[key] : 'Invalid Key'
   }
 
+  function logOut(){
+    fitbitAPI.resetToken();
+    withingsAPI.resetToken();
+    fitbitAPI.goToLogin();
+  }
+
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -175,7 +182,7 @@ export default function Vis() {
         </InfoItem>
         <Title className="mt-8">Treatment Information</Title>
         <Flex align='center' justify='center'>
-          <Button onClick={() => api.logOut()} danger>
+          <Button onClick={() => logOut()} danger>
             {'Log Out'}
           </Button>
         </Flex>

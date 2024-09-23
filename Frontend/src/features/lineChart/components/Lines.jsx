@@ -37,7 +37,7 @@ export default function Lines({
           <linearGradient id="stages-gradient" x1="0%" y1="0%" x2="0" y2="100%">
             {bgGradient.map(({ offset, color }) => (
               <stop
-                key={`${offset}-${color}`}
+                key={`${offset}-${color}`+Math.random()}
                 offset={offset}
                 stopColor={color}
                 stopOpacity="1"
@@ -52,7 +52,7 @@ export default function Lines({
 
           return (
             <rect
-              key={`${item[xAxisProperty]}${item[yAxisProperty]}`}
+              key={`${item[xAxisProperty]}${item[yAxisProperty]}`+Math.random()}
               x={xScale(item[xAxisProperty])}
               y={yScale(item[yAxisProperty])}
               height={height}
@@ -84,7 +84,7 @@ export default function Lines({
       {!hideDataPoints &&
         dataset.map((item, index) => (
           <DataPoint
-            key={`${item[xAxisProperty]}${item[yAxisProperty]}`}
+            key={`${item[xAxisProperty]}${item[yAxisProperty]}`+index}
             index={index}
             item={item}
             y={yScale(item[yAxisProperty])}
@@ -126,7 +126,7 @@ export default function Lines({
 
           return (
             <rect
-              key={`${item[xAxisProperty]}${item[yAxisProperty]}`}
+              key={`${item[xAxisProperty]}${item[yAxisProperty]}`+Math.random()}
               index={index}
               item={item}
               y={margin.top}
