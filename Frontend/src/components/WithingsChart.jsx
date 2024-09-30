@@ -1,6 +1,6 @@
 import tw from "tailwind-styled-components";
 import moment from "moment";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Alert,
   Button,
@@ -23,7 +23,6 @@ import ScatterChart from "@src/components/ScatterChart";
 // utils
 import {
   capitalizeFirstLetter,
-  filterDataSince,
   summarizeDataDaily,
   summarizeDataMonthly,
 } from "@src/utils";
@@ -32,24 +31,14 @@ import {
 import { DATE_PERIODS } from "@src/constants";
 import { WithingsAPI } from "@src/service/API";
 
-const DATE_SINCE_TIMESTAMP = 1716409800000;
 
-const todayTimestamp = moment().startOf("day").unix() * 1000;
-const nowTimestamp = moment().unix() * 1000;
-const weekAgoTimestamp = moment().subtract(7, "days").unix() * 1000;
-const monthAgoTimestamp = moment().subtract(1, "months").unix() * 1000;
-const yearAgoTimestamp = moment().subtract(1, "years").unix() * 1000;
+export default function WithingsCharts(props) {
+  const todayTimestamp = moment().startOf("day").unix() * 1000;
+  const nowTimestamp = moment().unix() * 1000;
+  const weekAgoTimestamp = moment().subtract(7, "days").unix() * 1000;
+  const monthAgoTimestamp = moment().subtract(1, "months").unix() * 1000;
+  const yearAgoTimestamp = moment().subtract(1, "years").unix() * 1000;
 
-export default function WithingsCharts() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const [height, setHeight] = useState(null);
-  const [weights, setWeights] = useState(null);
-  const [boneMass, setBoneMass] = useState(null);
-  const [fatRatio, setFatRatio] = useState(null);
-  const [muscle, setMuscle] = useState(null);
-  const [fatMassWeight, setFatMassWeight] = useState(null);
 
   const [dateRange, setDateRange] = useState({
     date_from: null,
@@ -58,153 +47,24 @@ export default function WithingsCharts() {
   const [datePeriod, setDatePeriod] = useState(DATE_PERIODS.all);
   const [datePickerKey, setDatePickerKey] = useState(0);
 
-  const api = new WithingsAPI('whithings-token');
+  const error = props.withingsError;
+  const loading = props.withingsData === undefined;
 
-  function formatWeight(weights){
-    try {
-      setWeights(
-        filterDataSince(weights, DATE_SINCE_TIMESTAMP, "date")?.reverse()
-      );
-    } catch (error) {
-      throw new Error(error);
-    }
-  }
-
-  function formatHeight(height){
-    try {
-      setHeight(height);
-    } catch (error) {
-      throw new Error("Failed to fetch height data");
-    }
-  }
-  
-  function formatBoneMass(bone){
-    try {
-      setBoneMass(
-        filterDataSince(bone, DATE_SINCE_TIMESTAMP, "date").reverse()
-      );
-    } catch (error) {
-      throw new Error("Failed to fetch bone mass data");
-    }
-  }
-
-  function formatFatRatio(fatRatio){
-    try {
-      setFatRatio(
-        filterDataSince(fatRatio, DATE_SINCE_TIMESTAMP, "date").reverse()
-      );
-    } catch (error) {
-      throw new Error("Failed to fetch bone mass data");
-    }
-  }
-
-  async function formatMuscle(muscle){
-    try {
-
-      setMuscle(
-        filterDataSince(muscle, DATE_SINCE_TIMESTAMP, "date").reverse()
-      );
-    } catch (error) {
-      throw new Error("Failed to fetch bone mass data");
-    }
-  }
-
-  function formatFatMassWeight(fatMassWeights){
-    try {
-
-      const temp = filterDataSince(fatMassWeights, DATE_SINCE_TIMESTAMP, "date").reverse();
-      setFatMassWeight(
-        temp
-      );
-    } catch (error) {
-      throw new Error("Failed to fetch bone mass data");
-    }
-  }
-
-  useEffect(() => {
-    getRequests();
-  }, []);
-
-
-  const getRequests = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-        const results = await api.fetchWithingsBatchEntry(['weight','height','bone_mass','fat_ratio','muscle_mass','fat_mass_weight']);
-        console.log('results',results)
-        formatWeight(results['weight']);
-        formatHeight(results['height']);
-        formatBoneMass(results['bone_mass']);
-        formatFatRatio(results['fat_ratio']);
-        formatFatMassWeight(results['fat_mass_weight']);
-        formatMuscle(results['muscle_mass']);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const weightsFilteredByTime = useMemo(() => {
+  const filterDates = useCallback((key) => {
+    if(props.withingsData === undefined || props.withingsData[key] === undefined){ return null };
+    const data = props.withingsData[key];
     if (dateRange.date_from === null || dateRange.date_to === null) {
-      return weights;
+      return data;
     }
+    return data?.filter(d => d.date >= dateRange.date_from && d.date <= dateRange.date_to);
 
-    return weights?.filter((weight) => {
-      const { date } = weight;
+  },[props.withingsData,dateRange]);
 
-      return date >= dateRange.date_from && date <= dateRange.date_to;
-    });
-  }, [weights, dateRange]);
-
-  const boneMassFilteredByTime = useMemo(() => {
-    if (dateRange.date_from === null || dateRange.date_to === null) {
-      return boneMass;
-    }
-    return boneMass?.filter((bone) => {
-      const { date } = bone;
-
-      return date >= dateRange.date_from && date <= dateRange.date_to;
-    });
-  }, [boneMass, dateRange]);
-
-  const fatRatioFilteredByTime = useMemo(() => {
-    if (dateRange.date_from === null || dateRange.date_to === null) {
-      return fatRatio;
-    }
-
-    return fatRatio?.filter((fat) => {
-      const { date } = fat;
-
-      return date >= dateRange.date_from && date <= dateRange.date_to;
-    });
-  }, [fatRatio, dateRange]);
-
-  const muscleFilteredByTime = useMemo(() => {
-    if (dateRange.date_from === null || dateRange.date_to === null) {
-      return muscle;
-    }
-
-    return muscle?.filter((item) => {
-      const { date } = item;
-
-      return date >= dateRange.date_from && date <= dateRange.date_to;
-    });
-  }, [muscle, dateRange]);
-
-  const fatMassWeightFilteredByTime = useMemo(() => {
-    if (dateRange.date_from === null || dateRange.date_to === null) {
-      return fatMassWeight;
-    }
-
-    return fatMassWeight?.filter((item) => {
-      const { date } = item;
-
-      return date >= dateRange.date_from && date <= dateRange.date_to;
-    });
-  }, [fatMassWeight, dateRange]);
+  const weightsFilteredByTime = filterDates('weight');
+  const boneMassFilteredByTime = filterDates('bone_mass');
+  const fatRatioFilteredByTime = filterDates('fat_ratio');
+  const muscleFilteredByTime = filterDates('muscle_mass');
+  const fatMassWeightFilteredByTime = filterDates('fat_mass_weight');
 
   const handlePeriodSelection = ({ target: { value } }) => {
     setDatePeriod(value);
@@ -249,6 +109,7 @@ export default function WithingsCharts() {
     }
   };
 
+  //todo: cleanup
   const summarizeWeightsByPeriod = useMemo(() => {
     const weightDailySummarized = summarizeDataDaily(
       weightsFilteredByTime,
@@ -406,7 +267,7 @@ export default function WithingsCharts() {
       <Flex justify="space-between" className="gap-4">
         <BMIChart
           weights={summarizeWeightsByPeriod}
-          height={height}
+          height={loading? undefined: props.withingsData.height}
           daysCount={
             summarizeDataDaily(weightsFilteredByTime, "weight")?.length
           }
@@ -421,7 +282,7 @@ export default function WithingsCharts() {
           fatMassWeight={fatMassWeightFilteredByTime}
           weight={weightsFilteredByTime}
           fatRatio={fatRatioFilteredByTime}
-          height={height}
+          height={loading? undefined: props.withingsData.height}
           datePeriod={datePeriod}
         />
       </Flex>

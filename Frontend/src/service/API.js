@@ -30,7 +30,7 @@ const withingsKeys = {
     'bone_mass': 88,//kg
 
 }
-
+const timeFormat ="YY MMM DD";
 
 
 class BaseAPI {
@@ -72,7 +72,7 @@ class BaseAPI {
         const currTime = new Date().getTime() / 1000;
         const expireTime = this.getExpireTime();
         if(expireTime === null){
-            console.log('withing expire thing no work');
+            return true;
         }
         // return (Math.abs(currTime - Number(expireTime)) > 5)
         return (currTime >= Number(expireTime) - 1)
@@ -476,18 +476,62 @@ export class FitbitAPI extends BaseAPI {
 
     }
 
-    async getStepsSince(months){
-        const [start,stop] = getTimeIntervalSinceToday(3);
-        const tempData = await this.fetchFitbitStepsRange(start,stop);
+    async getSPO2Since(months){
+        const [start,stop] = getTimeIntervalSinceToday(months);
+        const tempData = await this.fetchFitbitSpO2(start,stop);
         if(tempData !== null){
-            return tempData['activities-steps'];
+
+            const result = tempData.map((item) => ({
+                ...item,
+                timestamp: toTimestamp(item.dateTime),
+                time: moment(item.dateTime).format(timeFormat),
+                number: item.value.avg,
+                }))
+                .sort((a, b) => a.timestamp - b.timestamp);
+            return result;
+        }
+        return null;
+    }
+
+    async getHRSince(months){
+        const [start,stop] = getTimeIntervalSinceToday(months);
+        const tempHRData = await this.fetchFitbitHeartRate(start,stop);
+        if(tempHRData !== null){
+            const rates = tempHRData['activities-heart'].filter((rate) => rate.value.restingHeartRate !== undefined)
+            .map((rate) => ({
+                ...rate,
+                timestamp: toTimestamp(rate.dateTime),
+                time: moment(rate.dateTime).format(timeFormat),
+                number: rate.value.restingHeartRate,
+            }))
+            .sort((a, b) => a.timestamp - b.timestamp);
+            return rates
         }
         return null
     }
-    
+
+    async getStepsSince(months){
+        const [start,stop] = getTimeIntervalSinceToday(months);
+        const tempData = await this.fetchFitbitStepsRange(start,stop);
+        if(tempData !== null){
+            const temp = tempData['activities-steps'];
+            if (temp.length < 1){ return null; }
+            const tempSteps = temp.map((log) => {
+                const date = moment(log.dateTime, "").unix() * 1000;
+                return {
+                    ...log,
+                    number: Number(log.value),
+                    date,
+                    formattedDate: convertTimestampToDateString(date / 1000),
+                };
+              });
+            return tempSteps;
+        }
+        return null
+    }
 
     async getSleepSince(months){
-        const [start,stop] = getTimeIntervalSinceToday(3);
+        const [start,stop] = getTimeIntervalSinceToday(months);
         const tempSleepData = await this.fetchFitbitSleepLogRange(start,stop);
         if(tempSleepData !== null){
             const temp = tempSleepData.sleep.map((log) => ({

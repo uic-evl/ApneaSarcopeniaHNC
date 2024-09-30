@@ -102,10 +102,33 @@ export default function Vis() {
   } = theme.useToken();
 
   const fitbitAPI = new FitbitAPI('fitbit-token');
-  const withingsAPI = new WithingsAPI('withings-token');
+  const withingsAPI = new WithingsAPI('whithings-token');
+
+  const [monthRange,setMonthRange] = useState(3);
 
   const [fitbitProfile, setFitbitProfile] = useState();
   const [bmi, setBMI] = useState(0);
+
+  const [withingsData,setWithingsData] = useState();
+  const [withingsError, setWithingsError] = useState(null);
+  const [dateWindow,setDateWindow] = useState();
+
+  const [sleepData,setSleepData]= useState(null);
+  const [stepsData,setStepsData] = useState(null);
+  const [spo2Data, setSpo2Data] = useState(null);
+  const [hrData, setHRData] = useState(null);
+
+  const [sleepError,setSleepError] = useState();
+  const [stepsError, setStepsError] = useState();
+  const [spo2Error, setSpo2Error] = useState();
+  const [hrError, setHRError] = useState();
+
+  let withingsLoading = false;
+  let fibitLoading = false;
+  let sleepLoading = false;
+  let stepsLoading = false;
+  let spo2Loading = false;
+  let hrLoading = false;
 
   async function fetchProfile(){
     if (fitbitProfile === undefined) {
@@ -120,9 +143,103 @@ export default function Vis() {
     }
   }
 
+  async function getSPO2(months){
+    if(spo2Loading){ return }
+    try{
+      spo2Loading = true;
+      const tempSPO2 = await fitbitAPI.getSPO2Since(months);
+      console.log('spo2',tempSPO2);
+      setSpo2Data(tempSPO2);
+      setSpo2Error(undefined);
+      spo2Loading = false
+    } catch(error){
+      setSpo2Error(error);
+    } finally{
+      spo2Loading =false;
+    }
+  }
+
+  async function getSleep(months){
+    if(sleepLoading){return}
+    try{
+      sleepLoading = true;
+      const tempSleep = await fitbitAPI.getSleepSince(months);
+      console.log('sleep',tempSleep);
+      setSleepData(tempSleep);
+      setSleepError(undefined);
+      sleepLoading=false;
+    }  catch(error){
+      setSleepError(error);
+    } finally {
+      sleepLoading = false;
+    }
+
+  }
+
+  async function getSteps(months){
+    if(stepsLoading){return}
+    try{
+      stepsLoading = true;
+      const temp = await fitbitAPI.getStepsSince(months);
+      console.log('steps',temp)
+      setStepsData(temp);
+      setStepsError(undefined);
+      stepsLoading = false;
+    }  catch(error){
+      setStepsError(error);
+    } finally{
+      stepsLoading = false;
+    }
+  }
+
+  async function getHR(months){
+    if(hrLoading){ return; }
+    try {
+      hrLoading = true;
+      const temp = await fitbitAPI.getHRSince(months);
+      console.log('hr',temp)
+      setHRData(temp);
+      setHRError(undefined);
+      hrLoading = false;
+    }  catch(error){
+      setHRError(error);
+    } finally{
+      hrLoading = false;
+    }
+  }
+
+  async function getWithings(){
+    if(withingsLoading){
+      return;
+    }
+    withingsLoading = true;
+
+    try {
+        const results = await withingsAPI.fetchWithingsBatchEntry(['weight','height','bone_mass','fat_ratio','muscle_mass','fat_mass_weight']);
+        console.log('withings results',results);
+        withingsLoading = false;
+        setWithingsData(results);
+        setWithingsError(null);
+    } catch(error){
+      setWithingsError(error.message);
+    }finally {
+      withingsLoading=false;
+    }
+  };
+
+  
+
   useEffect(()=>{
     fetchProfile();
+    getWithings(withingsAPI);
   },[]);
+
+  useEffect(()=>{
+    getHR(monthRange);
+    getSteps(monthRange);
+    getSPO2(monthRange);
+    getSleep(monthRange);
+  },[monthRange])
 
   useEffect(()=>{
     if(fitbitProfile){
@@ -191,9 +308,27 @@ export default function Vis() {
       </Sider>
       <Layout>
         <Content>
-          <WithingsCharts />
-          <SleepLogsCharts />
-          <SleepStepsChart />
+          <SleepLogsCharts 
+            sleepData={sleepData}
+            stepsData={stepsData}
+            hrData={hrData}
+            spo2Data={spo2Data}
+            sleepError={sleepError}
+            stepsError={stepsError}
+            hrError={hrError}
+            spo2Error={spo2Error}
+          />
+          <WithingsCharts 
+            withingsData={withingsData}
+            withingsError={withingsError}
+          />
+          
+          <SleepStepsChart 
+            sleepData={sleepData}
+            stepsData={stepsData}
+            sleepError={sleepError}
+            stepsError={stepsError}
+          />
         </Content>
       </Layout>
     </Layout>

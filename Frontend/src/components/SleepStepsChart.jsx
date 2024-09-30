@@ -47,12 +47,10 @@ const weekAgoTimestamp = moment().subtract(7, "days").unix() * 1000;
 const monthAgoTimestamp = moment().subtract(1, "months").unix() * 1000;
 const yearAgoTimestamp = moment().subtract(1, "years").unix() * 1000;
 
-export default function SleepStepsChart() {
-  var sleepLoading = false;
-  var stepsLoading = false;
-  const [error, setError] = useState(null);
-  const [sleepScores, setSleepScores] = useState(null);
-  const [steps, setSteps] = useState(null);
+export default function SleepStepsChart(props) {
+  // const [error, setError] = useState(null);
+  // const [sleepScores, setSleepScores] = useState(null);
+  // const [steps, setSteps] = useState(null);
   const [dateRange, setDateRange] = useState({
     date_from: null,
     date_to: null,
@@ -64,69 +62,34 @@ export default function SleepStepsChart() {
     [CHART_TYPES.sleepScores]: CHART_TYPES.sleepScores,
   });
 
-  const api = new FitbitAPI('fitbit-token');
+  const sleepScores = useMemo(()=>{
+    if(props.sleepData){
+      const scores = props.sleepData.map((log) => {
+        const date = moment(log.dateOfSleep).unix() * 1000;
 
-  async function getSleep(){
-    if(sleepLoading){return}
-    try{
-      sleepLoading = true;
-      const tempSleep = await api.getSleepSince(3);
-      if(tempSleep!==null){
-        const scores = tempSleep.map((log) => {
-          const date = moment(log.dateOfSleep).unix() * 1000;
-
-          return {
-            number: log.efficiency,
-            date,
-            formattedDate: convertTimestampToDateString(date / 1000),
-          };
-        });
-        setSleepScores(scores);
-      } else{
-        setSleepScores(null);
-      }
-      sleepLoading=false;
+        return {
+          number: log.efficiency,
+          date,
+          formattedDate: convertTimestampToDateString(date / 1000),
+        };
+      });
+      return scores
     }
-    catch(error){
-      setError(error.message);
+    return null
+  },[props.sleepData]);
+
+  const error = useMemo(()=>{
+    let msg = '';
+    if(props.sleepError){
+      msg = 'Sleep data error: ' + props.sleepError.message + '</br>';
     }
-  }
-
-  async function getSteps(){
-    if(stepsLoading){return}
-    try{
-      stepsLoading = true;
-      const temp = await api.getStepsSince(3);
-      if(temp !== null){
-        const tempSteps = temp.map((log) => {
-          const date = moment(log.dateTime, "").unix() * 1000;
-          return {
-            number: Number(log.value),
-            date,
-            formattedDate: convertTimestampToDateString(date / 1000),
-          };
-        });
-        setSteps(tempSteps)
-      } else{
-        setSteps(null)
-      }
-      stepsLoading = false;
-    } catch(error){
-      setError(error.message);
+    if(props.stepsError){
+      msg += 'Step data error: ' + props.stepsError.message;
     }
-    
-  }
+    return msg;
+  },[props.sleepError, props.stepsError]);
 
-  async function fetchData(){
-    getSleep();
-    getSteps();
-  }
-
-  useEffect(() => {
-    fetchData();
-    // getRequests();
-  }, []);
-
+  const steps = props.stepsData? props.stepsData:null;
 
   const getTime = (date, daysCount) => {
     if (daysCount <= 1) {
@@ -352,7 +315,25 @@ export default function SleepStepsChart() {
     return false;
   }, [selectedItems, steps, sleepScores]);
 
-  if (sleepLoading || stepsLoading){
+  if (sleepScores === null || steps === null){
+    if(error !== ''){
+      return (
+        <Card className="relative mx-6 mt-5">
+          <Alert
+            className="w-full"
+            message="Fetch error"
+            showIcon
+            description={error}
+            type="error"
+            action={
+              <Button onClick={fetchData} size="middle" danger>
+                Retry
+              </Button>
+            }
+          />
+        </Card>
+      );
+    }
     return (
       <Spin spinning={true} tip="Loading...">
         <Card className="relative mx-6 mt-5 h-96"></Card>
@@ -360,25 +341,6 @@ export default function SleepStepsChart() {
     );
   }
 
-  if (!sleepLoading && !stepsLoading && (sleepScores === null || steps === null)) {
-    
-    return (
-      <Card className="relative mx-6 mt-5">
-        <Alert
-          className="w-full"
-          message="Fetch error"
-          showIcon
-          description={error}
-          type="error"
-          action={
-            <Button onClick={fetchData} size="middle" danger>
-              Retry
-            </Button>
-          }
-        />
-      </Card>
-    );
-  }
 
   return (
     <Card className="mx-6 mt-5">

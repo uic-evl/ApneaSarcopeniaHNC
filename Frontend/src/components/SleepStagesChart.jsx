@@ -38,92 +38,34 @@ function getTimeIntervalSinceToday(months){
   const startDate = moment().subtract(months,'months').format('YYYY-MM-DD');
   return [startDate,today];
 }
-export default function SleepStagesChart({ onItemSelect }) {
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  // const [loading, setLoading] = useState(false);
-  var sleepLoading = false;
-  var hrLoading = false;
-  var spo2Loading = false;
 
-  const [error, setError] = useState(null);
-  const [sleepLog, setSleepLog] = useState([]);
-  const [heartRate, setHeartRate] = useState([]);
-  const [spo2, setSpo2] = useState([]);
+export default function SleepStagesChart(props) {
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState({
     [CHART_TYPES.logs]: CHART_TYPES.logs,
     [CHART_TYPES.heartRate]: CHART_TYPES.heartRate,
     [CHART_TYPES.spo2]: CHART_TYPES.spo2,
   });
 
-  const api = new FitbitAPI('fitbit-token');
-
-  async function getSleep(){
-    if (sleepLoading){ return }
-    try{
-      sleepLoading = true;
-      const tempSleep = await api.getSleepSince(7);
-      setSleepLog(tempSleep);
-    } catch(error){
-      setError(error.message);
+  const sleepLog = props.sleepData;
+  const heartRate = props.hrData;
+  const spo2 = props.spo2Data;
+  const missing = d => d === null || d === undefined;
+  const error = useMemo(()=>{
+    let msg = '';
+    if(props.sleepError){
+      msg = 'Sleep data error: ' + props.sleepError.message + '</br>';
     }
-    sleepLoading=false;
-  }
-
-  async function getHeartRate(){
-    if (hrLoading){ return }
-    try{
-      hrLoading= true;
-      const [start,stop] = getTimeIntervalSinceToday(3);
-      const tempHRData = await api.fetchFitbitHeartRate(start,stop);
-      if(tempHRData !== null){
-        const rates = tempHRData['activities-heart'].filter((rate) => rate.value.restingHeartRate !== undefined)
-        .map((rate) => ({
-          ...rate,
-          timestamp: toTimestamp(rate.dateTime),
-          time: moment(rate.dateTime).format(timeFormat),
-          number: rate.value.restingHeartRate,
-        }))
-        .sort((a, b) => a.timestamp - b.timestamp);
-        setHeartRate(rates)
-      }
-    } catch(error){
-      setError(error.message);
+    if(props.spo2Error){
+      msg += 'SPO2 data error: ' + props.spo2Error.message + '</br>';
     }
-    
-    hrLoading=false;
-  }
-
-  async function getSPO2(){
-    if(spo2Loading){ return }
-    try{
-      spo2Loading = true;
-      const [start,stop] = getTimeIntervalSinceToday(3);
-      const tempSPO2 = await api.fetchFitbitSpO2(start,stop);
-      if(tempSPO2 !== null){
-        const result = tempSPO2.map((item) => ({
-            ...item,
-            timestamp: toTimestamp(item.dateTime),
-            time: moment(item.dateTime).format(timeFormat),
-            number: item.value.avg,
-          }))
-          .sort((a, b) => a.timestamp - b.timestamp);
-        setSpo2(result);
-      }
-    } catch(error){
-      setError(error.message);
+    if(props.hrError){
+      msg += 'Heart Rate data error: ' + props.hrError.message + '</br>';
     }
-    spo2Loading=false;
-  }
+    return msg;
+  },[props.sleepError, props.spo2Error,props.hrError]);
 
-  async function getRequests(){
-    getSleep();
-    getHeartRate();
-    getSPO2();
-  }
-
-  useEffect(() => {
-    getRequests();
-  }, []);
+  const loading = (missing(sleepLog) || missing(heartRate) || missing(spo2)) && (error === '');
 
   const toggleCalendarOpen = () => {
     setIsCalendarOpen((prevState) => !prevState);
@@ -203,7 +145,7 @@ export default function SleepStagesChart({ onItemSelect }) {
         title: "HearRate",
         color: "#607D8B",
         data:
-          heartRate.filter((rate) => availableDates.includes(rate.time)) || [],
+          heartRate? heartRate.filter((rate) => availableDates.includes(rate.time)) || []: [],
       });
     }
 
@@ -211,7 +153,7 @@ export default function SleepStagesChart({ onItemSelect }) {
       result.push({
         title: "Spo2",
         color: "#3f51b5",
-        data: spo2.filter((item) => availableDates.includes(item.time)) || [],
+        data: spo2? spo2.filter((item) => availableDates.includes(item.time)) || []: [],
       });
     }
 
@@ -237,7 +179,7 @@ export default function SleepStagesChart({ onItemSelect }) {
     clonedItem.sleepScore = selectedSleepLogByTime.efficiency;
     clonedItem.averageSpo2 = selectedSpo2ByTime.value.avg;
 
-    onItemSelect(clonedItem);
+    props.onItemSelect(clonedItem);
   };
 
   const checkIfNoData = useMemo(() => {
@@ -247,7 +189,7 @@ export default function SleepStagesChart({ onItemSelect }) {
     return false;
   }, [selectedItems, convertedLogs]);
 
-  if (sleepLoading) {
+  if (loading) {
     return (
       <Spin spinning={true} tip="Loading...">
         <Card className="relative mx-6 mt-5 h-96"></Card>
@@ -255,7 +197,7 @@ export default function SleepStagesChart({ onItemSelect }) {
     );
   }
 
-  if (error) {
+  if (error !== '') {
     return (
       <Alert
         className="w-full"
@@ -263,11 +205,6 @@ export default function SleepStagesChart({ onItemSelect }) {
         showIcon
         description={error}
         type="error"
-        action={
-          <Button onClick={getRequests} size="middle" danger>
-            Retry
-          </Button>
-        }
       />
     );
   }
