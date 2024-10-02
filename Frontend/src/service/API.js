@@ -30,6 +30,12 @@ const withingsKeys = {
     'bone_mass': 88,//kg
 
 }
+
+const validFitibtActivities = [
+    'activityCalories','calories','caloriesBMR',
+    'distance','elevation','floor','minutesSedentary',
+    'minutesLightlyActive','minutesFairlyActive','minutesVeryActive',
+    'steps','swimming-strokes']
 const timeFormat ="YY MMM DD";
 
 
@@ -445,6 +451,13 @@ export class FitbitAPI extends BaseAPI {
         return this.makeFitbitQuery("https://api.fitbit.com/1/user/-/profile.json")
     }
 
+    async fetchStepsGoal(period='daily'){
+        if(period !== 'daily' && period !== 'weekly'){
+            throw TypeError('Invalid argument to fetchStepsGoal. Must be either daily or weekly: https://dev.fitbit.com/build/reference/web-api/activity/get-activity-goals/')
+        }
+        return this.makeFitbitQuery('https://api.fitbit.com/1/user/-/activities/goals/daily.json')
+    }
+
     async fetchFitbitSleepLog(startDate){
         const args = {
             'afterDate': startDate,
@@ -473,7 +486,12 @@ export class FitbitAPI extends BaseAPI {
 
     async fetchFitbitSleepLogByDate(date){
         return this.makeFitbitQuery(`https://api.fitbit.com/1.2/user/-/sleep/date/${date}.json`);
+    }
 
+    async fetchFitbitActivityRange(activity,start,end){
+        if (validFitibtActivities.indexOf(activity) < 0)
+            throw new Error('Invalid Activity ' + activity + ' passed to fetchFitbitActivityRange');
+        return this.makeFitbitQuery(`https://api.fitbit.com/1/user/-/activities/${activity}/date/${start}/${end}.json`);
     }
 
     async getSPO2Since(months){
@@ -506,6 +524,27 @@ export class FitbitAPI extends BaseAPI {
             }))
             .sort((a, b) => a.timestamp - b.timestamp);
             return rates
+        }
+        return null
+    }
+
+    async getActivitySince(activity,months){
+        const [start,stop] = getTimeIntervalSinceToday(months);
+        const tempData = await this.fetchFitbitActivityRange(activity,start,stop);
+        if(tempData !== null){
+            console.log('raw activity ' + activity, tempData)
+            const temp = tempData[`activities-${activity}`];
+            if (temp.length < 1){ return null; }
+            const tempRes = temp.map((log) => {
+                const timestamp = moment(log.dateTime, "").unix() * 1000;
+                return {
+                    ...log,
+                    number: Number(log.value),
+                    date: timestamp,
+                    formattedDate: convertTimestampToDateString(timestamp / 1000),
+                };
+              });
+            return tempRes;
         }
         return null
     }
@@ -558,7 +597,7 @@ export class FitbitAPI extends BaseAPI {
         body.append("code_verifier", env.VERIFIER);
         body.append('refresh_token',token);
         const tokenUrl = "https://api.fitbit.com/oauth2/token";
-
+        console.log('refreshing')
         // console.log('body',body.toString())
         fetch(tokenUrl, {
             method: "POST",

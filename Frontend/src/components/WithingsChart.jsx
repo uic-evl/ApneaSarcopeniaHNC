@@ -48,10 +48,10 @@ export default function WithingsCharts(props) {
   const [datePickerKey, setDatePickerKey] = useState(0);
 
   const error = props.withingsError;
-  const loading = props.withingsData === undefined;
+  const loading = props.withingsData === null;
 
   const filterDates = useCallback((key) => {
-    if(props.withingsData === undefined || props.withingsData[key] === undefined){ return null };
+    if(props.withingsData === null || props.withingsData[key] === undefined){ return null };
     const data = props.withingsData[key];
     if (dateRange.date_from === null || dateRange.date_to === null) {
       return data;
@@ -238,11 +238,6 @@ export default function WithingsCharts(props) {
           showIcon
           description={error}
           type="error"
-          action={
-            <Button onClick={getRequests} size="middle" danger>
-              Retry
-            </Button>
-          }
         />
       </Card>
     );

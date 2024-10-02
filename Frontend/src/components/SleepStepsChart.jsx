@@ -23,7 +23,6 @@ import ActivitySummary from "@src/components/ActivitySummary";
 
 // constants
 import { DATE_PERIODS } from "@src/constants";
-import { FitbitAPI } from "../service/API.js";
 
 // utils
 import {
@@ -62,8 +61,8 @@ export default function SleepStepsChart(props) {
     [CHART_TYPES.sleepScores]: CHART_TYPES.sleepScores,
   });
 
-  const sleepScores = useMemo(()=>{
-    if(props.sleepData){
+  const sleepScores = useMemo(() => {
+    if (props.sleepData) {
       const scores = props.sleepData.map((log) => {
         const date = moment(log.dateOfSleep).unix() * 1000;
 
@@ -76,20 +75,20 @@ export default function SleepStepsChart(props) {
       return scores
     }
     return null
-  },[props.sleepData]);
+  }, [props.sleepData]);
 
-  const error = useMemo(()=>{
+  const error = useMemo(() => {
     let msg = '';
-    if(props.sleepError){
+    if (props.sleepError) {
       msg = 'Sleep data error: ' + props.sleepError.message + '</br>';
     }
-    if(props.stepsError){
+    if (props.stepsError) {
       msg += 'Step data error: ' + props.stepsError.message;
     }
     return msg;
-  },[props.sleepError, props.stepsError]);
+  }, [props.sleepError, props.stepsError]);
 
-  const steps = props.stepsData? props.stepsData:null;
+  const steps = props.stepsData ? props.stepsData : null;
 
   const getTime = (date, daysCount) => {
     if (daysCount <= 1) {
@@ -315,8 +314,8 @@ export default function SleepStepsChart(props) {
     return false;
   }, [selectedItems, steps, sleepScores]);
 
-  if (sleepScores === null || steps === null){
-    if(error !== ''){
+  if (sleepScores === null || steps === null) {
+    if (error !== '') {
       return (
         <Card className="relative mx-6 mt-5">
           <Alert
@@ -350,13 +349,13 @@ export default function SleepStepsChart(props) {
           value={datePeriod}
           onChange={handlePeriodSelection}
         >
-          {Object.keys(DATE_PERIODS).map((period,i) => (
-            <Radio.Button key={period+i+'something'} value={period}>
+          {Object.keys(DATE_PERIODS).map((period, i) => (
+            <Radio.Button key={period + i + 'something'} value={period}>
               {capitalizeFirstLetter(period)}
             </Radio.Button>
           ))}
         </Radio.Group>
-        <RangePicker key={datePickerKey+'no'} onChange={handleRangePicker} />
+        <RangePicker key={datePickerKey + 'no'} onChange={handleRangePicker} />
       </Flex>
       <Flex align="center" justify="space-between" className="gap-8 mx-24">
         <ActivitySummary

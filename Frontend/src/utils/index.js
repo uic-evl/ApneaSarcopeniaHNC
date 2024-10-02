@@ -1,4 +1,17 @@
 import moment from "moment";
+import * as d3 from 'd3';
+
+export function dayToTimestamp(v){
+  return moment(v).unix() * 1000;
+}
+
+export const todayTimestamp = () => dayToTimestamp(moment().startOf("day"));
+export const nowTimestamp = () => dayToTimestamp(moment());//.unix() * 1000;
+export const weekAgoTimestamp = () => dayToTimestamp(moment().subtract(7, "days"));//.unix() * 1000;
+export const monthAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "months"));//.unix() * 1000;
+export const yearAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "years"));//.unix() * 1000;
+
+export const sleepScoreColorScale = d3.scaleLinear().domain([60,100]).range(['white','green'])
 
 export const drawRectangle = (
   width,
@@ -49,7 +62,7 @@ export const filterByCount = (dataArray, count) => {
 };
 
 export const convertTimestampToDateString = (timestamp) => {
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestamp *1000);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
