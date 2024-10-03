@@ -29,7 +29,7 @@ export default function BodyCompScatterVis(props) {
         const lmiThreshold = props.gender === null? 15.25 : props.gender.toLowerCase() === 'male'? 16.7 : 13.8;
 
         //https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2929934/
-        const fmiThreshold = props.gender === null? 8.1 : props.gender.toLowerCase() === 'male'? 6.6 : 9.5;;
+        const fmiThreshold = props.gender === null? 8.1 : props.gender.toLowerCase() === 'male'? 6.6 : 9.5;
 
         const useFilter = props.useFilter ? props.useFilter : true;
 

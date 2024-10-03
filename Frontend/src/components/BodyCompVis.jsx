@@ -51,7 +51,6 @@ export default function BodyCompVis(props){
             .range([height-bottomMargin-dotSize,topMargin+dotSize])
         
         
-        console.log('dot size',dotSize)
         function drawLine(key){
             const accessor = accessors[key];
             const data = useFilter? filterDates(props.withingsData[key]): props.withingsData[key];
@@ -70,7 +69,6 @@ export default function BodyCompVis(props){
                 items.push(entry);
                 linePoints.push([tempX,tempY])
             })
-            console.log("here items",items)
 
             svg.select('.'+key+'path').remove();
             svg.append('path')

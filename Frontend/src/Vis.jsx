@@ -10,6 +10,7 @@ import {
   Radio,
   Typography,
 } from "antd";
+
 import tw from "tailwind-styled-components";
 
 const { Title, Text } = Typography
@@ -22,13 +23,11 @@ import WithingsCharts from "@src/components/WithingsChart";
 
 import SleepLogsCharts from "@src/components/SleepLogsCharts";
 
-import StepsChartVis from "./components/StepsChartVis.jsx";
 import SleepScoreChartVis from "./components/SleepScoreChartVis.jsx";
-import ActivityChartVis from "./components/ActivityChartVis.jsx";
+import ActivityContainer from "./components/ActivityContainer.jsx";
 import BodyCompVis from "./components/BodyCompVis.jsx";
 import BodyCompScatterVis from "./components/BodyCompScatterVis.jsx";
 
-const { Content, Sider } = Layout;
 
 import { WithingsAPI, FitbitAPI } from './service/API.js';
 
@@ -38,9 +37,7 @@ const activitesToFetch = [
   'minutesLightlyActive', 'minutesFairlyActive', 'minutesVeryActive'
 ]
 
-const plotActivityOptions = [
-  'activityCalories', 'totalActivity', 'minutesLightlyActive', 'minutesFairlyActive', 'minutesVeryActive'
-]
+
 function getItem(label, key, icon, children) {
   return {
     key,
@@ -57,6 +54,19 @@ import { nowTimestamp, convertTimestampToDateString, dayToTimestamp } from "./ut
 function capitalizeFirstLetter(string) {
   string = string.toLowerCase();
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function weightUnitString(weightUnit){
+  if(weightUnit === 'en_US'){
+    return 'lb'
+  }
+  if(weightUnit === 'en_US'){
+    return 'Stone'
+  }
+  if(weightUnit === undefined){
+    return '<Units Missing>'
+  }
+  return 'Kg'
 }
 
 function calcBMI(height, weight, heightUnit, weightUnit) {
@@ -111,8 +121,6 @@ export default function Vis() {
   const [stepsError, setStepsError] = useState();
   const [spo2Error, setSpo2Error] = useState();
   const [hrError, setHRError] = useState();
-
-  const [activityPlotVar, setActivityPlotVar] = useState('totalActivity')
 
   const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(21, "days")) });
 
@@ -413,40 +421,78 @@ export default function Vis() {
     fitbitAPI.goToLogin();
   }
 
-  function CardWraper(element, title) {
+  
+
+  function CardWraper(leftElement, rightElement, leftTitle = '', rightTitle = '', height='10em') {
+    const titleStyle = { width: '100%', height: '1.5em', fontSize: '1.1em', fontWeight: 'bold' };
+    const leftStyle = { width: '100%', height: 'calc(100% - 1.6em)' }
+    const rightStyle = leftStyle
     return (
-      <Card className="mx-6 mt-1 text-center p-1" style={{ width: '100%' }}>
-        <Flex align="center" justify="center" style={{ width: '100%', margin: '0px', height: '1.1em', fontSize: '1em', fontWeight: 'bold' }}>
+      <div className="mx-6 mt-1 text-center p-1 shadow" style={{ width: '100%' }}>
+        {/* <Flex align="center" justify="center" style={{ width: '100%', margin: '0px', height: '1.1em', fontSize: '1em', fontWeight: 'bold' }}>
           {title}
+        </Flex> */}
+        <Flex align="center" justify="space-between" style={{ height: 'auto', height: height, width: '100%', margin: '0px', padding: '0px' }}>
+          <div className='shadow m-0 p-0 border-h-2' style={{ width: '20vw', height: '100%' }}>
+            <div className='m-0 p-0 border-b-2 text-center' style={titleStyle}>
+              {leftTitle}
+            </div>
+            <div className='m-0 p-0' style={leftStyle}>
+              {leftElement}
+            </div>
+          </div>
+          <div className='shadow m-0 p-0' style={{ width: 'calc(100% - 20vw)', height: '100%' }}>
+            <div className='m-0 p-0 border-b-2 text-center' style={titleStyle}>
+              {rightTitle}
+            </div>
+            <div className='m-0 p-0' style={rightStyle}>
+              {rightElement}
+            </div>
+          </div>
         </Flex>
-        <Flex align="center" justify="space-between" style={{ height: '10em', width: '100%', margin: '0px', padding: '0px' }}>
-          {element}
-        </Flex>
-      </Card>
+      </div>
     )
   }
-  const charts = [
+  const rightCharts = [
+    <BodyCompVis
+      gender={fitbitProfile ? fitbitProfile['gender'] : null}
+      withingsData={withingsData}
+      dateRange={dateRange}
+      useFilter={useFilter}
+    />,
     <SleepScoreChartVis
       key={'sleep1'}
       sleepData={sleepData}
       dateRange={dateRange}
     />,
-    <StepsChartVis
-      key={'steps1'}
-      stepsData={stepsData}
-      stepsGoal={goalsDaily !== null && goalsDaily.steps ? goalsDaily.steps : 10000}
+    <ActivityContainer
+      activityData={activityData}
       dateRange={dateRange}
-    />
+      stepsData={stepsData}
+      goalsDaily={goalsDaily}
+    />,
   ]
-  const chartTitles = ['Sleep Efficiency', 'Steps']
+  const rightChartTitles = ['Body Comp Over Time','Sleep', 'Activity']
 
-  const handleActivityButtonChange = ({ target: { value } }) => {
-    if (activityData !== null && activityData[value] === undefined && value !== 'totalActivity') {
-      console.log('invalid plot value for activity data', value);
-      return;
-    }
-    setActivityPlotVar(value);
-  }
+  const leftCharts = [
+    <BodyCompScatterVis
+      gender={fitbitProfile ? fitbitProfile['gender'] : null}
+      bodyCompData={bodyCompData}
+      dateRange={dateRange}
+      useFilter={useFilter}
+    />,
+    <>{"PlaceHolder"}</>,
+    <>{"PlaceHolder"}</>,
+  ]
+
+  const chartHeights = [
+    '16em',
+    '10em',
+    '15em',
+  ]
+
+  const leftChartTitles = ['Body Comp','Sleep Score', 'Activity Score']
+
 
   return (
     <Row span={24} style={{ height: "100vh", width: '100vw' }}>
@@ -457,6 +503,8 @@ export default function Vis() {
         <Title level={5}>{`Gender: ${capitalizeFirstLetter(notUndefined(fitbitProfile, 'gender'))}`}</Title>
         <Title level={5}>{`Age: ${notUndefined(fitbitProfile, 'age')}`}</Title>
         <Title level={5}>{`Height: ${inchesToFeetString(notUndefined(fitbitProfile, 'height'))}`}</Title>
+        <Title level={5}>{`Weight (Fitbit): ${notUndefined(fitbitProfile, 'weight') + weightUnitString(notUndefined(fitbitProfile,'weightUnit'))}`}</Title>
+        <Title level={5}>{`Sleep Tracking Setting: ${notUndefined(fitbitProfile, 'sleepTracking')}`}</Title>
         <Flex align='center' justify='center'>
           <Button onClick={() => logOut()} danger>
             {'Log Out'}
@@ -473,55 +521,11 @@ export default function Vis() {
         <Row span={24}>
 
           <Col span={24}>
-            <div style={{ width: '100%' }}>
-              <DateSelector dateRange={dateRange} setDateRange={setDateRange} />
-            </div>
-            {CardWraper(
-              <div style={{ width: '100%', display: 'flex', height: '100%', justify: 'flex-center' }}>
-                <div style={{ width: 'calc(100% - 20em)', height: '100%', margin: '0px' }}>
-                  <BodyCompVis
-                    gender={fitbitProfile ? fitbitProfile['gender'] : null}
-                    withingsData={withingsData}
-                    dateRange={dateRange}
-                    useFilter={useFilter}
-                  />
-                </div>
-                <div style={{ width: '20em', height: '100%' }}>
-                  <BodyCompScatterVis
-                    gender={fitbitProfile ? fitbitProfile['gender'] : null}
-                    bodyCompData={bodyCompData}
-                    dateRange={dateRange}
-                    useFilter={useFilter}
-                  />
-                </div>
-              </div>
-              , 'Body Composition')}
-
-            {/* </Col>
-          <Col span={12}> */}
-
-            <Card className="mx-6 mt-1 text-center" style={{ width: '100%' }}>
-              <Flex align="center" justify="center" style={{ width: '100%', margin: '0px', height: '2em' }}>
-                <Radio.Group
-                  options={plotActivityOptions.map(v => {
-                    return { 'label': v.replace('minutes', ''), 'value': v }
-                  })}
-                  onChange={handleActivityButtonChange}
-                  value={activityPlotVar}
-                  optionType="button"
-                />
-              </Flex>
-              <Flex align="center" justify="space-between" style={{ height: '13em', width: '100%', margin: '0px' }}>
-                <ActivityChartVis
-                  activityData={activityData}
-                  dateRange={dateRange}
-                  plotVar={activityPlotVar}
-                />
-              </Flex>
-
-            </Card>
-
-            {charts.map((c, i) => CardWraper(c, chartTitles[i]))}
+            <DateSelector
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
+            {rightCharts.map((c, i) => CardWraper(leftCharts[i], c, leftChartTitles[i], rightChartTitles[i],chartHeights[i]))}
             <WithingsCharts
               withingsData={withingsData}
               withingsError={withingsError}

@@ -96,7 +96,7 @@ export default function DateSelector({ dateRange, setDateRange, ...props }) {
 
   //todo: update allowed dates dynamically?
   return (
-    <Card className="mx-6 mt-1" style={{width: '100%'}}>
+    <div className="mx-6 mt-3 shadow p-2" style={{width: '100%'}}>
       <Flex justify="center" className="gap-3 mb-4">
         <Button
           onClick={decrementWeek}
@@ -127,6 +127,6 @@ export default function DateSelector({ dateRange, setDateRange, ...props }) {
         // minDate={moment().subtract(3,'months').format('YYYY-MM-DD')}
         />
       </Flex>
-    </Card>
+    </div>
   );
 }

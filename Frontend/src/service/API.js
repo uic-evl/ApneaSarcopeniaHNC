@@ -455,7 +455,7 @@ export class FitbitAPI extends BaseAPI {
         if(period !== 'daily' && period !== 'weekly'){
             throw TypeError('Invalid argument to fetchStepsGoal. Must be either daily or weekly: https://dev.fitbit.com/build/reference/web-api/activity/get-activity-goals/')
         }
-        return this.makeFitbitQuery('https://api.fitbit.com/1/user/-/activities/goals/daily.json')
+        return this.makeFitbitQuery(`https://api.fitbit.com/1/user/-/activities/goals/${period}.json`)
     }
 
     async fetchFitbitSleepLog(startDate){
