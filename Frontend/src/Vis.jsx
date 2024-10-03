@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Button,
   Layout,
@@ -25,6 +25,8 @@ import SleepLogsCharts from "@src/components/SleepLogsCharts";
 import StepsChartVis from "./components/StepsChartVis.jsx";
 import SleepScoreChartVis from "./components/SleepScoreChartVis.jsx";
 import ActivityChartVis from "./components/ActivityChartVis.jsx";
+import BodyCompVis from "./components/BodyCompVis.jsx";
+import BodyCompScatterVis from "./components/BodyCompScatterVis.jsx";
 
 const { Content, Sider } = Layout;
 
@@ -112,8 +114,9 @@ export default function Vis() {
 
   const [activityPlotVar, setActivityPlotVar] = useState('totalActivity')
 
-  const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(14, "days")) });
-  const [activityError, setActivityError] = useState();
+  const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(21, "days")) });
+
+  const [useFilter, setUseFilter] = useState(true)
 
 
 
@@ -361,6 +364,44 @@ export default function Vis() {
 
   }, [fitbitProfile]);
 
+  //calculate bmi, fmi and lmi (using nasibehs forumla so idk) with the withings data, 
+  //returns a list of objects iwth bmi, fmi, and lmi, along with date: time since epoch in ms? and formattedDate: YYYY-MM-DD hh:mm:ss
+  //if times dont sync for a necessary variable, returns a -1
+  const bodyCompData = useMemo(() => {
+    if (withingsData === null) { return null }
+    const height = withingsData.height;//meters;
+    const timeDict = {}
+    for (const key of Object.keys(withingsData)) {
+      if (key === 'height') { continue; }
+      let vals = withingsData[key];
+
+      if (vals === undefined || !vals.length) {
+        console.log('missing', key, 'from activity');
+        continue
+      }
+      for (const val of vals) {
+        const date = val.date;
+        const entry = timeDict[date] ? timeDict[date] : {}
+        entry[key] = val;
+        timeDict[date] = entry
+      }
+    }
+    const heightSquared = height ** height;
+    let tempData = [];
+    for (const [key, val] of Object.entries(timeDict)) {
+      const ref = val.weight;
+      const entry = {
+        date: ref.date,
+        formattedDate: ref.formattedDate,
+      };
+      entry.bmi = val.weight ? val.weight.weight / heightSquared : -1;
+      entry.fmi = val.fat_mass_weight ? val.fat_mass_weight.fatMassWeight / heightSquared : -1;
+      entry.lmi = val.weight && val.fat_ratio ? (val.weight.weight * (1 - (val.fat_ratio.fatRatio / 100))) / heightSquared : -1;
+      tempData.push(entry)
+    }
+    return tempData
+  }, [withingsData]);
+
   function notUndefined(obj, key) {
     if (obj === undefined || obj === null) { return 'Missing' }
     return obj[key] ? obj[key] : 'Invalid Key'
@@ -374,8 +415,11 @@ export default function Vis() {
 
   function CardWraper(element, title) {
     return (
-      <Card className="mx-6 mt-1 text-center" title={title} style={{ width: '100%' }}>
-        <Flex align="center" justify="space-between" className="mx-24" style={{ height: '10em', width: '100%', margin: '0px' }}>
+      <Card className="mx-6 mt-1 text-center p-1" style={{ width: '100%' }}>
+        <Flex align="center" justify="center" style={{ width: '100%', margin: '0px', height: '1.1em', fontSize: '1em', fontWeight: 'bold' }}>
+          {title}
+        </Flex>
+        <Flex align="center" justify="space-between" style={{ height: '10em', width: '100%', margin: '0px', padding: '0px' }}>
           {element}
         </Flex>
       </Card>
@@ -425,33 +469,37 @@ export default function Vis() {
         </Flex>
       </Col>
       <Col span={19}>
-        <Row span={24}>
-          <div style={{ width: '100%' }}>
-            <DateSelector dateRange={dateRange} setDateRange={setDateRange} />
-          </div>
-        </Row>
+
         <Row span={24}>
 
-          <Col span={12}>
-            <div style={{ width: '49%', display: 'inline' }}>
-              <WithingsCharts
-                withingsData={withingsData}
-                withingsError={withingsError}
-              />
-              <SleepLogsCharts
-                sleepData={sleepData}
-                stepsData={stepsData}
-                hrData={hrData}
-                spo2Data={spo2Data}
-                sleepError={sleepError}
-                stepsError={stepsError}
-                hrError={hrError}
-                spo2Error={spo2Error}
-              />
-
+          <Col span={24}>
+            <div style={{ width: '100%' }}>
+              <DateSelector dateRange={dateRange} setDateRange={setDateRange} />
             </div>
-          </Col>
-          <Col span={12}>
+            {CardWraper(
+              <div style={{ width: '100%', display: 'flex', height: '100%', justify: 'flex-center' }}>
+                <div style={{ width: 'calc(100% - 20em)', height: '100%', margin: '0px' }}>
+                  <BodyCompVis
+                    gender={fitbitProfile ? fitbitProfile['gender'] : null}
+                    withingsData={withingsData}
+                    dateRange={dateRange}
+                    useFilter={useFilter}
+                  />
+                </div>
+                <div style={{ width: '20em', height: '100%' }}>
+                  <BodyCompScatterVis
+                    gender={fitbitProfile ? fitbitProfile['gender'] : null}
+                    bodyCompData={bodyCompData}
+                    dateRange={dateRange}
+                    useFilter={useFilter}
+                  />
+                </div>
+              </div>
+              , 'Body Composition')}
+
+            {/* </Col>
+          <Col span={12}> */}
+
             <Card className="mx-6 mt-1 text-center" style={{ width: '100%' }}>
               <Flex align="center" justify="center" style={{ width: '100%', margin: '0px', height: '2em' }}>
                 <Radio.Group
@@ -470,8 +518,24 @@ export default function Vis() {
                   plotVar={activityPlotVar}
                 />
               </Flex>
+
             </Card>
+
             {charts.map((c, i) => CardWraper(c, chartTitles[i]))}
+            <WithingsCharts
+              withingsData={withingsData}
+              withingsError={withingsError}
+            />
+            <SleepLogsCharts
+              sleepData={sleepData}
+              stepsData={stepsData}
+              hrData={hrData}
+              spo2Data={spo2Data}
+              sleepError={sleepError}
+              stepsError={stepsError}
+              hrError={hrError}
+              spo2Error={spo2Error}
+            />
           </Col>
         </Row>
       </Col>
