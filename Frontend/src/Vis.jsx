@@ -496,11 +496,11 @@ export default function Vis() {
 
   const chartHeights = [
     '16em',
-    '10em',
+    '12em',
     '15em',
   ]
 
-  const leftChartTitles = ['Body Comp', 'Sleep Score', 'Activity Goal Completion']
+  const leftChartTitles = ['Body Comp', 'Mean Sleep Efficiency', 'Activity Goal Completion']
 
 
   return (
