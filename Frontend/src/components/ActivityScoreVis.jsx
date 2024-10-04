@@ -1,50 +1,41 @@
-import { useEffect, useRef,useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
-import moment from 'moment';
+import { filterDates } from '@src/utils';
+import GaugeChart from './GaugeChart';
 
-function makeScale(targetMinutes){
-    return d3.scaleLinear()
-        .domain([0,targetMinutes])
-        .range(['white','green'])
-}
-const activityColorScales = {
-    'totalActivity': makeScale(120),
-    'minutesFairlyActive': makeScale(60),
-    'minutesLightlyActive': makeScale(45),
-    'minutesVeryActive': makeScale(15),
-    'activityCalories': makeScale(1000)
-}
-export default function ActivityChartVis(props) {
+export default function ActivityScoreVis({ activityData, stepsData, goalsDaily, dateRange }) {
 
-    const d3Container = useRef(null);
-    const [svg, height, width, tTip] = useSVGCanvas(d3Container);
-
-    const leftMargin = 4;
-    const rightMargin = 4;
+    const sideMargin = 4;
     const topMargin = 4;
     const bottomMargin = 14;
 
-    const activityLevels = ['minutesFairlyActive','minutesLightlyActive','minutesVeryActive'];
-    
-    const formattedData = useMemo(()=>{
-        if (props.activityData === null) {return}
+    const activityLevels = ['minutesFairlyActive', 'minutesLightlyActive', 'minutesVeryActive'];
+
+    const formattedData = useMemo(() => {
+        if (activityData === null || stepsData === null) { return }
         const timeDict = {};
-        for (let key of Object.keys(props.activityData)){
-            let vals = props.activityData[key];
-            if(vals === undefined){
-                console.log('missing',key,'from activity');
+        for (let key of Object.keys(activityData)) {
+            let vals = activityData[key];
+            if (vals === undefined) {
+                console.log('missing', key, 'from activity');
                 continue
             }
-            for(const val of vals){
+            for (const val of vals) {
                 const date = val.date;
-                const entry = timeDict[date]? timeDict[date]:{}
+                const entry = timeDict[date] ? timeDict[date] : {}
                 entry[key] = val;
                 timeDict[date] = entry
             }
         }
+        for (const val of stepsData) {
+            const date = val.date;
+            const entry = timeDict[date] ? timeDict[date] : {}
+            entry['steps'] = val;
+            timeDict[date] = entry
+        }
         let data = [];
-        for(const [key,val] of Object.entries(timeDict)){
+        for (const [key, val] of Object.entries(timeDict)) {
             const ref = val.minutesFairlyActive;
             const entry = {
                 date: ref.date,
@@ -52,118 +43,67 @@ export default function ActivityChartVis(props) {
                 formattedDate: ref.formattedDate,
             };
             let totalActivity = 0;
-            for(const [key2,val2] of Object.entries(val)){
+            for (const [key2, val2] of Object.entries(val)) {
                 entry[key2] = val2.number;
-                if(activityLevels.indexOf(key2) >= 0)
+                if (activityLevels.indexOf(key2) >= 0)
                     totalActivity += val2.number;
-            }   
+            }
             entry['totalActivity'] = totalActivity;
             data.push(entry)
         }
-        return data
-    },[props.activityData])
+        return filterDates(data, dateRange.start, dateRange.stop)
+    }, [activityData, stepsData, dateRange])
 
-    useEffect(() => {
-        if (formattedData === undefined || formattedData === null || svg === undefined || props.dateRange === undefined) { return }
-        const plotVar = props.plotVar? props.plotVar : 'totalActivity';
-        let data = formattedData.map(d =>{
-            return {number: d[plotVar], ...d}
+    const avgScore = useMemo(() => {
+        if (goalsDaily === null || formattedData === null) { return }
+
+        const stepG = goalsDaily.steps;
+        const calG = goalsDaily.caloriesOut;
+        const actG = goalsDaily.activeMinutes;
+        // const totalGoals = (stepG? 1:0) + (calG? 1:0) + (actG? 1:0);
+        function getScore(d) {
+            let numerator = 0;
+            let denominator = 0;
+            if (d.totalActivity && actG) {
+                numerator += Math.min(1, d.totalActivity / actG);
+                denominator += 1;
+            }
+            if (d.calories && calG) {
+                numerator += Math.min(1, d.calories / calG);
+                denominator += 1;
+            }
+            if (d.steps && stepG) {
+                numerator += Math.min(1, d.steps / stepG);
+                denominator += 1;
+            }
+            if (denominator === 0) {
+                return 0
+            }
+            return numerator / denominator;
+        }
+
+        var totalScore = 0;
+        var scoreCount = 0;
+        formattedData.forEach(d => {
+            const s = getScore(d);
+            if (s > 0) {
+                totalScore += s;
+                scoreCount += 1;
+            }
         })
-        if (props.dateRange.start !== null)
-            data = data.filter(d => d.date >= props.dateRange.start);
-        if (props.dateRange.stop !== null)
-            data = data.filter(d => d.date <= props.dateRange.stop);
-        if (data.length < 1)
-            return
-        //trim empty data at the beginning
-    
 
-        const viewWidth = (width - leftMargin - rightMargin)
-        const barWidth = Math.min(70, viewWidth / (data.length));
-        const xCorrection = Math.max(0, (viewWidth - data.length * barWidth) / 2);
+        const avgScore = scoreCount ? totalScore / scoreCount : 0;
 
-        const [vMin, vMax] = d3.extent(data.map(d => plotVar == 'activityCalories'? d.activityCalories:d.totalActivity));
-        const [dateMin, dateMax] = d3.extent(data.map(d => d.date));
+        return avgScore
+    }, [goalsDaily, formattedData, stepsData]);
 
-        const yScale = d3.scaleLinear()
-            .domain([0, vMax])
-            .range([2, height - topMargin - bottomMargin]);
 
-        const xScale = d3.scaleLinear()
-            .domain([dateMin, dateMax])
-            .range([xCorrection + leftMargin, width - rightMargin - barWidth])
-
-        const makeItem = (d, idx) => {
-            const h = yScale(d.number);
-            const entry = {
-                timestamp: d.date,
-                activity: d.number,
-                height: h,
-                x: xScale(d.date),
-                y: height - bottomMargin - h,
-                color: activityColorScales[props.plotVar](d.number),
-                dateString: d.dateTime
-            }
-            return entry;
-        }
-
-        const items = data.map(makeItem);
-        const bars = svg.selectAll('.bars').data(items, d => d.timestamp);
-        bars.enter()
-            .append('rect').attr('class', 'bars')
-            .merge(bars)
-            .attr('width', barWidth)
-            .attr('y', d => d.y)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 1)
-            .attr('rx', barWidth / 3).attr('ry', barWidth / 3)
-            .attr('opacity', .7)
-            .transition(100)
-            .attr('x', d => d.x)
-            .attr('height', d => d.height)
-            .attr('fill', d => d.color);
-
-        bars.exit().remove();
-
-        const timeLabels = svg.selectAll('.timeLabel').data(items, d => d.timestamp);
-        timeLabels.enter()
-            .append('text').attr('class','timeLabel')
-            .merge(timeLabels)
-            .attr('x',d=> d.x + (barWidth/2))
-            .attr('text-anchor','middle')
-            .attr('dominant-baseline','middle')
-            .attr('y', height-bottomMargin/2)
-            .attr('font-size',12)
-            .text(d => d.dateString.slice(5,d.dateString.length));
-        timeLabels.exit().remove();
-
-        const annotationSize = Math.min(18,barWidth/3)
-        function getAnnotationY(d){
-            let tempY = d.y + annotationSize;
-            if(tempY > height - 2*bottomMargin - annotationSize){
-                tempY = d.y - 1 - annotationSize/2;
-            }
-            return tempY
-        }
-        const valueLabels = svg.selectAll('.valueLabel').data(items, d => d.timestamp);
-        valueLabels.enter()
-            .append('text').attr('class','valueLabel')
-            .merge(valueLabels)
-            .transition(100)
-            .attr('x',d=> d.x + (barWidth/2))
-            .attr('text-anchor','middle')
-            .attr('dominant-baseline','middle')
-            .attr('y', getAnnotationY)
-            .attr('font-size',annotationSize)
-            .text(d => d.activity);
-        valueLabels.exit().remove();
-    }, [svg, formattedData,props.dateRange,props.plotVar]);
 
     return (
         <div
-            className={"d3-component"}
-            style={{ 'height': '90%', 'width': '99%' }}
-            ref={d3Container}
-        ></div>
+            style={{ 'height': '100%', 'width': '100%' }}
+        >
+            <GaugeChart score={avgScore} />
+        </div>
     );
 }

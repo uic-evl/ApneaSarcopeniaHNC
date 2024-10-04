@@ -2,7 +2,7 @@ import { useEffect, useRef,useMemo } from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
 import moment from 'moment';
-import { sleepScoreColorScale } from '../utils';
+import { sleepScoreColorScale,filterDates } from '../utils';
 export default function SleepScoreChartVis(props) {
 
     const d3Container = useRef(null);
@@ -23,27 +23,10 @@ export default function SleepScoreChartVis(props) {
                 date,
             };
         });
-        if (props.dateRange.start !== null)
-            data = data.filter(d => d.date >= props.dateRange.start);
-        if (props.dateRange.stop !== null)
-            data = data.filter(d => d.date <= props.dateRange.stop);
+
+        data = filterDates(data, props.dateRange.start, props.dateRange.stop, 'date')
         if (data.length < 1)
             return
-
-
-        //trim empty data at the beginning
-        let sliceStart = 0;
-        data.sort((a, b) => a.date - b.date);
-        for (const item of data) {
-            if (item.number <= 0) {
-                sliceStart += 1;
-            } else {
-                break
-            }
-        }
-        if (sliceStart > 0) {
-            data = data.slice(sliceStart, data.length)
-        }
 
         const viewWidth = (width - leftMargin - rightMargin)
         const barWidth = Math.min(70, viewWidth / (data.length));

@@ -1,7 +1,7 @@
 import { useEffect, useRef,useMemo } from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
-import moment from 'moment';
+import { filterDates } from '@src/utils';
 
 function makeScale(targetMinutes){
     return d3.scaleLinear()
@@ -63,21 +63,18 @@ export default function ActivityChartVis(props) {
         return data
     },[props.activityData])
 
+    
     useEffect(() => {
         if (formattedData === undefined || formattedData === null || svg === undefined || props.dateRange === undefined) { return }
         const plotVar = props.plotVar? props.plotVar : 'totalActivity';
         let data = formattedData.map(d =>{
             return {number: d[plotVar], ...d}
         })
-        if (props.dateRange.start !== null)
-            data = data.filter(d => d.date >= props.dateRange.start);
-        if (props.dateRange.stop !== null)
-            data = data.filter(d => d.date <= props.dateRange.stop);
+
+        data = filterDates(data, props.dateRange.start, props.dateRange.stop, 'date')
         if (data.length < 1)
             return
-        //trim empty data at the beginning
     
-
         const viewWidth = (width - leftMargin - rightMargin)
         const barWidth = Math.min(70, viewWidth / (data.length));
         const xCorrection = Math.max(0, (viewWidth - data.length * barWidth) / 2);

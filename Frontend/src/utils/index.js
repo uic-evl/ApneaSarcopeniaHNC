@@ -13,6 +13,14 @@ export const yearAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "years
 
 export const sleepScoreColorScale = d3.scaleLinear().domain([60,100]).range(['white','green'])
 
+export function filterDates(d,start,stop,accessor='date'){
+  if (start !== null)
+      d= d.filter(d => d[accessor] >= start);
+  if (stop !== null)
+      d= d.filter(d => d[accessor] <= stop);
+  return d
+}
+
 export const drawRectangle = (
   width,
   height,

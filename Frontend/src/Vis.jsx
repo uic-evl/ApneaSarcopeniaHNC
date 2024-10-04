@@ -19,7 +19,6 @@ import moment from "moment";
 // import LineChart from "@features/lineChart";
 
 // components
-import WithingsCharts from "@src/components/WithingsChart";
 
 import SleepLogsCharts from "@src/components/SleepLogsCharts";
 
@@ -27,6 +26,8 @@ import SleepScoreChartVis from "./components/SleepScoreChartVis.jsx";
 import ActivityContainer from "./components/ActivityContainer.jsx";
 import BodyCompVis from "./components/BodyCompVis.jsx";
 import BodyCompScatterVis from "./components/BodyCompScatterVis.jsx";
+import ActivityScoreVis from "./components/ActivityScoreVis.jsx";
+import SleepScoreVis from "./components/SleepScoreVis.jsx";
 
 
 import { WithingsAPI, FitbitAPI } from './service/API.js';
@@ -56,14 +57,14 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function weightUnitString(weightUnit){
-  if(weightUnit === 'en_US'){
+function weightUnitString(weightUnit) {
+  if (weightUnit === 'en_US') {
     return 'lb'
   }
-  if(weightUnit === 'en_US'){
+  if (weightUnit === 'en_US') {
     return 'Stone'
   }
-  if(weightUnit === undefined){
+  if (weightUnit === undefined) {
     return '<Units Missing>'
   }
   return 'Kg'
@@ -421,9 +422,9 @@ export default function Vis() {
     fitbitAPI.goToLogin();
   }
 
-  
 
-  function CardWraper(leftElement, rightElement, leftTitle = '', rightTitle = '', height='10em') {
+
+  function CardWraper(leftElement, rightElement, leftTitle = '', rightTitle = '', height = '10em') {
     const titleStyle = { width: '100%', height: '1.5em', fontSize: '1.1em', fontWeight: 'bold' };
     const leftStyle = { width: '100%', height: 'calc(100% - 1.6em)' }
     const rightStyle = leftStyle
@@ -432,7 +433,7 @@ export default function Vis() {
         {/* <Flex align="center" justify="center" style={{ width: '100%', margin: '0px', height: '1.1em', fontSize: '1em', fontWeight: 'bold' }}>
           {title}
         </Flex> */}
-        <Flex align="center" justify="space-between" style={{ height: 'auto', height: height, width: '100%', margin: '0px', padding: '0px' }}>
+        <Flex align="center" justify="space-between" style={{ height: height, width: '100%', margin: '0px', padding: '0px' }}>
           <div className='shadow m-0 p-0 border-h-2' style={{ width: '20vw', height: '100%' }}>
             <div className='m-0 p-0 border-b-2 text-center' style={titleStyle}>
               {leftTitle}
@@ -472,7 +473,7 @@ export default function Vis() {
       goalsDaily={goalsDaily}
     />,
   ]
-  const rightChartTitles = ['Body Comp Over Time','Sleep', 'Activity']
+  const rightChartTitles = ['Body Comp Over Time', 'Sleep', 'Activity']
 
   const leftCharts = [
     <BodyCompScatterVis
@@ -481,8 +482,16 @@ export default function Vis() {
       dateRange={dateRange}
       useFilter={useFilter}
     />,
-    <>{"PlaceHolder"}</>,
-    <>{"PlaceHolder"}</>,
+    <SleepScoreVis
+      sleepData={sleepData}
+      dateRange={dateRange}
+    />,
+    <ActivityScoreVis
+      activityData={activityData}
+      goalsDaily={goalsDaily}
+      stepsData={stepsData}
+      dateRange={dateRange}
+    />,
   ]
 
   const chartHeights = [
@@ -491,7 +500,7 @@ export default function Vis() {
     '15em',
   ]
 
-  const leftChartTitles = ['Body Comp','Sleep Score', 'Activity Score']
+  const leftChartTitles = ['Body Comp', 'Sleep Score', 'Activity Goal Completion']
 
 
   return (
@@ -503,7 +512,7 @@ export default function Vis() {
         <Title level={5}>{`Gender: ${capitalizeFirstLetter(notUndefined(fitbitProfile, 'gender'))}`}</Title>
         <Title level={5}>{`Age: ${notUndefined(fitbitProfile, 'age')}`}</Title>
         <Title level={5}>{`Height: ${inchesToFeetString(notUndefined(fitbitProfile, 'height'))}`}</Title>
-        <Title level={5}>{`Weight (Fitbit): ${notUndefined(fitbitProfile, 'weight') + weightUnitString(notUndefined(fitbitProfile,'weightUnit'))}`}</Title>
+        <Title level={5}>{`Weight (Fitbit): ${notUndefined(fitbitProfile, 'weight') + weightUnitString(notUndefined(fitbitProfile, 'weightUnit'))}`}</Title>
         <Title level={5}>{`Sleep Tracking Setting: ${notUndefined(fitbitProfile, 'sleepTracking')}`}</Title>
         <Flex align='center' justify='center'>
           <Button onClick={() => logOut()} danger>
@@ -525,11 +534,7 @@ export default function Vis() {
               dateRange={dateRange}
               setDateRange={setDateRange}
             />
-            {rightCharts.map((c, i) => CardWraper(leftCharts[i], c, leftChartTitles[i], rightChartTitles[i],chartHeights[i]))}
-            <WithingsCharts
-              withingsData={withingsData}
-              withingsError={withingsError}
-            />
+            {rightCharts.map((c, i) => CardWraper(leftCharts[i], c, leftChartTitles[i], rightChartTitles[i], chartHeights[i]))}
             <SleepLogsCharts
               sleepData={sleepData}
               stepsData={stepsData}

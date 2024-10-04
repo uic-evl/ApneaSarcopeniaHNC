@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
+import { filterDates } from '@src/utils';
 
 export default function BodyCompScatterVis(props) {
 
@@ -11,16 +12,6 @@ export default function BodyCompScatterVis(props) {
     const rightMargin = 4;
     const topMargin = 4;
     const bottomMargin = 14;
-
-
-
-    const filterDates = useCallback((data) => {
-        if (props.dateRange.start !== null)
-            data = data.filter(d => d.date >= props.dateRange.start);
-        if (props.dateRange.stop !== null)
-            data = data.filter(d => d.date <= props.dateRange.stop);
-        return data
-    }, [props.dateRange])
 
     useEffect(() => {
         if (props.bodyCompData === null || svg === undefined || props.dateRange === undefined) { return }
@@ -51,7 +42,7 @@ export default function BodyCompScatterVis(props) {
             .range([yStart , yStart - sideLength]);
 
 
-        const data = useFilter ? filterDates(props.bodyCompData) : props.bodyCompData.map(d => d);
+        const data = useFilter ? filterDates(props.bodyCompData,props.dateRange.start,props.dateRange.stop) : props.bodyCompData.map(d => d);
         data.sort((a, b) => a.date - b.date)
 
         const colorScale = d3.scaleLinear()
@@ -121,7 +112,7 @@ export default function BodyCompScatterVis(props) {
         points.exit().remove();
         points.raise()
 
-    }, [svg, props.bodyCompData, filterDates, props.useFilter, props.gender]);
+    }, [svg, props.bodyCompData, props.dateRange, props.useFilter, props.gender]);
 
     return (
         <div
