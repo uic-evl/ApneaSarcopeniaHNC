@@ -8,10 +8,12 @@ export default function BodyCompScatterVis(props) {
     const d3Container = useRef(null);
     const [svg, height, width, tTip] = useSVGCanvas(d3Container);
 
+    const bottomTitleSize = 20;
+    const sectionTitleSize = 20;
     const leftMargin = 4;
     const rightMargin = 4;
-    const topMargin = 4;
-    const bottomMargin = 14;
+    const topMargin = sectionTitleSize;
+    const bottomMargin = sectionTitleSize + bottomTitleSize;
 
     //default x scale, unless they go out-of-bounds
     const defaultLmiExtents = [10,30]
@@ -31,7 +33,9 @@ export default function BodyCompScatterVis(props) {
         const lmiExtents = d3.extent(props.bodyCompData.map(d => d.lmi));
         const fmiExtents = d3.extent(props.bodyCompData.map(d => d.fmi));
 
-        const sideLength = Math.min(width - leftMargin - rightMargin, height - topMargin - bottomMargin);
+        const viewHeight = height - topMargin -bottomMargin;
+        const viewWidth = width - leftMargin - rightMargin;
+        const sideLength = Math.min(viewHeight,viewWidth);
 
         const xOffset = Math.max(0, (width - leftMargin - rightMargin - sideLength) / 2);
         const xStart = leftMargin + xOffset;
@@ -75,6 +79,7 @@ export default function BodyCompScatterVis(props) {
             pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);
         });
 
+        //draw dotted lines at sarcopenia and obesity cuttoffs
         const threshPoints = [
             [
                 [xStart, yScale(fmiThreshold)],
@@ -95,11 +100,28 @@ export default function BodyCompScatterVis(props) {
             .attr('strokeWidth', 10)
             .attr('stroke-dasharray',4);
 
+        //make sarcopenia range red
+        const pos = []
+        const increment = .05;
+        var currpos = 0;
+        while(currpos <= 1){
+            pos.push(currpos );
+            currpos += increment
+        }
+        const badZoneWidth = xScale(lmiThreshold)-xStart;
         svg.selectAll('.colorFill').remove();
-        svg.append('rect')
+        svg.selectAll('.colorFill').data(pos)
+            .enter()
+            .append('rect')
             .attr('class','colorFill')
-            .attr('')
+            .attr('x', (g) => xStart + g*badZoneWidth)
+            .attr('y',yStart-sideLength)
+            .attr('width', g => .1*badZoneWidth)
+            .attr('height',sideLength)
+            .attr('fill','red')
+            .attr('opacity',g=>.1*(1-(g**4)) )
 
+        //draw a ling for the trajectory
         const dotSize = Math.max(4, Math.min(8, sideLength / 20, width / (10 * data.length)));
         svg.selectAll('.linePath').remove();
         svg.append('path').attr('class', 'linePath')
@@ -108,7 +130,7 @@ export default function BodyCompScatterVis(props) {
             .attr('stroke', 'teal')
             .attr('stroke-width', dotSize / 4)
 
-
+        //draw bmi for timepoints
         const points = svg.selectAll('.points').data(plotData, (d, i) => i);
         points.enter()
             .append('circle').attr('class', 'points')
@@ -119,7 +141,43 @@ export default function BodyCompScatterVis(props) {
             .attr('r', dotSize)
             .attr('fill', d => colorScale(d.date))
         points.exit().remove();
-        points.raise()
+        points.raise();
+
+        const annotationText = [
+            {
+                x: xStart + sideLength/4,
+                y: topMargin- .2*sectionTitleSize,
+                text: 'Sarcopenic Obesity',
+                size: .7*sectionTitleSize,
+                length: badZoneWidth,
+            },
+            {
+                x: xStart + sideLength/4,
+                y: height - bottomTitleSize - .2*sectionTitleSize,
+                text: "Scarcopenia",
+                size: .7*sectionTitleSize,
+                length: badZoneWidth,
+            },
+            {
+                x: width/2,
+                y: height - 1,
+                text: 'Lean Mass Index vs Fat Mass Index',
+                size: .8*bottomTitleSize,
+                length: ''
+            }
+        ]
+
+        const annotations = svg.selectAll('.anno').data(annotationText);
+        annotations.enter()
+            .append('text').attr('class','anno')
+            .merge(annotations)
+            .attr('x',d=>d.x)
+            .attr('y',d=>d.y)
+            .attr('font-size',d=>d.size)
+            .attr('text-anchor','middle')
+            .attr('textLength',d=>d.length)
+            .attr('lengthAdjust','spacingAndGlyphs')
+            .text(d=>d.text)
 
     }, [svg, props.bodyCompData, props.dateRange, props.useFilter, props.gender]);
 

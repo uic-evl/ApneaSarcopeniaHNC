@@ -92,11 +92,6 @@ function inchesToFeetString(height) {
 }
 
 export default function Vis() {
-  const [collapsed, setCollapsed] = useState(false);
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
   const fitbitAPI = new FitbitAPI('fitbit-token');
   const withingsAPI = new WithingsAPI('whithings-token');
 
@@ -123,7 +118,7 @@ export default function Vis() {
   const [spo2Error, setSpo2Error] = useState();
   const [hrError, setHRError] = useState();
 
-  const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(21, "days")) });
+  const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(4,'weeks')) });
 
   const [useFilter, setUseFilter] = useState(true)
 
@@ -494,7 +489,7 @@ export default function Vis() {
   ]
 
   const chartHeights = [
-    '16em',
+    '20em',
     '12em',
     '15em',
   ]

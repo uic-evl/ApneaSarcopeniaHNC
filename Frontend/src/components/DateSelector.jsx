@@ -55,7 +55,7 @@ export default function DateSelector({ dateRange, setDateRange, ...props }) {
   }
 
   function resetDates() {
-    setDateRange({ stop: dayToTimestamp(moment()), start: dayToTimestamp(moment().subtract(21, "days")) })
+    setDateRange({ stop: dayToTimestamp(moment()), start: dayToTimestamp(moment().subtract(4,"weeks")) })
   }
 
   function handleRangePicker(_, datePicker) {
