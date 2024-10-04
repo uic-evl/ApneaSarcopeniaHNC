@@ -31,7 +31,7 @@ export default function BodyCompVis(props) {
     useEffect(() => {
         if (props.withingsData === null || svg === undefined || props.dateRange === undefined) { return }
         const dotSize = Math.min(20, width / (4 * props.withingsData.weight.length), rightMargin, leftMargin);
-        console.log("Withings data", props.withingsData);
+
         const hSquared = props.withingsData.height;
         const useFilter = props.useFilter ? props.useFilter : false;
         const xDomain = useFilter ? [props.dateRange.start, props.dateRange.stop] : d3.extent(props.withingsData.weight.map(d => d.date))

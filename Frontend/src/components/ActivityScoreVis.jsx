@@ -55,7 +55,7 @@ export default function ActivityScoreVis({ activityData, stepsData, goalsDaily, 
     }, [activityData, stepsData, dateRange])
 
     const avgScore = useMemo(() => {
-        if (goalsDaily === null || formattedData === null) { return }
+        if (goalsDaily === null || formattedData === null || formattedData === undefined) { return }
 
         const stepG = goalsDaily.steps;
         const calG = goalsDaily.caloriesOut;

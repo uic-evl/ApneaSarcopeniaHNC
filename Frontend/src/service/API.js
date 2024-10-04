@@ -575,7 +575,9 @@ export class FitbitAPI extends BaseAPI {
         if(tempSleepData !== null){
             const temp = tempSleepData.sleep.map((log) => ({
                 ...log,
-                timestamp: toTimestamp(log.dateOfSleep),
+                date: moment(log.dateOfSleep).unix() * 1000,
+                number: Number(log.efficiency),
+                formattedDate: log.dateOfSleep,
                 }))
                 .sort((a, b) => a.timestamp - b.timestamp);
             return temp

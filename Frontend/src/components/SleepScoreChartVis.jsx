@@ -14,17 +14,7 @@ export default function SleepScoreChartVis(props) {
     const bottomMargin = 14;
     useEffect(() => {
         if (props.sleepData === null || svg === undefined || props.dateRange === undefined) { return }
-        var data = props.sleepData.map((log) => {
-            const date = moment(log.dateOfSleep).unix() * 1000;
-
-            return {
-                ...log,
-                number: log.efficiency,
-                date,
-            };
-        });
-
-        data = filterDates(data, props.dateRange.start, props.dateRange.stop, 'date')
+        const data = filterDates(props.sleepData, props.dateRange.start, props.dateRange.stop, 'date')
         if (data.length < 1)
             return
 
@@ -58,7 +48,7 @@ export default function SleepScoreChartVis(props) {
         }
 
         const items = data.map(makeItem);
-        const bars = svg.selectAll('.bars').data(items, d => d.timestamp);
+        const bars = svg.selectAll('.bars').data(items, d => d.date);
         bars.enter()
             .append('rect').attr('class', 'bars')
             .merge(bars)

@@ -188,11 +188,9 @@ export default function Vis() {
       }
       console.log('activities', res);
       setActivityData(res)
-      setActivityError(undefined);
       activityLoading = false
     } catch (error) {
       console.log('activity error', error.message)
-      setActivityError(error);
     } finally {
       activityLoading = false;
     }
@@ -216,6 +214,7 @@ export default function Vis() {
   }
 
   async function getSleep(months) {
+    console.log('calling sleep thing',sleepLoading)
     if (sleepLoading) { return }
     try {
       sleepLoading = true;

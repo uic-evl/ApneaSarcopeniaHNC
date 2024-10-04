@@ -18,7 +18,7 @@ export default function SleepScoreVis({ sleepData, dateRange }) {
         if (sleepData === null || dateRange===null) { return }
     
         const data = filterDates(
-            sleepData.map(d => {return {...d,date: moment(d.dateOfSleep).unix() * 1000}}),
+            sleepData,
             dateRange.start,
             dateRange.stop
         )
