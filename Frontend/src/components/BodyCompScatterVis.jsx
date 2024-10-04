@@ -13,6 +13,10 @@ export default function BodyCompScatterVis(props) {
     const topMargin = 4;
     const bottomMargin = 14;
 
+    //default x scale, unless they go out-of-bounds
+    const defaultLmiExtents = [10,30]
+    //default y scale, unless they go out-of-bounds
+    const defaultFmiExtents = [1,15]
     useEffect(() => {
         if (props.bodyCompData === null || svg === undefined || props.dateRange === undefined) { return }
 
@@ -32,13 +36,13 @@ export default function BodyCompScatterVis(props) {
         const xOffset = Math.max(0, (width - leftMargin - rightMargin - sideLength) / 2);
         const xStart = leftMargin + xOffset;
         const xScale = d3.scaleLinear()
-            .domain([Math.min(lmiExtents[0], 5), Math.max(lmiExtents[1], 25)])
+            .domain([Math.min(lmiExtents[0], defaultLmiExtents[0]), Math.max(lmiExtents[1], defaultLmiExtents[1])])
             .range([xStart, xStart + sideLength]);
 
         const yOffset = Math.max(0, (height - topMargin - bottomMargin - sideLength) / 2);
         const yStart = height - bottomMargin - yOffset
         const yScale = d3.scaleLinear()
-            .domain([Math.min(fmiExtents[0], 4), Math.max(fmiExtents[1], 16)])
+            .domain([Math.min(fmiExtents[0], defaultFmiExtents[0]), Math.max(fmiExtents[1], defaultFmiExtents[1])])
             .range([yStart , yStart - sideLength]);
 
 
@@ -89,7 +93,12 @@ export default function BodyCompScatterVis(props) {
             .attr('fill', 'none')
             .attr('stroke', 'black')
             .attr('strokeWidth', 10)
-            .attr('stroke-dasharray',4)
+            .attr('stroke-dasharray',4);
+
+        svg.selectAll('.colorFill').remove();
+        svg.append('rect')
+            .attr('class','colorFill')
+            .attr('')
 
         const dotSize = Math.max(4, Math.min(8, sideLength / 20, width / (10 * data.length)));
         svg.selectAll('.linePath').remove();

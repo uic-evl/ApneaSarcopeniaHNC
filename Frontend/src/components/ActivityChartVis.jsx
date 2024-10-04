@@ -1,7 +1,7 @@
 import { useEffect, useRef,useMemo } from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
-import { filterDates } from '@src/utils';
+import { filterDates,dayInMs } from '@src/utils';
 
 function makeScale(targetMinutes){
     return d3.scaleLinear()
@@ -75,12 +75,13 @@ export default function ActivityChartVis(props) {
         if (data.length < 1)
             return
     
-        const viewWidth = (width - leftMargin - rightMargin)
-        const barWidth = Math.min(70, viewWidth / (data.length));
-        const xCorrection = Math.max(0, (viewWidth - data.length * barWidth) / 2);
+        const viewWidth = (width - leftMargin - rightMargin);
+        const [dateMin, dateMax] = [props.dateRange.start,props.dateRange.stop];//d3.extent(data.map(d => d.date));
+        const barWidth = (viewWidth)/(1+(dateMax-dateMin)/(dayInMs))//Math.min(70, viewWidth / (data.length));
+        const xCorrection = 0//Math.max(0, (viewWidth - data.length * barWidth) / 2);
+
 
         const [vMin, vMax] = d3.extent(data.map(d => plotVar == 'activityCalories'? d.activityCalories:d.totalActivity));
-        const [dateMin, dateMax] = d3.extent(data.map(d => d.date));
 
         const yScale = d3.scaleLinear()
             .domain([0, vMax])

@@ -1,6 +1,7 @@
 import {useEffect, useRef,useMemo} from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
+import {filterDates,dayInMs} from '@src/utils';
 
 export default function StepsChartVis(props){
 
@@ -25,35 +26,15 @@ export default function StepsChartVis(props){
 
     useEffect(()=>{
         if(props.stepsData === null || svg === undefined || props.dateRange === undefined){ return }
-        let data = props.stepsData.map(d=>d);
-        if(props.dateRange.start !== null)
-            data = data.filter(d => d.date >= props.dateRange.start );
-        if(props.dateRange.stop !== null)
-            data = data.filter(d => d.date <= props.dateRange.stop);
-        if(data.length < 1)
-            return
-        
 
-        //trim empty data at the beginning
-        // let sliceStart = 0;
-        // data.sort((a,b) => a.date - b.date);
-        // for(const item of data){
-        //     if (item.number <= 0){
-        //         sliceStart += 1;
-        //     } else{
-        //         break
-        //     }
-        // }
-        // if(sliceStart > 0){
-        //     data = data.slice(sliceStart, data.length)
-        // }
+        let data = filterDates(props.stepsData,props.dateRange.start,props.dateRange.stop);
 
-        const viewWidth = (width - leftMargin - rightMargin)
-        const barWidth = Math.min(70,viewWidth/(data.length));
-        const xCorrection = Math.max(0, (viewWidth - data.length*barWidth)/2);
+        const viewWidth = (width - leftMargin - rightMargin);
+        const [dateMin, dateMax] = [props.dateRange.start,props.dateRange.stop];//d3.extent(data.map(d => d.date));
+        const barWidth = (viewWidth)/(1+(dateMax-dateMin)/(dayInMs))//Math.min(70, viewWidth / (data.length));
+        const xCorrection = 0//Math.max(0, (viewWidth - data.length * barWidth) / 2);
 
         const [vMin,vMax] = d3.extent(data.map(d => d.number));
-        const [dateMin, dateMax] = d3.extent(data.map(d => d.date));
 
         const yScale = d3.scaleLinear()
             .domain([0,Math.max(vMax,1.1*props.stepsGoal)])

@@ -2,6 +2,7 @@ import { useEffect, useRef,useMemo } from 'react';
 import useSVGCanvas from './useSVGCanvas';
 import * as d3 from 'd3';
 import moment from 'moment';
+import { dayInMs } from '../utils';
 import { sleepScoreColorScale,filterDates } from '../utils';
 export default function SleepScoreChartVis(props) {
 
@@ -19,18 +20,20 @@ export default function SleepScoreChartVis(props) {
             return
 
         const viewWidth = (width - leftMargin - rightMargin)
-        const barWidth = Math.min(70, viewWidth / (data.length));
-        const xCorrection = Math.max(0, (viewWidth - data.length * barWidth) / 2);
+        
+        
 
         const [vMin, vMax] = d3.extent(data.map(d => d.number));
-        const [dateMin, dateMax] = d3.extent(data.map(d => d.date));
+        const [dateMin, dateMax] = [props.dateRange.start,props.dateRange.stop];//d3.extent(data.map(d => d.date));
+        const barWidth = (width-leftMargin-rightMargin)/(1+(dateMax-dateMin)/(dayInMs))//Math.min(70, viewWidth / (data.length));
+        const xCorrection = 0//Math.max(0, (viewWidth - data.length * barWidth) / 2);
 
         const yScale = d3.scaleLinear()
             .domain([0, vMax])
             .range([2, height - topMargin - bottomMargin]);
 
         const xScale = d3.scaleLinear()
-            .domain([dateMin, dateMax])
+            .domain([dateMin,dateMax])
             .range([xCorrection + leftMargin, width - rightMargin - barWidth])
 
         const makeItem = (d, idx) => {
@@ -97,6 +100,8 @@ export default function SleepScoreChartVis(props) {
             .attr('font-size',annotationSize)
             .text(d => d.sleepScore);
         valueLabels.exit().remove();
+
+        svg.selectAll('text').raise();
     }, [svg, props.sleepData,props.dateRange]);
 
     return (

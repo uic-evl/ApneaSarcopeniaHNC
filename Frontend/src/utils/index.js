@@ -11,6 +11,8 @@ export const weekAgoTimestamp = () => dayToTimestamp(moment().subtract(7, "days"
 export const monthAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "months"));//.unix() * 1000;
 export const yearAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "years"));//.unix() * 1000;
 
+export const dayInMs = dayToTimestamp(moment().startOf('day')) - dayToTimestamp(moment().startOf('day').add(-1,'days'));
+
 export const sleepScoreColorScale = d3.scaleLinear().domain([60,100]).range(['white','green'])
 
 export function filterDates(d,start,stop,accessor='date'){
