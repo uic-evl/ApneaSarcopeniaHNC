@@ -501,9 +501,10 @@ export class FitbitAPI extends BaseAPI {
 
             const result = tempData.map((item) => ({
                 ...item,
-                timestamp: toTimestamp(item.dateTime),
+                date: toTimestamp(item.dateTime),
                 time: moment(item.dateTime).format(timeFormat),
                 number: item.value.avg,
+                timestamp: item.dateTime,
                 }))
                 .sort((a, b) => a.timestamp - b.timestamp);
             return result;
@@ -518,9 +519,10 @@ export class FitbitAPI extends BaseAPI {
             const rates = tempHRData['activities-heart'].filter((rate) => rate.value.restingHeartRate !== undefined)
             .map((rate) => ({
                 ...rate,
-                timestamp: toTimestamp(rate.dateTime),
+                date: toTimestamp(rate.dateTime),
                 time: moment(rate.dateTime).format(timeFormat),
                 number: rate.value.restingHeartRate,
+                timestamp: item.dateTime
             }))
             .sort((a, b) => a.timestamp - b.timestamp);
             return rates

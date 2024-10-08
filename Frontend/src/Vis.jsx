@@ -28,6 +28,7 @@ import BodyCompVis from "./components/BodyCompVis.jsx";
 import BodyCompScatterVis from "./components/BodyCompScatterVis.jsx";
 import ActivityScoreVis from "./components/ActivityScoreVis.jsx";
 import SleepScoreVis from "./components/SleepScoreVis.jsx";
+import SleepContainer from "./components/SleepContainer.jsx";
 
 
 import { WithingsAPI, FitbitAPI } from './service/API.js';
@@ -118,7 +119,7 @@ export default function Vis() {
   const [spo2Error, setSpo2Error] = useState();
   const [hrError, setHRError] = useState();
 
-  const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(4,'weeks')) });
+  const [dateRange, setDateRange] = useState({ stop: nowTimestamp(), start: dayToTimestamp(moment().subtract(4, 'weeks')) });
 
   const [useFilter, setUseFilter] = useState(true)
 
@@ -209,7 +210,7 @@ export default function Vis() {
   }
 
   async function getSleep(months) {
-    console.log('calling sleep thing',sleepLoading)
+    console.log('calling sleep thing', sleepLoading)
     if (sleepLoading) { return }
     try {
       sleepLoading = true;
@@ -455,9 +456,15 @@ export default function Vis() {
       dateRange={dateRange}
       useFilter={useFilter}
     />,
-    <SleepScoreChartVis
-      key={'sleep1'}
+    <SleepContainer
       sleepData={sleepData}
+      stepsData={stepsData}
+      hrData={hrData}
+      spo2Data={spo2Data}
+      sleepError={sleepError}
+      stepsError={stepsError}
+      hrError={hrError}
+      spo2Error={spo2Error}
       dateRange={dateRange}
     />,
     <ActivityContainer
@@ -489,9 +496,9 @@ export default function Vis() {
   ]
 
   const chartHeights = [
-    '20em',
-    '12em',
-    '15em',
+    'min(22em,calc(33vh - 3em))',
+    'min(22em,calc(33vh - 3em))',
+    'min(22em,calc(33vh - 3em))',
   ]
 
   const leftChartTitles = ['Body Comp', 'Mean Sleep Efficiency', 'Activity Goal Completion']
@@ -529,7 +536,7 @@ export default function Vis() {
               setDateRange={setDateRange}
             />
             {rightCharts.map((c, i) => CardWraper(leftCharts[i], c, leftChartTitles[i], rightChartTitles[i], chartHeights[i]))}
-            <SleepLogsCharts
+            {/* <SleepLogsCharts
               sleepData={sleepData}
               stepsData={stepsData}
               hrData={hrData}
@@ -538,7 +545,7 @@ export default function Vis() {
               stepsError={stepsError}
               hrError={hrError}
               spo2Error={spo2Error}
-            />
+            /> */}
           </Col>
         </Row>
       </Col>
