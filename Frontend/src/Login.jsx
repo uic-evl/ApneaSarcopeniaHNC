@@ -3,10 +3,20 @@ import { useState, useEffect } from "react";
 import {Button} from 'antd';
 import * as env from "./env.js";
 import './index.css';
-import API from "./service/API.js";
+import {FitbitAPI,WithingsAPI} from "./service/API.js";
 
 export default function Login() {
   const navigate = useNavigate();
+
+  const fitbitApi = new FitbitAPI('fitbit-token');
+  const withingsApi = new WithingsAPI('whithings-token');
+  if(fitbitApi.isExpired()){
+    fitbitApi.resetToken();
+  }
+  if(withingsApi.isExpired()){
+    withingsApi.resetToken();
+  }
+  
   const [fitbitCode,setFitbitCode] = useState(localStorage.getItem('fitbit-code'));
   const [whithingsCode, setWhithingsCode] = useState(localStorage.getItem('whithings-code'));
   const [fitbitToken,setFitbitToken] = useState(localStorage.getItem('fitbit-token'));

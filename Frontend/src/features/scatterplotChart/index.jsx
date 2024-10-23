@@ -64,7 +64,7 @@ export default function ScatterplotChart({ dataset, options, className }) {
     return (
       <circle
         key={i}
-        r={1.2}
+        r={5}
         cx={xScale(d?.[xAxisProperty])}
         cy={yScale(d?.[yAxisProperty])}
         opacity={1}
@@ -80,18 +80,18 @@ export default function ScatterplotChart({ dataset, options, className }) {
     <Wrapper className={className}>
       <svg viewBox={svgViewBox}>
         <line
-          x1={sizes.canvas.width / 2}
+          x1={sizes.canvas.width*.5}
           y1={0}
-          x2={sizes.canvas.width / 2}
+          x2={sizes.canvas.width*.5}
           y2={sizes.canvas.height}
           fill="transparent"
           stroke="#C0C0C0"
         />
         <line
           x1={0}
-          y1={sizes.canvas.height / 2}
+          y1={sizes.canvas.height*.5}
           x2={sizes.canvas.width}
-          y2={sizes.canvas.height / 2}
+          y2={sizes.canvas.height*.5}
           fill="transparent"
           stroke="#C0C0C0"
         />

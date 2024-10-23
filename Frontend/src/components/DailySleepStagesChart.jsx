@@ -12,14 +12,14 @@ const levelMapping = {
   deep: 60,
 };
 
-import API from "../service/API.js";
+import {FitbitAPI} from "../service/API.js";
 
 export default function DailySleepStagesChart({ selectedItem }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sleepLog, setSleepLog] = useState([]);
 
-  const api = new API('fitbit-token','whithings-token');
+  const api = new FitbitAPI('fitbit-token');
 
   async function fetchSleep(date){
     const tempSleep = await api.fetchFitbitSleepLogByDate(date);

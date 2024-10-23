@@ -6,7 +6,7 @@ import { Card, Flex } from "antd";
 import DailySleepStagesChart from "@src/components/DailySleepStagesChart";
 import SleepStagesChart from "@src/components/SleepStagesChart";
 
-export default function SleepLogsCharts() {
+export default function SleepLogsCharts(props) {
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handleItemSelect = (item) => {
@@ -19,9 +19,9 @@ export default function SleepLogsCharts() {
   return (
     <Card className="mx-6 mt-5">
       <Flex justify="center">
-        <SleepStagesChart onItemSelect={handleItemSelect} />
+        <SleepStagesChart {...props} onItemSelect={handleItemSelect} />
       </Flex>
-      <DailySleepStagesChart selectedItem={selectedItem} />
+      <DailySleepStagesChart {...props} selectedItem={selectedItem} />
     </Card>
   );
 }
