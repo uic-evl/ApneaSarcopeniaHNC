@@ -122,6 +122,9 @@ export default function Vis() {
   const [sleepData, setSleepData] = useState(loadFromSession("sleepData"));
   const [stepsData, setStepsData] = useState(loadFromSession("stepsData"));
   const [spo2Data, setSpo2Data] = useState(loadFromSession("spo2Data"));
+  const [spo2MinuteData, setSpo2MinuteData] = useState(
+    loadFromSession("spo2MinuteData")
+  );
   const [hrData, setHRData] = useState(loadFromSession("hrData"));
   const [activityData, setActivityData] = useState(
     loadFromSession("activityData")
@@ -130,6 +133,7 @@ export default function Vis() {
   const [sleepError, setSleepError] = useState();
   const [stepsError, setStepsError] = useState();
   const [spo2Error, setSpo2Error] = useState();
+  const [spo2MinuteError, setSpo2MinuteError] = useState();
   const [hrError, setHRError] = useState();
 
   const [dateRange, setDateRange] = useState({
@@ -159,6 +163,7 @@ export default function Vis() {
   let sleepLoading = false;
   let stepsLoading = false;
   let spo2Loading = false;
+  let spo2MinuteLoading = false;
   let hrLoading = false;
   let stepGoalsLoading = false;
   let activityLoading = false;
@@ -226,6 +231,23 @@ export default function Vis() {
       setSpo2Error(error);
     } finally {
       spo2Loading = false;
+    }
+  }
+
+  async function getSPO2Minute(months) {
+    if (spo2MinuteData) {
+      return;
+    }
+    try {
+      spo2MinuteLoading = true;
+      const tempSPO2Minute = await fitbitAPI.getSPO2MinuteSince(months);
+      console.log("spo2 minute", tempSPO2Minute);
+      setSpo2MinuteData(tempSPO2Minute);
+      setSpo2MinuteError(undefined);
+    } catch (error) {
+      setSpo2MinuteError(error);
+    } finally {
+      spo2MinuteLoading = false;
     }
   }
 
@@ -318,6 +340,7 @@ export default function Vis() {
       "sleepData",
       "hrData",
       "spo2Data",
+      "spo2MinuteData",
       "activityData",
     ]) {
       sessionStorage.removeItem(key);
@@ -327,6 +350,7 @@ export default function Vis() {
     getHR(months);
     getSteps(months);
     getSPO2(months);
+    getSPO2Minute(months);
     getSleep(months);
     getActivity(monthRange);
     getWithings();
@@ -344,6 +368,7 @@ export default function Vis() {
     if (hrData === null) getHR(monthRange);
     if (stepsData === null) getSteps(monthRange);
     if (spo2Data === null) getSPO2(monthRange);
+    if (spo2MinuteData === null) getSPO2Minute(monthRange);
     if (sleepData === null) getSleep(monthRange);
     if (activityData === null) getActivity(monthRange);
   }, [monthRange]);
@@ -363,6 +388,10 @@ export default function Vis() {
   useEffect(() => {
     savetoSession(spo2Data, "spo2Data");
   }, [spo2Data]);
+
+  useEffect(() => {
+    savetoSession(spo2MinuteData, "spo2MinuteData");
+  }, [spo2MinuteData]);
 
   useEffect(() => {
     savetoSession(hrData, "hrData");
