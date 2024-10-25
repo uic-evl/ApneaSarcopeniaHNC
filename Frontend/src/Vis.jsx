@@ -126,6 +126,10 @@ export default function Vis() {
     loadFromSession("spo2MinuteData")
   );
   const [hrData, setHRData] = useState(loadFromSession("hrData"));
+  const [hrMinuteData, setHRMinuteData] = useState(
+    loadFromSession("hrMinuteData")
+  );
+
   const [activityData, setActivityData] = useState(
     loadFromSession("activityData")
   );
@@ -135,11 +139,16 @@ export default function Vis() {
   const [spo2Error, setSpo2Error] = useState();
   const [spo2MinuteError, setSpo2MinuteError] = useState();
   const [hrError, setHRError] = useState();
+  const [hrMinuteError, setHRMinuteError] = useState();
 
   const [dateRange, setDateRange] = useState({
     stop: nowTimestamp(),
     start: dayToTimestamp(moment().subtract(4, "weeks")),
   });
+
+  const [detailsDate, setDetailsDate] = useState(
+    convertTimestampToDateString(nowTimestamp() / 1000)
+  );
 
   const [useFilter, setUseFilter] = useState(true);
 
@@ -165,6 +174,7 @@ export default function Vis() {
   let spo2Loading = false;
   let spo2MinuteLoading = false;
   let hrLoading = false;
+  let hrMinuteLoading = false;
   let stepGoalsLoading = false;
   let activityLoading = false;
 
@@ -234,13 +244,13 @@ export default function Vis() {
     }
   }
 
-  async function getSPO2Minute(months) {
-    if (spo2MinuteData) {
+  async function getSPO2Minute(date) {
+    if (spo2MinuteLoading) {
       return;
     }
     try {
       spo2MinuteLoading = true;
-      const tempSPO2Minute = await fitbitAPI.getSPO2MinuteSince(months);
+      const tempSPO2Minute = await fitbitAPI.getSPO2MinuteSince(date);
       console.log("spo2 minute", tempSPO2Minute);
       setSpo2MinuteData(tempSPO2Minute);
       setSpo2MinuteError(undefined);
@@ -289,20 +299,41 @@ export default function Vis() {
   }
 
   async function getHR(months) {
+    // console.log("inside get HR");
     if (hrLoading) {
       return;
     }
     try {
       hrLoading = true;
+      // console.log("inside HR TRY");
       const temp = await fitbitAPI.getHRSince(months);
       console.log("hr", temp);
       setHRData(temp);
       setHRError(undefined);
       hrLoading = false;
+      // console.log("HR DONE");
     } catch (error) {
       setHRError(error);
     } finally {
       hrLoading = false;
+    }
+  }
+
+  async function getHRMinute(date) {
+    if (hrMinuteLoading) {
+      return;
+    }
+    try {
+      hrMinuteLoading = true;
+      const temp = await fitbitAPI.getHRMinuteSince(date);
+      console.log("hr minute", temp);
+      setHRMinuteData(temp);
+      setHRMinuteError(undefined);
+      hrMinuteLoading = false;
+    } catch (error) {
+      setHRMinuteError(error);
+    } finally {
+      hrMinuteLoading = false;
     }
   }
 
@@ -339,6 +370,7 @@ export default function Vis() {
       "stepsData",
       "sleepData",
       "hrData",
+      "hrMinuteData",
       "spo2Data",
       "spo2MinuteData",
       "activityData",
@@ -348,9 +380,10 @@ export default function Vis() {
     await fitbitAPI.refreshFitbitToken();
     fetchProfile();
     getHR(months);
+    getHRMinute(detailsDate);
     getSteps(months);
     getSPO2(months);
-    getSPO2Minute(months);
+    getSPO2Minute(detailsDate);
     getSleep(months);
     getActivity(monthRange);
     getWithings();
@@ -366,12 +399,18 @@ export default function Vis() {
 
   useEffect(() => {
     if (hrData === null) getHR(monthRange);
+    // if (hrMinuteData === null) getHRMinute(monthRange);
     if (stepsData === null) getSteps(monthRange);
     if (spo2Data === null) getSPO2(monthRange);
-    if (spo2MinuteData === null) getSPO2Minute(monthRange);
+    // if (spo2MinuteData === null) getSPO2Minute(monthRange);
     if (sleepData === null) getSleep(monthRange);
     if (activityData === null) getActivity(monthRange);
   }, [monthRange]);
+
+  useEffect(() => {
+    getSPO2Minute(detailsDate);
+    getHRMinute(detailsDate);
+  }, [detailsDate]);
 
   useEffect(() => {
     savetoSession(fitbitProfile, "fitbitProfile");
@@ -396,6 +435,10 @@ export default function Vis() {
   useEffect(() => {
     savetoSession(hrData, "hrData");
   }, [hrData]);
+
+  useEffect(() => {
+    savetoSession(hrMinuteData, "hrMinuteData");
+  }, [hrMinuteData]);
 
   useEffect(() => {
     savetoSession(withingsData, "withingsData");
@@ -568,6 +611,8 @@ export default function Vis() {
       hrError={hrError}
       spo2Error={spo2Error}
       dateRange={dateRange}
+      detailsDate={detailsDate}
+      setDetailsDate={setDetailsDate}
     />,
     <ActivityContainer
       activityData={activityData}
@@ -645,7 +690,11 @@ export default function Vis() {
       <Col span={19}>
         <Row span={24}>
           <Col span={24}>
-            <DateSelector dateRange={dateRange} setDateRange={setDateRange} />
+            <DateSelector
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              setDetailsDate={setDetailsDate}
+            />
             {rightCharts.map((c, i) =>
               CardWraper(
                 leftCharts[i],

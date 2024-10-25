@@ -45,6 +45,7 @@ const validFitibtActivities = [
   "swimming-strokes",
 ];
 const timeFormat = "YY MMM DD";
+const minuteFormat = "HH:mm:ss";
 
 class BaseAPI {
   constructor(cookieName, refreshName) {
@@ -487,10 +488,17 @@ export class FitbitAPI extends BaseAPI {
     );
   }
 
-  async fetchFitbitSpO2Minute(start, end) {
+  async fetchFitbitSpO2Minute(date) {
     return this.makeFitbitQuery(
-      // `https://api.fitbit.com/1/user/-/spo2/date/${start}/${end}/all.json`
-      `https://api.fitbit.com/1/user/-/spo2/date/2024-10-23/all.json`
+      `https://api.fitbit.com/1/user/-/spo2/date/${date}/all.json`
+      // `https://api.fitbit.com/1/user/-/spo2/date/2024-10-23/all.json`
+    );
+  }
+
+  async fetchFitbitHRMinute(date) {
+    return this.makeFitbitQuery(
+      `https://api.fitbit.com/1/user/-/activities/heart/date/${date}/1d/1min.json`
+      // `https://api.fitbit.com/1/user/-/activities/heart/date/2019-01-01/1d/1min.json`
     );
   }
 
@@ -525,6 +533,7 @@ export class FitbitAPI extends BaseAPI {
   async getSPO2Since(months) {
     const [start, stop] = getTimeIntervalSinceToday(months);
     const tempData = await this.fetchFitbitSpO2(start, stop);
+    // console.log("spo2since", tempData);
     if (tempData !== null) {
       const result = tempData
         .map((item) => ({
@@ -540,34 +549,62 @@ export class FitbitAPI extends BaseAPI {
     return null;
   }
 
-  async getSPO2MinuteSince(months) {
+  async getSPO2MinuteSince(date) {
     console.log("getting start and end spo2 minute");
-    const stop = moment().format("YYYY-MM-DD");
-    const start = moment(stop).subtract(30, "days").format("YYYY-MM-DD");
-    // const [start, stop] = getTimeIntervalSinceToday(1);
-    console.log("spo2 minute", start, stop);
-    const tempData = await this.fetchFitbitSpO2Minute(start, stop);
-    console.log(tempData);
-    if (tempData !== null) {
-      const result = tempData
-        .map((item) => ({
-          ...item,
-          date: toTimestamp(item.dateTime),
-          minutes: item.minutes.map((each) => ({
-            ...each,
-            value: each.value,
-            timestamp: moment(each.minute).format(timeFormat),
-          })),
+
+    const tempData = await this.fetchFitbitSpO2Minute(date);
+    // console.log("tempdata", tempData);
+
+    if (tempData !== null && Array.isArray(tempData.minutes)) {
+      const result = tempData.minutes
+        .map((each) => ({
+          ...each,
+          value: each.value,
+          timestamp: moment(each.minute).format(minuteFormat), // Format each.minute
         }))
-        .sort((a, b) => a.timestamp - b.timestamp);
-      return result;
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      return {
+        ...tempData,
+        date: moment(tempData.dateTime).format(timeFormat),
+        minutes: result,
+      };
     }
+
+    return null;
+  }
+
+  async getHRMinuteSince(date) {
+    console.log("getting start and end hr minute");
+    const tempData = await this.fetchFitbitHRMinute(date);
+    // console.log("HR temp data", tempData);
+
+    if (
+      tempData !== null &&
+      Array.isArray(tempData["activities-heart-intraday"].dataset)
+    ) {
+      // const result = tempData["activities-heart-intraday"].dataset
+      //   .map((each) => ({
+      //     ...each,
+      //     value: each.value,
+      //     timestamp: moment(each.time).format(minuteFormat),
+      //   }))
+      //   .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      return {
+        ...tempData,
+        date: moment(tempData.dateTime).format(timeFormat),
+        // minutes: result,
+      };
+    }
+
     return null;
   }
 
   async getHRSince(months) {
     const [start, stop] = getTimeIntervalSinceToday(months);
     const tempHRData = await this.fetchFitbitHeartRate(start, stop);
+    // console.log("get HR Since", tempHRData);
     if (tempHRData !== null) {
       const rates = tempHRData["activities-heart"]
         .filter((rate) => rate.value.restingHeartRate !== undefined)
@@ -576,9 +613,10 @@ export class FitbitAPI extends BaseAPI {
           date: toTimestamp(rate.dateTime),
           time: moment(rate.dateTime).format(timeFormat),
           number: rate.value.restingHeartRate,
-          timestamp: item.dateTime,
+          timestamp: rate.dateTime,
         }))
         .sort((a, b) => a.timestamp - b.timestamp);
+      // console.log("hr rates", rates);
       return rates;
     }
     return null;
