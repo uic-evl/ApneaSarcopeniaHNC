@@ -15,6 +15,8 @@ export default function SleepContainer({
   spo2Data,
   detailsDate,
   setDetailsDate,
+  spo2MinuteData,
+  hrMinuteData,
 }) {
   function incerementSingleDay() {
     const currday = moment(detailsDate, "YYYY-MM-DD");
@@ -58,7 +60,7 @@ export default function SleepContainer({
         />
       </Flex>
       {plotVar === "Details" ? (
-        <>
+        <div style={{ position: "absolute", top: "40%", right: "5%" }}>
           <Flex
             align="center"
             justify="center"
@@ -94,7 +96,7 @@ export default function SleepContainer({
               </Button>
             </div>
           </Flex>
-        </>
+        </div>
       ) : null}
 
       <Flex
@@ -112,7 +114,18 @@ export default function SleepContainer({
             // spo2Data={spo2Data}
           />
         ) : (
-          <SleepDetailsChartVis sleepData={sleepData} dateRange={dateRange} />
+          <SleepDetailsChartVis
+            sleepData={sleepData.filter(
+              (item) => item.dateOfSleep === detailsDate
+            )}
+            dateRange={dateRange}
+            hrData={hrData.filter((item) => item.dateTime === detailsDate)}
+            spo2Data={spo2Data.filter((item) => item.dateTime === detailsDate)}
+            detailsDate={detailsDate}
+            hrMinuteData={hrMinuteData}
+            spo2MinuteData={spo2MinuteData}
+            hrSpo2Var={hrSpo2Var}
+          />
         )}
       </Flex>
     </>
