@@ -32,6 +32,8 @@ import SleepContainer from "./components/SleepContainer.jsx";
 
 import { WithingsAPI, FitbitAPI } from "./service/API.js";
 
+import {ApneaKNN,fetchSpO2}from "./spo2KNN.js";
+
 const activitesToFetch = [
   "calories",
   "activityCalories",
@@ -103,6 +105,17 @@ export default function Vis() {
   const fitbitAPI = new FitbitAPI("fitbit-token");
   const withingsAPI = new WithingsAPI("whithings-token");
 
+  const [apneaModel, setApneaModel] = useState(null);
+
+  async function makeApneaModel(){
+    const spo2data = await fetchSpO2();
+    if(spo2data !== null){
+      console.log('spo2 knn data',spo2data);
+      setApneaModel(new ApneaKNN(spo2data));
+    }
+  }
+
+
   //for fitbit data requests from today in months. Max is 100 days (~3.3 months).
   //Todo: maybe figure out how to do longer data periods?
   const [monthRange, setMonthRange] = useState(3.1);
@@ -123,7 +136,8 @@ export default function Vis() {
   const [stepsData, setStepsData] = useState(loadFromSession("stepsData"));
   const [spo2Data, setSpo2Data] = useState(loadFromSession("spo2Data"));
   const [spo2MinuteData, setSpo2MinuteData] = useState(
-    loadFromSession("spo2MinuteData")
+    null
+    // loadFromSession("spo2MinuteData")
   );
   const [hrData, setHRData] = useState(loadFromSession("hrData"));
   const [hrMinuteData, setHRMinuteData] = useState(
@@ -395,6 +409,9 @@ export default function Vis() {
     if (withingsData === null) getWithings();
 
     if (goalsDaily === null) fetchStepsGoals();
+    if (spo2MinuteData === null) getSPO2Minute(3);
+    makeApneaModel();
+
   }, []);
 
   useEffect(() => {
