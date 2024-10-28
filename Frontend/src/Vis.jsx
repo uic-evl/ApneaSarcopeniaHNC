@@ -199,7 +199,7 @@ export default function Vis() {
       }
       fitbitLoading = true;
       const data = await fitbitAPI.fetchFitbitProfile();
-      // console.log('data fetched',data.user);
+      console.log("data fetched", data.user);
       if (data && data !== null) {
         //relevant data: age, gender, sfullName, weight, weightUnit
         setFitbitProfile(data.user);

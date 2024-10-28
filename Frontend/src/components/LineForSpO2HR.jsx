@@ -126,6 +126,7 @@ export default function LineForSpO2HR({
     );
 
     console.log(filteredSleepData);
+    if (filteredSleepData.length === 0) return;
 
     const firstIndex = sleepData[0].levels.data.findIndex(
       (d) => d.time === filteredSleepData[0].time

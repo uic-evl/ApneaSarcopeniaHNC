@@ -115,12 +115,12 @@ export default function SleepContainer({
           />
         ) : (
           <SleepDetailsChartVis
-            sleepData={sleepData.filter(
+            sleepData={sleepData?.filter(
               (item) => item.dateOfSleep === detailsDate
             )}
             dateRange={dateRange}
-            hrData={hrData.filter((item) => item.dateTime === detailsDate)}
-            spo2Data={spo2Data.filter((item) => item.dateTime === detailsDate)}
+            hrData={hrData?.filter((item) => item.dateTime === detailsDate)}
+            spo2Data={spo2Data?.filter((item) => item.dateTime === detailsDate)}
             detailsDate={detailsDate}
             hrMinuteData={hrMinuteData}
             spo2MinuteData={spo2MinuteData}
