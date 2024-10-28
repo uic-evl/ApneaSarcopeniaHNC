@@ -23,38 +23,42 @@ export default function SleepDetailsChartVis(props) {
 
   return (
     // <>
-      // {props.hrSpo2Var === "SpO2" ? ( 
-        <LineForSpO2HR
-          sleepData={props.sleepData}
-          dateRange={props.dateRange}
-          hrData={props.hrData}
-          spo2Data={props.spo2Data}
-          detailsDate={props.detailsDate}
-          minuteData={props.hrSpo2Var === "SpO2"? props.spo2MinuteData?.minutes: props.hrMinuteData["activities-heart-intraday"].dataset}
-          hrSpo2Var={props.hrSpo2Var}
-          timeDomain={
-            props.spo2MinuteData !== null
-              ? d3.extent(props.spo2MinuteData.minutes, (d) => d.time)
-              : undefined
-          }
-        />
-      // ) 
-      // : (
-      //   <LineForSpO2HR
-      //     sleepData={props.sleepData}
-      //     dateRange={props.dateRange}
-      //     hrData={props.hrData}
-      //     spo2Data={props.spo2Data}
-      //     detailsDate={props.detailsDate}
-      //     minuteData={props.hrMinuteData["activities-heart-intraday"].dataset}
-      //     hrSpo2Var={props.hrSpo2Var}
-      //     timeDomain={
-      //       props.spo2MinuteData !== null
-      //         ? d3.extent(props.spo2MinuteData.minutes, (d) => d.time)
-      //         : undefined
-      //     }
-      //   />
-      // )}
+    // {props.hrSpo2Var === "SpO2" ? (
+    <LineForSpO2HR
+      sleepData={props.sleepData}
+      dateRange={props.dateRange}
+      hrData={props.hrData}
+      spo2Data={props.spo2Data}
+      detailsDate={props.detailsDate}
+      minuteData={
+        props.hrSpo2Var === "SpO2"
+          ? props.spo2MinuteData?.minutes
+          : props.hrMinuteData["activities-heart-intraday"].dataset
+      }
+      hrSpo2Var={props.hrSpo2Var}
+      timeDomain={
+        props.spo2MinuteData !== null
+          ? d3.extent(props.spo2MinuteData.minutes, (d) => d.time)
+          : undefined
+      }
+    />
+    // )
+    // : (
+    //   <LineForSpO2HR
+    //     sleepData={props.sleepData}
+    //     dateRange={props.dateRange}
+    //     hrData={props.hrData}
+    //     spo2Data={props.spo2Data}
+    //     detailsDate={props.detailsDate}
+    //     minuteData={props.hrMinuteData["activities-heart-intraday"].dataset}
+    //     hrSpo2Var={props.hrSpo2Var}
+    //     timeDomain={
+    //       props.spo2MinuteData !== null
+    //         ? d3.extent(props.spo2MinuteData.minutes, (d) => d.time)
+    //         : undefined
+    //     }
+    //   />
+    // )}
     // </>
   );
 }

@@ -50,6 +50,7 @@ export default function LineForSpO2HR({
   const bottomMargin = 30;
 
   //   console.log("time domain", timeDomain);
+  // console.log(minuteData);
 
   useEffect(() => {
     if (
@@ -57,8 +58,8 @@ export default function LineForSpO2HR({
       svg === undefined ||
       dateRange === undefined ||
       detailsDate === undefined ||
-      hrData === undefined || hrData === null || hrData.length < 1 ||
-      spo2Data === undefined || spo2Data === null || spo2Data.length < 1 ||
+      hrData === undefined || //hrData === null || hrData.length < 1 ||
+      spo2Data === undefined || //spo2Data === null || spo2Data.length < 1 ||
       minuteData === undefined ||
       timeDomain === undefined
     ) {
@@ -69,6 +70,7 @@ export default function LineForSpO2HR({
       svg?.selectAll(".avg-line").remove();
       svg?.selectAll(".avg-label").remove();
       svg?.selectAll(".line-point").remove();
+      svg?.selectAll(".sleep-rect").remove();
 
       return;
     }
@@ -153,7 +155,7 @@ export default function LineForSpO2HR({
 
     // console.log(filteredSleepData);
 
-    // vis.selectAll(".sleep-rect").remove();
+    svg.selectAll(".sleep-rect").remove();
 
     const bars = vis.selectAll(".sleep-rect").data(filteredSleepData);
 
@@ -186,7 +188,7 @@ export default function LineForSpO2HR({
     svg.selectAll(".avg-line").remove();
     svg.selectAll(".avg-label").remove();
     // if hr data draw a line based on resting heart rate
-    const avg = hrSpo2Var === "HR" ? hrData[0].number : spo2Data[0].value.avg;
+    const avg = hrSpo2Var === "HR" ? hrData[0].number : spo2Data[0]?.value.avg;
     vis
       .append("line")
       .attr("class", "avg-line")
