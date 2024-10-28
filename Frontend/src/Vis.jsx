@@ -32,7 +32,7 @@ import SleepContainer from "./components/SleepContainer.jsx";
 
 import { WithingsAPI, FitbitAPI } from "./service/API.js";
 
-import {ApneaKNN,fetchSpO2}from "./spo2KNN.js";
+import {spo2ApneaPrediction,fetchSpO2}from "./spo2KNN.js";
 
 const activitesToFetch = [
   "calories",
@@ -105,13 +105,14 @@ export default function Vis() {
   const fitbitAPI = new FitbitAPI("fitbit-token");
   const withingsAPI = new WithingsAPI("whithings-token");
 
-  const [apneaModel, setApneaModel] = useState(null);
+  const [apneaData,setApneaData] = useState(null)
 
-  async function makeApneaModel(){
+  async function getApneaData(){
     const spo2data = await fetchSpO2();
+    // console.log('spo2 response',spo2data);
     if(spo2data !== null){
-      console.log('spo2 knn data',spo2data);
-      setApneaModel(new ApneaKNN(spo2data));
+      // console.log('spo2 knn data 2',spo2data);
+      setApneaData(spo2data);
     }
   }
 
@@ -409,10 +410,21 @@ export default function Vis() {
     if (withingsData === null) getWithings();
 
     if (goalsDaily === null) fetchStepsGoals();
-    if (spo2MinuteData === null) getSPO2Minute(3);
-    makeApneaModel();
+    // if (spo2MinuteData === null) getSPO2Minute(3);
+    getApneaData();
 
   }, []);
+
+  const [apneaScore,setApneaScore] = useState();
+  const [apneaModelK,setApneaModelK] = useState(5);
+  useEffect(()=>{
+    console.log("here000",spo2MinuteData,apneaData)
+    if(spo2MinuteData === null || spo2MinuteData.minutes === undefined || apneaData === undefined || apneaData === null) { return }
+  
+    const scoreDict = spo2ApneaPrediction(spo2MinuteData.minutes.map(i => i.value),apneaData,apneaModelK)
+    console.log('apnea score',scoreDict,spo2MinuteData.minutes.map(i => i.value));
+    setApneaScore(scoreDict);
+  },[spo2MinuteData,apneaData,apneaModelK])
 
   useEffect(() => {
     if (hrData === null) getHR(monthRange);
@@ -649,7 +661,7 @@ export default function Vis() {
       dateRange={dateRange}
       useFilter={useFilter}
     />,
-    <SleepScoreVis sleepData={sleepData} dateRange={dateRange} />,
+    <SleepScoreVis apneaScore={apneaScore} sleepData={sleepData} dateRange={dateRange} />,
     <ActivityScoreVis
       activityData={activityData}
       goalsDaily={goalsDaily}
@@ -666,7 +678,7 @@ export default function Vis() {
 
   const leftChartTitles = [
     "Body Comp",
-    "Mean Sleep Efficiency",
+    "Apnea Risk",
     "Activity Goal Completion",
   ];
 

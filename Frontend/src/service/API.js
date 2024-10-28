@@ -554,7 +554,7 @@ export class FitbitAPI extends BaseAPI {
     // console.log("getting start and end spo2 minute");
 
     const tempData = await this.fetchFitbitSpO2Minute(date);
-    // console.log("tempdata", tempData);
+    console.log("spo minute tempdata", tempData,date);
 
     if (tempData !== null && Array.isArray(tempData.minutes)) {
       const result = tempData.minutes
@@ -566,7 +566,6 @@ export class FitbitAPI extends BaseAPI {
         .sort((a, b) => new Date(a.time) - new Date(b.time));
 
       return {
-        ...tempData,
         date: moment(tempData.dateTime).format(timeFormat),
         minutes: result,
       };

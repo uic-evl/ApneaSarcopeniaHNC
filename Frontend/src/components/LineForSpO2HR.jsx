@@ -57,8 +57,8 @@ export default function LineForSpO2HR({
       svg === undefined ||
       dateRange === undefined ||
       detailsDate === undefined ||
-      hrData === undefined ||
-      spo2Data === undefined ||
+      hrData === undefined || hrData === null || hrData.length < 1 ||
+      spo2Data === undefined || spo2Data === null || spo2Data.length < 1 ||
       minuteData === undefined ||
       timeDomain === undefined
     ) {

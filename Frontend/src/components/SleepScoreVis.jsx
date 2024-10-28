@@ -5,7 +5,7 @@ import { filterDates } from '@src/utils';
 import GaugeChart from './GaugeChart';
 import moment from 'moment';
 
-export default function SleepScoreVis({ sleepData, dateRange }) {
+export default function SleepScoreVis({apneaScore, sleepData, dateRange }) {
 
     const d3Container = useRef(null);
     const [svg, height, width, tTip] = useSVGCanvas(d3Container);
@@ -47,7 +47,8 @@ export default function SleepScoreVis({ sleepData, dateRange }) {
         <div
             style={{ 'height': '100%', 'width': '100%' }}
         >
-            <GaugeChart score={avgScore} />
+            {/* <GaugeChart score={avgScore} /> */}
+            <GaugeChart score={apneaScore? apneaScore.totalScore : 0} colorScale={d3.interpolateReds}/>
         </div>
     );
 }

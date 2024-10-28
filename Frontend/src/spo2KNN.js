@@ -1,64 +1,39 @@
 
 
-const [apneaModel, setApneaModel] = useState(null);
+const argsort = arr => arr.map((v, i) => [+v, +i]).sort((a,b) => a[0]-b[0]).map(a => a[1]);
 
-async function makeApneaModel(){
-  const spo2data = await fetchSpO2();
-  if(spo2data !== null){
-    console.log('spo2 knn data',spo2data);
-    setApneaModel(new ApneaKNN(spo2data));
-  }
+export function apneaKNN(inputData, refData, k) {
+    const data = processFitbitSpo2(inputData)
+    const dists = [];
+    const labels = [];
+    let minDist = Infinity;
+    for (const obj of refData) {
+        //data is 30s freqeuency, fitbit is 60s
+        const refSpo2 = obj.SpO2.filter((d, i) => i % 2 > 0);
+        const refLabel = obj.apnea;
+        const tempdist = DTW(data, refSpo2);
+        dists.push(tempdist);
+        labels.push(refLabel);
+        if(tempdist < minDist){ minDist = tempdist}
+    }
+    const order = argsort(dists);
+    const sortedLabels = order.map(i => labels[i]).slice(0,k);
+    const sortedDists = order.map(i => dists[i]).slice(0,k);
+    const neighbors = order.map(i => refData[i]).slice(0,k);
+    if(minDist !== sortedDists[0]){
+        console.log('error in dtw knn','order:',order,'selected Dists',sortedDists,'min dist',minDist,'all dists',dists);
+
+    }
+    let avg = 0;
+    for (const l of sortedLabels) {
+        avg += l / sortedLabels.length;
+    }
+    return {'knnScore': avg, 'neighbors': neighbors};
 }
-export class ApneaKNN {
 
-    constructor(spo2data) {
-        this.spo2Data = spo2data;
-    }
 
-    getPrediction(inputData, k = 5) {
-        const data = this.processFitbitSpo2(inputData)
-        const dists = [];
-        const labels = [];
-        for (const obj of this.spo2Data) {
-            //data is 30s freqeuency, fitbit is 60s
-            const refSpo2 = obj.SpO2.filter((d,i) => i%2 > 0);
-            const refLabel = obj.apnea;
-            const tempdist = DTW(data, refSpo2);
-            if (dists.length < 1) {
-                dists.push(tempdist);
-                labels.push(refLabel);
-            } else {
-                let flag = false;
-                for (const i in dists) {
-                    const currDist = dists[+i]
-                    if (tempdist < currDist) {
-                        dists.splice(+i, 0, tempdist);
-                        labels.splice(+i, 0, refLabel);
-                        flag = true;
-                        break
-                    }
-                }
-                if (dists.length > k) {
-                    dists.pop();
-                    labels.pop();
-                }
-                if (dists.length < k && flag) {
-                    dists.push(tempdist);
-                    labels.push(refLabel);
-                }
-            }
-        }
-        console.log('knn here',dists,labels);
-        let avg = 0;
-        for(const l of labels){
-            avg += l/labels.length;
-        }
-        return avg;
-    }
-
-    processFitbitSpo2(input) {
-        return input
-    }
+function processFitbitSpo2(input) {
+    return input
 }
 
 function DTW(s, t, window = Infinity) {
@@ -85,18 +60,61 @@ function DTW(s, t, window = Infinity) {
     return dtw[n][m]; // Return the DTW distance
 }
 
+function mean(arr){
+    if (arr.length < 1){
+        return null
+    }
+    let mval = 0;
+    for(const val of arr){
+        mval += val
+    }
+    return mval / arr.length
+}
+
+export function spo2ApneaRules(spo2Array){
+    const data = processFitbitSpo2(spo2Array);
+    const meanval = mean(data);
+    let stdval = 0;
+    let under91Count = 0;
+    let under85count = 0;
+    for(const val of data){
+        stdval += (val - meanval)**2;
+        if(val < 91){
+            under91Count += 1/data.length;
+            if(val < 88){
+                under85count += 1/data.length;
+            }
+        }
+    }
+    stdval = stdval/data.length;
+    const stdRule = stdval >= 1.375;
+    const under91Rule = under91Count >= .023;
+    const under85Rule = under85count >= .001;
+    return [stdRule, under91Rule, under85Rule];
+}
+
+export function spo2ApneaPrediction(spo2Data,refData,k){
+    const [stdRule, under91Rule, under85Rule] = spo2ApneaRules(spo2Data);
+    let knnRes = apneaKNN(spo2Data,refData,k);
+    knnRes['stdRule'] = stdRule;
+    knnRes['under91Rule'] = under91Rule;
+    knnRes['under85Rule'] = under85Rule;
+    knnRes['totalScore'] = (knnRes.knnScore/2) + (stdRule + under91Rule + under85Rule)/6;
+    return knnRes;
+}
+
 export async function fetchSpO2() {
-    console.log('fetching spo2 knn')
-    fetch('https://raw.githubusercontent.com/uic-evl/ApneaSarcopeniaHNC/refs/heads/knn/Python/spo2_apnea_records.json')
+    // console.log('fetching spo2 knn')
+    return fetch('https://raw.githubusercontent.com/uic-evl/ApneaSarcopeniaHNC/refs/heads/knn/Python/spo2_apnea_records.json')
         .then(response => {
-            console.log('spo2 knn response', response)
+            // console.log('spo2 knn response', response)
             if (!response.ok) {
                 console.log('spo2 fetch error', response)
                 return null
             }
             return response.json();
         }).then(data => {
-            console.log('spo2 knn data', data)
+            // console.log('spo2 knn data', data)
             return data
         })
 }
