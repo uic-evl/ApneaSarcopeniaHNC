@@ -213,7 +213,7 @@ export class WithingsAPI extends BaseAPI {
     for (const item of items) {
       const result = await this.fetchWithingsEntry(item, startDate, endDate);
       res[item] = this.formatWithingData(result, item);
-      console.log("response", res);
+      // console.log("response", res);
     }
     return res;
   }
@@ -380,7 +380,7 @@ export class WithingsAPI extends BaseAPI {
         return response.json();
       })
       .then((data) => {
-        console.log("whithing refrehsh body", data);
+        // console.log("whithing refrehsh body", data);
         if (data.body.access_token) {
           const atoken = data.body.access_token;
           console.log("Whiting Refrheshed Access Token:", atoken);
@@ -542,6 +542,7 @@ export class FitbitAPI extends BaseAPI {
           time: moment(item.dateTime).format(timeFormat),
           number: item.value.avg,
           timestamp: item.dateTime,
+          time: moment(item.dateTime).format(minuteFormat),
         }))
         .sort((a, b) => a.timestamp - b.timestamp);
       return result;
@@ -550,19 +551,19 @@ export class FitbitAPI extends BaseAPI {
   }
 
   async getSPO2MinuteSince(date) {
-    console.log("getting start and end spo2 minute");
+    // console.log("getting start and end spo2 minute");
 
     const tempData = await this.fetchFitbitSpO2Minute(date);
-    console.log("spo minute tempdata", tempData,date);
+    console.log("spo minute tempdata", tempData, date);
 
     if (tempData !== null && Array.isArray(tempData.minutes)) {
       const result = tempData.minutes
         .map((each) => ({
           ...each,
           value: each.value,
-          timestamp: moment(each.minute).format(minuteFormat), // Format each.minute
+          time: moment(each.minute).format(minuteFormat), // Format each.minute
         }))
-      result.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
 
       return {
         date: moment(tempData.dateTime).format(timeFormat),
@@ -574,7 +575,7 @@ export class FitbitAPI extends BaseAPI {
   }
 
   async getHRMinuteSince(date) {
-    console.log("getting start and end hr minute");
+    // console.log("getting start and end hr minute");
     const tempData = await this.fetchFitbitHRMinute(date);
     // console.log("HR temp data", tempData);
 
@@ -625,7 +626,7 @@ export class FitbitAPI extends BaseAPI {
     const [start, stop] = getTimeIntervalSinceToday(months);
     const tempData = await this.fetchFitbitActivityRange(activity, start, stop);
     if (tempData !== null) {
-      console.log("raw activity " + activity, tempData);
+      // console.log("raw activity " + activity, tempData);
       const temp = tempData[`activities-${activity}`];
       if (temp.length < 1) {
         return null;
@@ -676,6 +677,14 @@ export class FitbitAPI extends BaseAPI {
           date: moment(log.dateOfSleep).unix() * 1000,
           number: Number(log.efficiency),
           formattedDate: log.dateOfSleep,
+          levels: {
+            ...log.levels,
+            data: log.levels.data.map((level) => ({
+              ...level,
+              value: level.seconds,
+              time: moment(level.dateTime).format(minuteFormat),
+            })),
+          },
         }))
         .sort((a, b) => a.timestamp - b.timestamp);
       return temp;

@@ -32,7 +32,7 @@ import SleepContainer from "./components/SleepContainer.jsx";
 
 import { WithingsAPI, FitbitAPI } from "./service/API.js";
 
-import {apneaKNN,fetchSpO2}from "./spo2KNN.js";
+import { spo2ApneaPrediction, fetchSpO2 } from "./spo2KNN.js";
 
 const activitesToFetch = [
   "calories",
@@ -105,17 +105,16 @@ export default function Vis() {
   const fitbitAPI = new FitbitAPI("fitbit-token");
   const withingsAPI = new WithingsAPI("whithings-token");
 
-  const [apneaData,setApneaData] = useState(null)
+  const [apneaData, setApneaData] = useState(null);
 
-  async function getApneaData(){
+  async function getApneaData() {
     const spo2data = await fetchSpO2();
     // console.log('spo2 response',spo2data);
-    if(spo2data !== null){
+    if (spo2data !== null) {
       // console.log('spo2 knn data 2',spo2data);
       setApneaData(spo2data);
     }
   }
-
 
   //for fitbit data requests from today in months. Max is 100 days (~3.3 months).
   //Todo: maybe figure out how to do longer data periods?
@@ -231,7 +230,7 @@ export default function Vis() {
         const temp = await fitbitAPI.getActivitySince(key, months);
         res[key] = temp;
       }
-      console.log("activities", res);
+      // console.log("activities", res);
       setActivityData(res);
       activityLoading = false;
     } catch (error) {
@@ -248,7 +247,7 @@ export default function Vis() {
     try {
       spo2Loading = true;
       const tempSPO2 = await fitbitAPI.getSPO2Since(months);
-      console.log("spo2", tempSPO2);
+      // console.log("spo2", tempSPO2);
       setSpo2Data(tempSPO2);
       setSpo2Error(undefined);
       spo2Loading = false;
@@ -266,7 +265,7 @@ export default function Vis() {
     try {
       spo2MinuteLoading = true;
       const tempSPO2Minute = await fitbitAPI.getSPO2MinuteSince(date);
-      console.log("spo2 minute", tempSPO2Minute);
+      // console.log("spo2 minute", tempSPO2Minute);
       setSpo2MinuteData(tempSPO2Minute);
       setSpo2MinuteError(undefined);
     } catch (error) {
@@ -284,7 +283,7 @@ export default function Vis() {
     try {
       sleepLoading = true;
       const tempSleep = await fitbitAPI.getSleepSince(months);
-      console.log("sleep", tempSleep);
+      // console.log("sleep", tempSleep);
       setSleepData(tempSleep);
       setSleepError(undefined);
       sleepLoading = false;
@@ -302,7 +301,7 @@ export default function Vis() {
     try {
       stepsLoading = true;
       const temp = await fitbitAPI.getStepsSince(months);
-      console.log("steps", temp);
+      // console.log("steps", temp);
       setStepsData(temp);
       setStepsError(undefined);
       stepsLoading = false;
@@ -322,7 +321,7 @@ export default function Vis() {
       hrLoading = true;
       // console.log("inside HR TRY");
       const temp = await fitbitAPI.getHRSince(months);
-      console.log("hr", temp);
+      // console.log("hr", temp);
       setHRData(temp);
       setHRError(undefined);
       hrLoading = false;
@@ -341,7 +340,7 @@ export default function Vis() {
     try {
       hrMinuteLoading = true;
       const temp = await fitbitAPI.getHRMinuteSince(date);
-      console.log("hr minute", temp);
+      // console.log("hr minute", temp);
       setHRMinuteData(temp);
       setHRMinuteError(undefined);
       hrMinuteLoading = false;
@@ -367,7 +366,7 @@ export default function Vis() {
         "muscle_mass",
         "fat_mass_weight",
       ]);
-      console.log("withings results", results);
+      // console.log("withings results", results);
       withingsLoading = false;
       setWithingsData(results);
       setWithingsError(null);
@@ -412,19 +411,33 @@ export default function Vis() {
     if (goalsDaily === null) fetchStepsGoals();
     // if (spo2MinuteData === null) getSPO2Minute(3);
     getApneaData();
-
   }, []);
 
-  const [apneaScore,setApneaScore] = useState();
-  const [apneaModelK,setApneaModelK] = useState(6);
-  useEffect(()=>{
-    console.log("here000",spo2MinuteData,apneaData)
-    if(spo2MinuteData === null || spo2MinuteData.minutes === undefined || apneaData === undefined || apneaData === null) { return }
-  
-    const score =apneaKNN(spo2MinuteData.minutes.map(i => i.value),apneaData,apneaModelK)
-    console.log('apnea score',score,spo2MinuteData.minutes.map(i => i.value));
-    setApneaScore(score);
-  },[spo2MinuteData,apneaData,apneaModelK])
+  const [apneaScore, setApneaScore] = useState();
+  const [apneaModelK, setApneaModelK] = useState(5);
+  useEffect(() => {
+    console.log("here000", spo2MinuteData, apneaData);
+    if (
+      spo2MinuteData === null ||
+      spo2MinuteData.minutes === undefined ||
+      apneaData === undefined ||
+      apneaData === null
+    ) {
+      return;
+    }
+
+    const scoreDict = spo2ApneaPrediction(
+      spo2MinuteData.minutes.map((i) => i.value),
+      apneaData,
+      apneaModelK
+    );
+    console.log(
+      "apnea score",
+      scoreDict,
+      spo2MinuteData.minutes.map((i) => i.value)
+    );
+    setApneaScore(scoreDict);
+  }, [spo2MinuteData, apneaData, apneaModelK]);
 
   useEffect(() => {
     if (hrData === null) getHR(monthRange);
@@ -642,6 +655,8 @@ export default function Vis() {
       dateRange={dateRange}
       detailsDate={detailsDate}
       setDetailsDate={setDetailsDate}
+      spo2MinuteData={spo2MinuteData}
+      hrMinuteData={hrMinuteData}
     />,
     <ActivityContainer
       activityData={activityData}
@@ -659,7 +674,11 @@ export default function Vis() {
       dateRange={dateRange}
       useFilter={useFilter}
     />,
-    <SleepScoreVis apneaScore={apneaScore} sleepData={sleepData} dateRange={dateRange} />,
+    <SleepScoreVis
+      apneaScore={apneaScore}
+      sleepData={sleepData}
+      dateRange={dateRange}
+    />,
     <ActivityScoreVis
       activityData={activityData}
       goalsDaily={goalsDaily}
