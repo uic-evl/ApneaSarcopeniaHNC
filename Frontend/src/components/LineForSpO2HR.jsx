@@ -55,6 +55,7 @@ export default function LineForSpO2HR({
   useEffect(() => {
     if (
       sleepData === null ||
+      sleepData === undefined ||
       svg === undefined ||
       dateRange === undefined ||
       detailsDate === undefined ||
@@ -124,6 +125,8 @@ export default function LineForSpO2HR({
         timeToSeconds(d.time) + d.seconds <= timeToSeconds(timeDomain[1])
     );
 
+    console.log(filteredSleepData);
+
     const firstIndex = sleepData[0].levels.data.findIndex(
       (d) => d.time === filteredSleepData[0].time
     );
@@ -188,7 +191,7 @@ export default function LineForSpO2HR({
     svg.selectAll(".avg-line").remove();
     svg.selectAll(".avg-label").remove();
     // if hr data draw a line based on resting heart rate
-    const avg = hrSpo2Var === "HR" ? hrData[0].number : spo2Data[0]?.value.avg;
+    const avg = hrSpo2Var === "HR" ? hrData[0]?.number : spo2Data[0]?.value.avg;
     vis
       .append("line")
       .attr("class", "avg-line")

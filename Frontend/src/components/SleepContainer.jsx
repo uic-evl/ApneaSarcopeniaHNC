@@ -32,10 +32,10 @@ export default function SleepContainer({
     setDetailsDate(newDay.format("YYYY-MM-DD"));
   }
 
-  const [plotVar, setPlotVar] = useState("Efficiency");
+  const [plotVar, setPlotVar] = useState("Details");
   const [hrSpo2Var, setHRSpo2Var] = useState("SpO2");
 
-  const plotActivityOptions = ["Efficiency", "Levels", "Details"];
+  const plotActivityOptions = ["Details", "Efficiency", "Levels"];
   const handleButtonChange = ({ target: { value } }) => {
     setPlotVar(value);
   };
