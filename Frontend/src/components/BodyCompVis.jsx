@@ -11,6 +11,14 @@ const accessors = {
   weight: "weight",
 };
 
+const labelText = {
+  fat_mass_weight: "Fat Mass Index",
+  bone_mass: "Bone Mass Index",
+  fat_ratio: "Fat Ratio",
+  muscle_mass: "Muscle Mass Index",
+  weight: "Body Mass Index",
+};
+
 const colorDict = {
   fat_mass_weight: "#e41a1c",
   weight: "#377eb8",
@@ -126,7 +134,7 @@ export default function BodyCompVis(props) {
         .attr("text-anchor", "end")
         .attr("font-size", "10px")
         .attr("fill", color)
-        .text(key);
+        .text(labelText[key]);
 
       svg.select("." + key + "path").remove();
       svg

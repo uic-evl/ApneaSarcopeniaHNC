@@ -4,6 +4,7 @@ import * as d3 from "d3";
 import { dayInMs } from "../utils";
 import { filterDates } from "../utils";
 
+const variables = ["hr", "spo2"];
 const colorMap = {
   rem: "#b3cde3",
   light: "#8c96c6",
@@ -37,15 +38,15 @@ export default function LineForSpO2HR({
   hrData,
   spo2Data,
   detailsDate,
-  minuteData,
-  hrSpo2Var,
+  spo2MinuteData,
+  hrMinuteData,
   timeDomain,
 }) {
   const d3Container = useRef(null);
   const [svg, height, width, tTip] = useSVGCanvas(d3Container);
 
   const leftMargin = 40;
-  const rightMargin = 10;
+  const rightMargin = 40;
   const topMargin = 10;
   const bottomMargin = 30;
 
@@ -61,17 +62,20 @@ export default function LineForSpO2HR({
       detailsDate === undefined ||
       hrData === undefined || //hrData === null || hrData.length < 1 ||
       spo2Data === undefined || //spo2Data === null || spo2Data.length < 1 ||
-      minuteData === undefined ||
+      spo2MinuteData === undefined ||
+      hrMinuteData === undefined ||
       timeDomain === undefined
     ) {
       console.log("something is undefined");
       svg?.select(".x-axis-minute").remove();
       svg?.select(".y-axis-minute").remove();
+      svg?.select(".y-axis-right").remove();
       svg?.selectAll(".line-minute").remove();
       svg?.selectAll(".avg-line").remove();
       svg?.selectAll(".avg-label").remove();
       svg?.selectAll(".line-point").remove();
       svg?.selectAll(".sleep-rect").remove();
+      svg?.selectAll(".axis-label").remove();
 
       return;
     }
@@ -81,7 +85,8 @@ export default function LineForSpO2HR({
     const viewWidth = width - leftMargin - rightMargin;
     const viewHeight = height - topMargin - bottomMargin;
 
-    const [valMin, valMax] = hrSpo2Var === "HR" ? [30, 150] : [70, 100];
+    const spoDomain = [70, 100];
+    const hrDomain = [30, 160];
     // console.log("time min", timeMin, "time max", timeMax);
     // console.log(timeDomain);
     // console.log(valMax, valMin);
@@ -91,10 +96,8 @@ export default function LineForSpO2HR({
       .domain([timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1])])
       .range([0, viewWidth]);
 
-    const yScale = d3
-      .scaleLinear()
-      .domain([valMin, valMax])
-      .range([viewHeight, 0]);
+    const spoScale = d3.scaleLinear().domain(spoDomain).range([viewHeight, 0]);
+    const hrScale = d3.scaleLinear().domain(hrDomain).range([viewHeight, 0]);
 
     const axisBottom = d3
       .axisBottom(xScale)
@@ -102,42 +105,54 @@ export default function LineForSpO2HR({
       .tickFormat((d) => {
         return secondsToTimeString(d);
       });
-    const axisLeft = d3.axisLeft(yScale).ticks(5);
+    const axisLeft = d3.axisLeft(spoScale).ticks(5);
+
+    const axisRight = d3.axisRight(hrScale).ticks(5);
 
     svg.selectAll(".line-for-spo2-hr").remove();
     const vis = svg
       .append("g")
       .attr("class", "line-for-spo2-hr")
       .attr("transform", `translate(${leftMargin},${topMargin})`);
+
     svg.select(".x-axis-minute").remove();
     vis
       .append("g")
       .attr("class", "x-axis-minute")
       .attr("transform", "translate(0," + viewHeight + ")")
       .call(axisBottom);
+
     svg.select(".y-axis-minute").remove();
     vis.append("g").attr("class", "y-axis-minute").call(axisLeft);
 
+    svg.select(".y-axis-right").remove();
+    vis
+      .append("g")
+      .attr("class", "y-axis-right")
+      .attr("transform", `translate(${viewWidth},0)`)
+      .call(axisRight);
+
     // add background rectanlge based on sleep data level
-    const filteredSleepData = sleepData[0].levels.data.filter(
+    const filteredSleepData = sleepData[0]?.levels.data.filter(
       (d) =>
         timeToSeconds(d.time) >= timeToSeconds(timeDomain[0]) &&
         timeToSeconds(d.time) + d.seconds <= timeToSeconds(timeDomain[1])
     );
 
     // console.log(filteredSleepData);
-    if (filteredSleepData.length === 0) return;
+    if (filteredSleepData === undefined || filteredSleepData?.length === 0)
+      return;
 
-    const firstIndex = sleepData[0].levels.data.findIndex(
+    const firstIndex = sleepData[0]?.levels.data.findIndex(
       (d) => d.time === filteredSleepData[0].time
     );
 
-    const lastIndex = sleepData[0].levels.data.findIndex(
+    const lastIndex = sleepData[0]?.levels.data.findIndex(
       (d) => d.time === filteredSleepData[filteredSleepData.length - 1].time
     );
 
     // add the first time from timeDomain and its level fro the sleep data
-    filteredSleepData.push({
+    filteredSleepData?.push({
       time: timeDomain[0],
       level: sleepData[0].levels.data[firstIndex - 1]?.level,
       seconds:
@@ -149,7 +164,7 @@ export default function LineForSpO2HR({
     // console.log(timeDomain[1]);
 
     // add the last time from timeDomain and its level fro the sleep data
-    filteredSleepData.push({
+    filteredSleepData?.push({
       time: sleepData[0].levels.data[lastIndex + 1]?.time,
       level: sleepData[0].levels.data[lastIndex + 1]?.level,
       seconds:
@@ -192,32 +207,53 @@ export default function LineForSpO2HR({
     svg.selectAll(".avg-line").remove();
     svg.selectAll(".avg-label").remove();
     // if hr data draw a line based on resting heart rate
-    const avg = hrSpo2Var === "HR" ? hrData[0]?.number : spo2Data[0]?.value.avg;
+    const avg = [hrData[0]?.number, spo2Data[0]?.value.avg];
+
     vis
+      .selectAll("avg-line")
+      .data(avg)
+      .enter()
       .append("line")
       .attr("class", "avg-line")
       .attr("x1", 0)
       .attr("x2", viewWidth)
-      .attr("y1", yScale(avg))
-      .attr("y2", yScale(avg))
+      .attr("y1", (d, i) => (i === 0 ? hrScale(d) : spoScale(d)))
+      .attr("y2", (d, i) => (i === 0 ? hrScale(d) : spoScale(d)))
       .attr("stroke", "red")
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "5,5");
 
     vis
+      .selectAll("avg-label")
+      .data(avg)
+      .enter()
       .append("text")
       .attr("class", "avg-label")
-      .attr("x", viewWidth - 80)
-      .attr("y", yScale(avg) - 5)
-      .text(`Avg ${hrSpo2Var} ${avg}`)
+      .attr("x", viewWidth - 100)
+      .attr("y", (d, i) => (i === 0 ? hrScale(d) - 5 : spoScale(d) - 5))
+      .text((d, i) => `${i === 0 ? "AVG HR" : "AVG SpO2"}: ${d}`)
       .attr("fill", "red")
       .attr("font-size", "12px");
 
     svg.selectAll(".line-minute").remove();
-    svg.selectAll(".line-point").remove();
+    svg.selectAll(".axis-label").remove();
+
+    //add a text near axisleft
+    vis
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", 0)
+      .attr("y", 0)
+      .text("SpO2");
+    vis
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", viewWidth - 20)
+      .attr("y", 0)
+      .text("HR");
 
     // Filter the data based on the time domain
-    const filteredData = minuteData.filter(
+    const spoFilteredData = spo2MinuteData.filter(
       (d) =>
         timeToSeconds(d.time) >= timeToSeconds(timeDomain[0]) &&
         timeToSeconds(d.time) <= timeToSeconds(timeDomain[1])
@@ -226,7 +262,7 @@ export default function LineForSpO2HR({
     // Create the line path
     vis
       .append("path")
-      .datum(filteredData)
+      .datum(spoFilteredData)
       .attr("class", "line-minute")
       .attr("fill", "none")
       .attr("stroke", "black")
@@ -236,9 +272,41 @@ export default function LineForSpO2HR({
         d3
           .line()
           .x((d) => xScale(timeToSeconds(d.time)))
-          .y((d) => yScale(d.value))
+          .y((d) => spoScale(d.value))
       );
-  }, [svg, sleepData, dateRange, detailsDate, hrData, spo2Data, minuteData]);
+
+    // Filter the data based on the time domain
+    const hrFilteredData = hrMinuteData.filter(
+      (d) =>
+        timeToSeconds(d.time) >= timeToSeconds(timeDomain[0]) &&
+        timeToSeconds(d.time) <= timeToSeconds(timeDomain[1])
+    );
+
+    // Create the line path
+    vis
+      .append("path")
+      .datum(hrFilteredData)
+      .attr("class", "line-minute")
+      .attr("fill", "none")
+      .attr("stroke", "black")
+      .attr("stroke-width", 2)
+      .attr(
+        "d",
+        d3
+          .line()
+          .x((d) => xScale(timeToSeconds(d.time)))
+          .y((d) => hrScale(d.value))
+      );
+  }, [
+    svg,
+    sleepData,
+    dateRange,
+    detailsDate,
+    hrData,
+    spo2Data,
+    spo2MinuteData,
+    hrMinuteData,
+  ]);
 
   return (
     <div

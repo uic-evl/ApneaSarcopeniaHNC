@@ -22,43 +22,23 @@ export default function SleepDetailsChartVis(props) {
   // console.log("spo2 minute data", props.spo2MinuteData);
 
   return (
-    // <>
-    // {props.hrSpo2Var === "SpO2" ? (
     <LineForSpO2HR
       sleepData={props.sleepData}
       dateRange={props.dateRange}
       hrData={props.hrData}
       spo2Data={props.spo2Data}
       detailsDate={props.detailsDate}
-      minuteData={
-        props.hrSpo2Var === "SpO2"
-          ? props.spo2MinuteData?.minutes
-          : props.hrMinuteData["activities-heart-intraday"].dataset
+      spo2MinuteData={props.spo2MinuteData?.minutes}
+      hrMinuteData={
+        props.hrMinuteData
+          ? props.hrMinuteData["activities-heart-intraday"]?.dataset
+          : undefined
       }
-      hrSpo2Var={props.hrSpo2Var}
       timeDomain={
         props.spo2MinuteData !== null
           ? d3.extent(props.spo2MinuteData.minutes, (d) => d.time)
           : undefined
       }
     />
-    // )
-    // : (
-    //   <LineForSpO2HR
-    //     sleepData={props.sleepData}
-    //     dateRange={props.dateRange}
-    //     hrData={props.hrData}
-    //     spo2Data={props.spo2Data}
-    //     detailsDate={props.detailsDate}
-    //     minuteData={props.hrMinuteData["activities-heart-intraday"].dataset}
-    //     hrSpo2Var={props.hrSpo2Var}
-    //     timeDomain={
-    //       props.spo2MinuteData !== null
-    //         ? d3.extent(props.spo2MinuteData.minutes, (d) => d.time)
-    //         : undefined
-    //     }
-    //   />
-    // )}
-    // </>
   );
 }

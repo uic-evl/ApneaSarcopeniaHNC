@@ -33,14 +33,10 @@ export default function SleepContainer({
   }
 
   const [plotVar, setPlotVar] = useState("Details");
-  const [hrSpo2Var, setHRSpo2Var] = useState("SpO2");
 
   const plotActivityOptions = ["Details", "Efficiency", "Levels"];
   const handleButtonChange = ({ target: { value } }) => {
     setPlotVar(value);
-  };
-  const handleHRSpo2ButtonChange = ({ target: { value } }) => {
-    setHRSpo2Var(value);
   };
 
   return (
@@ -60,21 +56,7 @@ export default function SleepContainer({
         />
       </Flex>
       {plotVar === "Details" ? (
-        <div style={{ position: "absolute", top: "40%", right: "5%" }}>
-          <Flex
-            align="center"
-            justify="center"
-            style={{ width: "100%", margin: "0px", height: "2em" }}
-          >
-            <Radio.Group
-              options={["SpO2", "HR"].map((v) => {
-                return { label: v, value: v };
-              })}
-              onChange={handleHRSpo2ButtonChange}
-              value={hrSpo2Var}
-              optionType="button"
-            />
-          </Flex>
+        <div style={{ position: "absolute", top: "45%", right: "2%" }}>
           <Flex
             align="center"
             justify="center"
@@ -124,7 +106,6 @@ export default function SleepContainer({
             detailsDate={detailsDate}
             hrMinuteData={hrMinuteData}
             spo2MinuteData={spo2MinuteData}
-            hrSpo2Var={hrSpo2Var}
           />
         )}
       </Flex>
