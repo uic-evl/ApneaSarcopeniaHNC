@@ -56,7 +56,7 @@ export default function SleepContainer({
         />
       </Flex>
       {plotVar === "Details" ? (
-        <div style={{ position: "absolute", top: "45%", right: "2%" }}>
+        <div style={{ position: "absolute", top: "45%" }}>
           <Flex
             align="center"
             justify="center"

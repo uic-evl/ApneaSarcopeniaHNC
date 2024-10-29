@@ -106,6 +106,7 @@ export default function SleepLevelChartVis(props) {
 
     bars.exit().remove();
 
+    const formatTime = d3.timeFormat("%m/%d");
     const timeLabels = svg.selectAll(".sleepTimeLabel").data(
       items.filter((d) => d.level === "deep"),
       (d) => d.date + d.level
@@ -119,8 +120,8 @@ export default function SleepLevelChartVis(props) {
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
       .attr("y", height - bottomMargin / 2)
-      .attr("font-size", 12)
-      .text((d) => d.dateString.slice(5, d.dateString.length));
+      .attr("font-size", 8)
+      .text((d) => formatTime(new Date(d.dateString)));
     timeLabels.exit().remove();
 
     const annotationSize = Math.min(18, barWidth / 3);
