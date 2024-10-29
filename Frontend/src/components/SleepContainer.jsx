@@ -46,6 +46,24 @@ export default function SleepContainer({
         justify="center"
         style={{ width: "100%", margin: "0px", height: "2em" }}
       >
+        {plotVar === "Details" ? (
+          <div style={{ fontSize: "0.8em", color: "gray" }}>
+            <Button onClick={decrementSingleDay}>
+              <LeftOutlined />
+            </Button>
+            {detailsDate}
+            <Button
+              onClick={incerementSingleDay}
+              disabled={moment(detailsDate, "YYYY-MM-DD").isSame(
+                moment(),
+                "day"
+              )}
+            >
+              <RightOutlined />
+            </Button>
+          </div>
+        ) : null}
+
         <Radio.Group
           options={plotActivityOptions.map((v) => {
             return { label: v, value: v };
@@ -55,32 +73,6 @@ export default function SleepContainer({
           optionType="button"
         />
       </Flex>
-      {plotVar === "Details" ? (
-        <div style={{ position: "absolute", top: "45%" }}>
-          <Flex
-            align="center"
-            justify="center"
-            style={{ width: "100%", margin: "0px", height: "2em" }}
-          >
-            <div style={{ fontSize: "0.8em", color: "gray" }}>
-              <Button onClick={decrementSingleDay}>
-                <LeftOutlined />
-              </Button>
-              {detailsDate}
-              <Button
-                onClick={incerementSingleDay}
-                disabled={moment(detailsDate, "YYYY-MM-DD").isSame(
-                  moment(),
-                  "day"
-                )}
-              >
-                <RightOutlined />
-              </Button>
-            </div>
-          </Flex>
-        </div>
-      ) : null}
-
       <Flex
         align="center"
         justify="space-between"
