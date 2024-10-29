@@ -1,0 +1,35 @@
+networks:
+  app:
+    driver: bridge
+
+services:
+  ##uncomment belowfor production build
+  # templateproxy:
+  #   container_name: apneaproxy
+  #   image: nginx
+  #   restart: always
+  #   ports:
+  #     - 443:443
+  #     - 80:80
+  #   volumes:
+  #     - /etc/ssl/private/_.evl.uic.edu.key:/etc/ssl/evl.key
+  #     - /etc/ssl/certs/_.evl.uic.edu.crt:/etc/ssl/evl.crt
+  #     - ./docker/proxy/https-forwarding.conf:/etc/nginx/conf.d/https-forwarding.conf
+  #   networks: 
+  #     - app
+  templatefrontend:
+    container_name: apneafrontend
+    restart: unless-stopped
+    image: node:20.11.1-alpine3.19
+    ports:
+      # - 8000:8000
+      - 5173:5173
+    volumes:
+      - ./:/workspace/ApneaSarcopeniaHNC
+      - ./docker/frontend/init-development.sh:/usr/local/bin/init-development.sh
+      - ./docker/frontend/init.sh:/usr/local/bin/init.sh
+    #switch when using the production server
+    entrypoint: sh -c "sh /usr/local/bin/init-development.sh"
+    # entrypoint: sh -c "sh /usr/local/bin/init.sh"
+    networks:
+      - app
