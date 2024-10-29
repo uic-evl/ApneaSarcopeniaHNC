@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
 import { filterDates } from "@src/utils";
+import moment from "moment";
 
 export default function BodyCompScatterVis(props) {
   const d3Container = useRef(null);
@@ -187,11 +188,20 @@ export default function BodyCompScatterVis(props) {
       .append("circle")
       .attr("class", "points")
       .merge(points)
-      .transition(100)
+
       .attr("cx", (d) => xScale(d.lmi))
       .attr("cy", (d) => yScale(d.fmi))
       .attr("r", dotSize)
-      .attr("fill", (d) => colorScale(d.date));
+      .attr("fill", (d) => colorScale(d.date))
+      .append("title")
+      .text((d) => {
+        // console.log(d);
+        return `Date: ${moment(d.date).format("YYYY-MM-DD")}
+        LMI: ${d.lmi.toFixed(2)}
+        FMI: ${d.fmi.toFixed(2)}
+        BMI: ${d.bmi.toFixed(2)}`;
+      })
+      .transition(100);
     points.exit().remove();
     points.raise();
 
@@ -206,7 +216,7 @@ export default function BodyCompScatterVis(props) {
       {
         x: xStart + sideLength / 4,
         y: height - bottomTitleSize - 0.2 * sectionTitleSize,
-        text: "Scarcopenia",
+        text: "Sacropenia",
         size: 0.7 * sectionTitleSize,
         length: badZoneWidth,
       },

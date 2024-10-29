@@ -53,9 +53,14 @@ export default function BodyCompVis(props) {
 
     const plotVars = props.plotVars
       ? props.plotVars
-      : ["bone_mass", "fat_mass_weight", "muscle_mass"];
+      : ["bone_mass", "fat_mass_weight", "muscle_mass", "weight"];
+    console.log(props.withingsData);
+    // const weightMax = d3.max(
+    //   props.withingsData.muscle_mass.map((d) => d.muscle / hSquared)
+    // );
+
     const weightMax = d3.max(
-      props.withingsData.muscle_mass.map((d) => d.muscle / hSquared)
+      props.withingsData.weight.map((d) => d.weight / hSquared)
     );
     const yScale = d3
       .scaleLinear()
@@ -63,7 +68,7 @@ export default function BodyCompVis(props) {
       .range([height - bottomMargin - dotSize, topMargin + dotSize]);
 
     function drawLine(key) {
-      console.log(key);
+      //   console.log(key);
       // draw the axes
       svg.select(".x-axis").remove();
       svg.select(".y-axis").remove();
@@ -117,7 +122,7 @@ export default function BodyCompVis(props) {
         .append("text")
         .attr("class", key + "text")
         .attr("x", width - rightMargin)
-        .attr("y", height - bottomMargin - 12 - plotVars.indexOf(key) * 50)
+        .attr("y", height - bottomMargin - 20 - plotVars.indexOf(key) * 38)
         .attr("text-anchor", "end")
         .attr("font-size", "10px")
         .attr("fill", color)
