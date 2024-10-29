@@ -62,6 +62,8 @@ class BaseAPI {
       ? {
           Authorization: token ? `Bearer ${token}` : undefined,
           "Content-Type": "application/json",
+          "Accept-Language": "en_US",
+          "Accept-Locale": "en_US",
         }
       : {};
     return headers;

@@ -79,6 +79,7 @@ function weightUnitString(weightUnit) {
 }
 
 function calcBMI(height, weight, heightUnit, weightUnit) {
+  console.log("calc bmi", height, weight, heightUnit, weightUnit);
   //unit considerations https://dev.fitbit.com/build/reference/web-api/developer-guide/application-design/#Localization
   if (heightUnit === "en_US") {
     height = height * 0.0254;
@@ -665,7 +666,7 @@ export default function Vis() {
       goalsDaily={goalsDaily}
     />,
   ];
-  const rightChartTitles = ["Body Comp Over Time", "Sleep", "Activity"];
+  const rightChartTitles = ["Body Composition Over Time", "Sleep", "Activity"];
 
   const leftCharts = [
     <BodyCompScatterVis
@@ -694,7 +695,7 @@ export default function Vis() {
   ];
 
   const leftChartTitles = [
-    "Body Comp",
+    "Body Composition",
     "Apnea Risk",
     "Activity Goal Completion",
   ];
@@ -703,7 +704,7 @@ export default function Vis() {
     <Row span={24} style={{ height: "100vh", width: "100vw" }}>
       <Col className={"shadow mx-2 mt-4"} span={4}>
         <div />
-        <Title level={3}>Patient Reported Outcome</Title>
+        <Title level={3}>Patient Demographics</Title>
         <Title level={4}>{notUndefined(fitbitProfile, "fullName")}</Title>
         <Title level={5}>{`Gender: ${capitalizeFirstLetter(
           notUndefined(fitbitProfile, "gender")
@@ -720,6 +721,7 @@ export default function Vis() {
           fitbitProfile,
           "sleepTracking"
         )}`}</Title>
+        <Title level={3}>Patient Reported Outcome</Title>
         <Flex align="center" justify="center">
           <Button onClick={() => logOut()} danger>
             {"Log Out"}
