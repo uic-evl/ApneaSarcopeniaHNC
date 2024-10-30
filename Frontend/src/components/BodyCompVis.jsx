@@ -124,18 +124,6 @@ export default function BodyCompVis(props) {
         linePoints.push([tempX, tempY]);
       });
 
-      //adding the name of the variable to the plot near the lines
-      svg.select("." + key + "text").remove();
-      svg
-        .append("text")
-        .attr("class", key + "text")
-        .attr("x", width - rightMargin)
-        .attr("y", height - bottomMargin - 20 - plotVars.indexOf(key) * 38)
-        .attr("text-anchor", "end")
-        .attr("font-size", "10px")
-        .attr("fill", color)
-        .text(labelText[key]);
-
       svg.select("." + key + "path").remove();
       svg
         .append("path")
@@ -160,10 +148,23 @@ export default function BodyCompVis(props) {
         .attr("stroke-width", dotSize / 2)
         .append("title")
         .text((d) => {
-          return `${d.formattedDate}: ${d[accessor].toFixed(2)}`;
+          return `${d.formattedDate}: ${d[accessor].toFixed(2) / hSquared}`;
         })
         .transition(100);
       dots.exit().remove();
+
+      // console.log(items);
+      //adding the name of the variable to the plot near the lines
+      svg.select("." + key + "text").remove();
+      svg
+        .append("text")
+        .attr("class", key + "text")
+        .attr("x", width - rightMargin)
+        .attr("y", items[items.length - 1].y + 8)
+        .attr("text-anchor", "end")
+        .attr("font-size", "10px")
+        .attr("fill", color)
+        .text(labelText[key]);
     }
 
     plotVars.map(drawLine);

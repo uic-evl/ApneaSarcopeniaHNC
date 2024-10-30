@@ -144,6 +144,22 @@ export default function BodyCompScatterVis(props) {
       .attr("strokeWidth", 10)
       .attr("stroke-dasharray", 4);
 
+    // add text for the thresholds
+    const threshText = ["LMI ", "FMI "];
+    svg.selectAll(".threshText").remove();
+    const text = svg.selectAll(".threshText").data(threshText);
+    text
+      .enter()
+      .append("text")
+      .attr("class", "threshText")
+      .merge(text)
+      .attr("x", (d, i) =>
+        i === 0 ? xScale(lmiThreshold) : xStart + sideLength + 5
+      )
+      .attr("y", (d, i) => (i === 0 ? yStart + 5 : yScale(fmiThreshold) - 5))
+      .attr("font-size", 0.5 * sectionTitleSize)
+      .text((d, i) => d);
+
     //make sarcopenia range red
     const pos = [];
     const increment = 0.05;
@@ -216,15 +232,29 @@ export default function BodyCompScatterVis(props) {
       {
         x: xStart + sideLength / 4,
         y: height - bottomTitleSize - 0.2 * sectionTitleSize,
-        text: "Sacropenia",
+        text: "Sarcopenia",
         size: 0.7 * sectionTitleSize,
+        length: badZoneWidth,
+      },
+      {
+        x: xStart + sideLength - 5,
+        y: topMargin - 0.2 * sectionTitleSize,
+        text: "Obesity",
+        size: 0.5 * sectionTitleSize,
+        length: badZoneWidth,
+      },
+      {
+        x: xStart + sideLength - 5,
+        y: height - bottomTitleSize - 0.2 * sectionTitleSize,
+        text: "High Lean Mass",
+        size: 0.65 * sectionTitleSize,
         length: badZoneWidth,
       },
       {
         x: width / 2,
         y: height - 1,
         text: "Lean Mass Index vs Fat Mass Index",
-        size: 0.8 * bottomTitleSize,
+        size: 0.6 * bottomTitleSize,
         length: "",
       },
     ];

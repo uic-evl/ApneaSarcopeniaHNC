@@ -6,6 +6,7 @@ import { Button, Flex, Radio } from "antd";
 import moment from "moment";
 import { convertTimestampToDateString, dayToTimestamp } from "@src/utils";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { SleepLegend } from "./SleepLegend";
 
 export default function SleepContainer({
   sleepData,
@@ -48,6 +49,7 @@ export default function SleepContainer({
       >
         {plotVar === "Details" ? (
           <div style={{ fontSize: "0.8em", color: "gray" }}>
+            Current Date:
             <Button onClick={decrementSingleDay}>
               <LeftOutlined />
             </Button>
@@ -73,6 +75,7 @@ export default function SleepContainer({
           optionType="button"
         />
       </Flex>
+      <SleepLegend plotVar={plotVar} />
       <Flex
         align="center"
         justify="space-between"
