@@ -119,7 +119,13 @@ export const SleepLegend = ({ plotVar }) => {
   return (
     <div
       className={"d3-component"}
-      style={{ height: "10%", width: "10%", position: "absolute", top: "40%" }}
+      style={{
+        height: "10%",
+        width: "10%",
+        position: "absolute",
+        top: "40%",
+        paddingLeft: "1%",
+      }}
       ref={d3Container}
     ></div>
   );
