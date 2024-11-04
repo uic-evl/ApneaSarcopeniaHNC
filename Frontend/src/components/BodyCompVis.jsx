@@ -54,6 +54,8 @@ export default function BodyCompVis(props) {
     const xDomain = useFilter
       ? [props.dateRange.start, props.dateRange.stop]
       : d3.extent(props.withingsData.weight.map((d) => d.date));
+
+    console.log(xDomain);
     const xScale = d3
       .scaleLinear()
       .domain(xDomain)
@@ -62,10 +64,6 @@ export default function BodyCompVis(props) {
     const plotVars = props.plotVars
       ? props.plotVars
       : ["bone_mass", "fat_mass_weight", "muscle_mass", "weight"];
-    console.log(props.withingsData);
-    // const weightMax = d3.max(
-    //   props.withingsData.muscle_mass.map((d) => d.muscle / hSquared)
-    // );
 
     const weightMax = d3.max(
       props.withingsData.weight.map((d) => d.weight / hSquared)
@@ -83,9 +81,10 @@ export default function BodyCompVis(props) {
 
       const axisBottom = d3
         .axisBottom(xScale)
-        .tickFormat(d3.timeFormat("%m/%d"));
+        .tickFormat(d3.timeFormat("%m/%d"))
+        .ticks(7);
 
-      const axisLeft = d3.axisLeft(yScale).ticks(10);
+      const axisLeft = d3.axisLeft(yScale);
 
       svg
         .append("g")

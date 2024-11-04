@@ -1,4 +1,4 @@
-import { Button, Card, DatePicker, Flex } from "antd";
+import { Button, Card, DatePicker, Flex, Radio } from "antd";
 import moment from "moment";
 
 const { RangePicker } = DatePicker;
@@ -12,11 +12,14 @@ import {
   DoubleRightOutlined,
   RollbackOutlined,
 } from "@ant-design/icons";
+import { useState } from "react";
 
 export default function DateSelector({
   dateRange,
   setDateRange,
   setDetailsDate,
+  datePicker,
+  setDatePicker,
   ...props
 }) {
   //wrapper element. Pass a list of objects as children and it will render them under a date selector thing
@@ -52,6 +55,37 @@ export default function DateSelector({
     }
   }
 
+  function updateDateRange(value) {
+    console.log(datePicker);
+    const currStop = convertTimestampToDateString(dateRange.stop / 1000);
+
+    if (value === "week") {
+      const newStart = moment(currStop).subtract(1, "week");
+      setDateRange({
+        start: dayToTimestamp(newStart),
+        stop: dayToTimestamp(currStop),
+      });
+    } else if (value === "month") {
+      const newStart = moment(currStop).subtract(1, "month");
+      setDateRange({
+        start: dayToTimestamp(newStart),
+        stop: dayToTimestamp(currStop),
+      });
+    } else if (value === "quarter") {
+      const newStart = moment(currStop).subtract(3, "month");
+      setDateRange({
+        start: dayToTimestamp(newStart),
+        stop: dayToTimestamp(currStop),
+      });
+    }
+  }
+  const datePeriod = ["quarter", "month", "week"];
+
+  function handleDatePeriodChange(e) {
+    setDatePicker(e.target.value);
+    updateDateRange(e.target.value);
+  }
+
   const forwardEnabled = dateRange.stop < moment().unix() * 1000;
   const backwardEnabled =
     dateRange.start >= moment().subtract(100, "days").unix() * 1000;
@@ -65,11 +99,21 @@ export default function DateSelector({
   }
 
   function incrementWeek() {
-    shiftDateRange(7);
+    // week or month or quarter
+    console.log(datePicker);
+    datePicker === "week"
+      ? shiftDateRange(7)
+      : datePicker === "month"
+      ? shiftDateRange(30)
+      : shiftDateRange(90);
   }
 
   function decrementWeek() {
-    shiftDateRange(-7);
+    datePicker === "week"
+      ? shiftDateRange(-7)
+      : datePicker === "month"
+      ? shiftDateRange(-30)
+      : shiftDateRange(-90);
   }
 
   function resetDates() {
@@ -121,6 +165,14 @@ export default function DateSelector({
   return (
     <div className="mx-6 mt-3 shadow p-2" style={{ width: "100%" }}>
       <Flex justify="center" className="gap-3 mb-4">
+        <Radio.Group
+          options={datePeriod.map((v) => {
+            return { label: v, value: v };
+          })}
+          onChange={handleDatePeriodChange}
+          value={datePicker}
+          optionType="button"
+        />
         <Button onClick={decrementWeek} disabled={!backwardEnabled}>
           <DoubleLeftOutlined />
         </Button>

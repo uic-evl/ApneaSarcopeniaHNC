@@ -79,7 +79,7 @@ function weightUnitString(weightUnit) {
 }
 
 function calcBMI(height, weight, heightUnit, weightUnit) {
-  console.log("calc bmi", height, weight, heightUnit, weightUnit);
+  // console.log("calc bmi", height, weight, heightUnit, weightUnit);
   //unit considerations https://dev.fitbit.com/build/reference/web-api/developer-guide/application-design/#Localization
   if (heightUnit === "en_US") {
     height = height * 0.0254;
@@ -160,6 +160,8 @@ export default function Vis() {
     stop: nowTimestamp(),
     start: dayToTimestamp(moment().subtract(4, "weeks")),
   });
+
+  const [datePicker, setDatePicker] = useState("month");
 
   const [detailsDate, setDetailsDate] = useState(
     convertTimestampToDateString(nowTimestamp() / 1000)
@@ -417,7 +419,7 @@ export default function Vis() {
   const [apneaScore, setApneaScore] = useState();
   const [apneaModelK, setApneaModelK] = useState(5);
   useEffect(() => {
-    console.log("here000", spo2MinuteData, apneaData);
+    // console.log("here000", spo2MinuteData, apneaData);
     if (
       spo2MinuteData === null ||
       spo2MinuteData.minutes === undefined ||
@@ -432,11 +434,11 @@ export default function Vis() {
       apneaData,
       apneaModelK
     );
-    console.log(
-      "apnea score",
-      scoreDict,
-      spo2MinuteData.minutes.map((i) => i.value)
-    );
+    // console.log(
+    //   "apnea score",
+    //   scoreDict,
+    //   spo2MinuteData.minutes.map((i) => i.value)
+    // );
     setApneaScore(scoreDict);
   }, [spo2MinuteData, apneaData, apneaModelK]);
 
@@ -497,7 +499,7 @@ export default function Vis() {
 
   useEffect(() => {
     if (fitbitProfile !== null) {
-      console.log("profile", fitbitProfile);
+      // console.log("profile", fitbitProfile);
       const height = fitbitProfile["height"];
       const weight = fitbitProfile["weight"];
       if (height && weight) {
@@ -643,6 +645,7 @@ export default function Vis() {
       withingsData={withingsData}
       dateRange={dateRange}
       useFilter={useFilter}
+      datePicker={datePicker}
     />,
     <SleepContainer
       sleepData={sleepData}
@@ -744,6 +747,8 @@ export default function Vis() {
               dateRange={dateRange}
               setDateRange={setDateRange}
               setDetailsDate={setDetailsDate}
+              datePicker={datePicker}
+              setDatePicker={setDatePicker}
             />
             {rightCharts.map((c, i) =>
               CardWraper(
