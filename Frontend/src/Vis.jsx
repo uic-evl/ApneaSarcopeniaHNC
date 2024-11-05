@@ -661,12 +661,14 @@ export default function Vis() {
       setDetailsDate={setDetailsDate}
       spo2MinuteData={spo2MinuteData}
       hrMinuteData={hrMinuteData}
+      datePicker={datePicker}
     />,
     <ActivityContainer
       activityData={activityData}
       dateRange={dateRange}
       stepsData={stepsData}
       goalsDaily={goalsDaily}
+      datePicker={datePicker}
     />,
   ];
   const rightChartTitles = ["Body Composition Over Time", "Sleep", "Activity"];

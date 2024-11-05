@@ -3,6 +3,8 @@ import useSVGCanvas from "./useSVGCanvas";
 import { filterDates } from "@src/utils";
 import * as d3 from "d3";
 
+const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
+
 const accessors = {
   fat_mass_weight: "fatMassWeight",
   bone_mass: "bone",
@@ -87,12 +89,12 @@ export default function BodyCompVis(props) {
         .tickFormat(
           // quarter do nothing else time format
           props.datePicker === "quarter"
-            ? (d, i) => `${d + 1} mo`
+            ? (d, i) => quarterLabels[i]
             : d3.timeFormat("%m/%d")
         )
         .ticks(
           props.datePicker === "quarter"
-            ? 3
+            ? 2
             : props.datePicker === "week"
             ? 7
             : 10
@@ -149,7 +151,7 @@ export default function BodyCompVis(props) {
           props.dateRange.start,
           props.dateRange.stop
         );
-        console.log(quarters);
+        // console.log(quarters);
 
         // Loop over each month
         quarters.forEach(({ start, stop }, i) => {
@@ -178,8 +180,8 @@ export default function BodyCompVis(props) {
         });
       }
 
-      console.log(items);
-      console.log(linePoints);
+      // console.log(items);
+      // console.log(linePoints);
 
       svg.select("." + key + "path").remove();
       svg

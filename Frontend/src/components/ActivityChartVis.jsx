@@ -6,6 +6,8 @@ import { filterDates, dayInMs } from "@src/utils";
 function makeScale(targetMinutes) {
   return d3.scaleLinear().domain([0, targetMinutes]).range(["white", "green"]);
 }
+const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
+
 const activityColorScales = {
   totalActivity: makeScale(120),
   minutesFairlyActive: makeScale(60),
@@ -90,8 +92,14 @@ export default function ActivityChartVis(props) {
 
     const viewWidth = width - leftMargin - rightMargin;
     const viewHeight = height - topMargin - bottomMargin;
-    const [dateMin, dateMax] = [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
-    const barWidth = viewWidth / (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
+    const [dateMin, dateMax] =
+      props.datePicker === "quarter"
+        ? [0, 2]
+        : [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
+    const barWidth =
+      props.datePicker === "quarter"
+        ? (width - leftMargin - rightMargin) / (1.5 * 3)
+        : viewWidth / (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
     const xCorrection = 0; //Math.max(0, (viewWidth - data.length * barWidth) / 2);
 
     const [vMin, vMax] = d3.extent(
@@ -180,8 +188,43 @@ export default function ActivityChartVis(props) {
       };
       return entry;
     };
+    const getQuarterData = (data) => {
+      const results = [];
+      const divideIntoMonths = (start, stop) =>
+        Array.from({ length: 3 }, (_, i) => ({
+          start: start + i * ((stop - start) / 3),
+          stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
+        }));
 
-    const items = data.map(makeItem);
+      const quarters = divideIntoMonths(
+        props.dateRange.start,
+        props.dateRange.stop
+      );
+      quarters.forEach(({ start, stop }, i) => {
+        const monthlyData = data.filter(
+          (d) => d.date >= start && d.date < stop
+        );
+        if (monthlyData.length > 0) {
+          const totalSteps = monthlyData.reduce((acc, d) => acc + d.number, 0);
+          const avg = totalSteps / monthlyData.length;
+          results.push({
+            timestamp: i,
+            activity: avg,
+            x: xScale(i),
+            y: height - bottomMargin - yScale(avg),
+            height: yScale(avg),
+            color: colorScale(avg),
+          });
+        }
+      });
+
+      return results;
+    };
+
+    const items =
+      props.datePicker === "quarter"
+        ? getQuarterData(data)
+        : data.map(makeItem);
     const bars = svg.selectAll(".bars").data(items, (d) => d.timestamp);
     bars
       .enter()
@@ -216,7 +259,11 @@ export default function ActivityChartVis(props) {
       .attr("dominant-baseline", "middle")
       .attr("y", height - bottomMargin / 2)
       .attr("font-size", 8)
-      .text((d) => formatTime(new Date(d.dateString)));
+      .text((d) =>
+        props.datePicker === "quarter"
+          ? quarterLabels[d.timestamp]
+          : formatTime(new Date(d.dateString))
+      );
     timeLabels.exit().remove();
 
     const annotationSize = Math.min(18, barWidth / 3);
@@ -241,9 +288,9 @@ export default function ActivityChartVis(props) {
       .attr("dominant-baseline", "middle")
       .attr("y", getAnnotationY)
       .attr("font-size", annotationSize)
-      .text((d) => d.activity);
+      .text((d) => Math.round(d.activity));
     valueLabels.exit().remove();
-  }, [svg, formattedData, props.dateRange, props.plotVar]);
+  }, [svg, formattedData, props.dateRange, props.plotVar, props.datePicker]);
 
   return (
     <div

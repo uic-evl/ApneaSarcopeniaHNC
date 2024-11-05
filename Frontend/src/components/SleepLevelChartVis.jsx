@@ -4,6 +4,8 @@ import * as d3 from "d3";
 import { dayInMs } from "../utils";
 import { filterDates } from "../utils";
 
+const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
+
 const colorMap = {
   rem: "#b3cde3",
   light: "#8c96c6",
@@ -42,9 +44,15 @@ export default function SleepLevelChartVis(props) {
 
     const viewWidth = width - leftMargin - rightMargin;
     const [vMin, vMax] = d3.extent(data.map((d) => d.timeInBed));
-    const [dateMin, dateMax] = [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
+    const [dateMin, dateMax] =
+      props.datePicker === "quarter"
+        ? [0, 2]
+        : [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
     const barWidth =
-      (width - leftMargin - rightMargin) / (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
+      props.datePicker === "quarter"
+        ? (width - leftMargin - rightMargin) / (1.5 * 3)
+        : (width - leftMargin - rightMargin) /
+          (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
     const xCorrection = 0; //Math.max(0, (viewWidth - data.length * barWidth) / 2);
 
     const yScale = d3
@@ -58,32 +66,93 @@ export default function SleepLevelChartVis(props) {
       .range([xCorrection + leftMargin, width - rightMargin - barWidth]);
 
     const items = [];
-    for (const day of data) {
-      if (!day.isMainSleep) {
-        continue;
+    if (props.datePicker !== "quarter") {
+      for (const day of data) {
+        if (!day.isMainSleep) {
+          continue;
+        }
+        //   console.log(day);
+        const subEntry = {
+          date: day.date,
+          x: xScale(day.date),
+          dateString: day.dateOfSleep,
+        };
+        let currY = height - bottomMargin;
+        for (const level of orderedSleepLevels) {
+          const entry = Object.assign(
+            {
+              level: level,
+              color: colorMap[level] ? colorMap[level] : "black",
+            },
+            subEntry
+          );
+          const minutes = day.levels.summary[level]?.minutes;
+          const h = yScale(minutes);
+          entry.height = h;
+          currY = currY - h;
+          entry.y = currY;
+          entry.minutes = minutes;
+          items.push(entry);
+        }
       }
-      //   console.log(day);
-      const subEntry = {
-        date: day.date,
-        x: xScale(day.date),
-        dateString: day.dateOfSleep,
-      };
-      let currY = height - bottomMargin;
-      for (const level of orderedSleepLevels) {
-        const entry = Object.assign(
-          { level: level, color: colorMap[level] ? colorMap[level] : "black" },
-          subEntry
+    } else {
+      const divideIntoMonths = (start, stop) =>
+        Array.from({ length: 3 }, (_, i) => ({
+          start: start + i * ((stop - start) / 3),
+          stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
+        }));
+
+      const quarters = divideIntoMonths(
+        props.dateRange.start,
+        props.dateRange.stop
+      );
+
+      quarters.forEach(({ start, stop }, i) => {
+        // Filter data for the current month
+        const monthlyData = data.filter(
+          (day) => day.date >= start && day.date < stop && day.isMainSleep
         );
-        const minutes = day.levels.summary[level]?.minutes;
-        const h = yScale(minutes);
-        entry.height = h;
-        currY = currY - h;
-        entry.y = currY;
-        entry.minutes = minutes;
-        items.push(entry);
-      }
+
+        // Initialize a structure to hold totals and counts for averaging
+        const sleepTotals = {};
+        const sleepCounts = {};
+
+        // Aggregate sleep data
+        monthlyData.forEach((day) => {
+          for (const level of orderedSleepLevels) {
+            const minutes = day.levels.summary[level]?.minutes || 0;
+            sleepTotals[level] = (sleepTotals[level] || 0) + minutes;
+            sleepCounts[level] = (sleepCounts[level] || 0) + 1;
+          }
+        });
+
+        let currY = height - bottomMargin;
+        // Calculate averages and create entries
+        for (const level of orderedSleepLevels) {
+          const averageMinutes =
+            sleepCounts[level] > 0
+              ? sleepTotals[level] / sleepCounts[level]
+              : 0;
+
+          const entry = {
+            date: i,
+            level: level,
+            minutes: averageMinutes,
+            x: xScale(i),
+            color: colorMap[level] || "black",
+          };
+
+          const h = yScale(averageMinutes);
+          entry.height = h;
+          currY = currY - h;
+          entry.y = currY;
+
+          items.push(entry);
+        }
+      });
     }
 
+    console.log(items);
     const bars = svg
       .selectAll(".sleepBars")
       .data(items, (d) => d.date + d.level);
@@ -121,7 +190,11 @@ export default function SleepLevelChartVis(props) {
       .attr("dominant-baseline", "middle")
       .attr("y", height - bottomMargin / 2)
       .attr("font-size", 8)
-      .text((d) => formatTime(new Date(d.dateString)));
+      .text((d) =>
+        props.datePicker === "quarter"
+          ? quarterLabels[d.date]
+          : formatTime(new Date(d.dateString))
+      );
     timeLabels.exit().remove();
 
     const annotationSize = Math.min(18, barWidth / 3);
@@ -144,11 +217,11 @@ export default function SleepLevelChartVis(props) {
       .attr("dominant-baseline", "middle")
       .attr("y", getAnnotationY)
       .attr("font-size", (d) => Math.min(d.height, annotationSize))
-      .text((d) => (d.height > 8 ? d.minutes : ""));
+      .text((d) => (d.height > 8 ? Math.round(d.minutes) : ""));
     valueLabels.exit().remove();
 
     svg.selectAll("text").raise();
-  }, [svg, props.sleepData, props.dateRange]);
+  }, [svg, props.sleepData, props.dateRange, props.datePicker]);
 
   return (
     <div

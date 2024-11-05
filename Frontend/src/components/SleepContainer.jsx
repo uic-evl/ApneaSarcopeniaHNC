@@ -18,6 +18,7 @@ export default function SleepContainer({
   setDetailsDate,
   spo2MinuteData,
   hrMinuteData,
+  datePicker,
 }) {
   function incerementSingleDay() {
     const currday = moment(detailsDate, "YYYY-MM-DD");
@@ -82,11 +83,16 @@ export default function SleepContainer({
         style={{ height: "calc(100% - 2.1em)", width: "100%", margin: "0px" }}
       >
         {plotVar === "Efficiency" ? (
-          <SleepScoreChartVis dateRange={dateRange} sleepData={sleepData} />
+          <SleepScoreChartVis
+            dateRange={dateRange}
+            sleepData={sleepData}
+            datePicker={datePicker}
+          />
         ) : plotVar === "Levels" ? (
           <SleepLevelChartVis
             sleepData={sleepData}
             dateRange={dateRange}
+            datePicker={datePicker}
             // hrData={hrData}
             // spo2Data={spo2Data}
           />
