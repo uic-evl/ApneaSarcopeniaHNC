@@ -51,11 +51,14 @@ export default function BodyCompVis(props) {
 
     const hSquared = props.withingsData.height;
     const useFilter = props.useFilter ? props.useFilter : false;
-    const xDomain = useFilter
-      ? [props.dateRange.start, props.dateRange.stop]
-      : d3.extent(props.withingsData.weight.map((d) => d.date));
 
-    console.log(xDomain);
+    const xDomain =
+      props.datePicker === "quarter"
+        ? [0, 2]
+        : useFilter
+        ? [props.dateRange.start, props.dateRange.stop]
+        : d3.extent(props.withingsData.weight.map((d) => d.date));
+
     const xScale = d3
       .scaleLinear()
       .domain(xDomain)
@@ -81,8 +84,19 @@ export default function BodyCompVis(props) {
 
       const axisBottom = d3
         .axisBottom(xScale)
-        .tickFormat(d3.timeFormat("%m/%d"))
-        .ticks(7);
+        .tickFormat(
+          // quarter do nothing else time format
+          props.datePicker === "quarter"
+            ? (d, i) => `${d + 1} mo`
+            : d3.timeFormat("%m/%d")
+        )
+        .ticks(
+          props.datePicker === "quarter"
+            ? 3
+            : props.datePicker === "week"
+            ? 7
+            : 10
+        );
 
       const axisLeft = d3.axisLeft(yScale);
 
@@ -110,18 +124,62 @@ export default function BodyCompVis(props) {
       const color = colorDict[key] ? colorDict[key] : "black";
       const linePoints = [];
       const items = [];
-      data.forEach((d) => {
-        const tempX = xScale(d.date);
-        const tempY = yScale(d[accessor] / hSquared);
-        const entry = {
-          x: tempX,
-          value: d[accessor] / hSquared,
-          y: tempY,
-          ...d,
-        };
-        items.push(entry);
-        linePoints.push([tempX, tempY]);
-      });
+      if (props.datePicker !== "quarter") {
+        data.forEach((d) => {
+          const tempX = xScale(d.date);
+          const tempY = yScale(d[accessor] / hSquared);
+          const entry = {
+            x: tempX,
+            value: d[accessor] / hSquared,
+            y: tempY,
+            ...d,
+          };
+          items.push(entry);
+          linePoints.push([tempX, tempY]);
+        });
+      } else {
+        // Get three months from dateRange
+        const divideIntoMonths = (start, stop) =>
+          Array.from({ length: 3 }, (_, i) => ({
+            start: start + i * ((stop - start) / 3),
+            stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
+          }));
+
+        const quarters = divideIntoMonths(
+          props.dateRange.start,
+          props.dateRange.stop
+        );
+        console.log(quarters);
+
+        // Loop over each month
+        quarters.forEach(({ start, stop }, i) => {
+          // console.log(i);
+          const monthlyData = data.filter(
+            (d) => d.date >= start && d.date < stop
+          );
+
+          // Calculate the average for the current month
+          if (monthlyData.length > 0) {
+            const sum = monthlyData.reduce((acc, d) => acc + d[accessor], 0);
+            const average = sum / monthlyData.length;
+
+            const tempX = xScale(i); // Use the middle point for X
+            const tempY = yScale(average / hSquared); // Scale the average value
+
+            const entry = {
+              x: tempX,
+              value: average / hSquared,
+              y: tempY,
+              date: i,
+            };
+            items.push(entry);
+            linePoints.push([tempX, tempY]);
+          }
+        });
+      }
+
+      console.log(items);
+      console.log(linePoints);
 
       svg.select("." + key + "path").remove();
       svg
@@ -147,7 +205,9 @@ export default function BodyCompVis(props) {
         .attr("stroke-width", dotSize / 2)
         .append("title")
         .text((d) => {
-          return `${d.formattedDate}: ${d[accessor].toFixed(2) / hSquared}`;
+          return props.datePicker === "quarter"
+            ? `${d.date + 1} month: ${d.value.toFixed(2)}`
+            : `${d.formattedDate}: ${d.value.toFixed(2)}`;
         })
         .transition(100);
       dots.exit().remove();
@@ -167,7 +227,13 @@ export default function BodyCompVis(props) {
     }
 
     plotVars.map(drawLine);
-  }, [svg, props.withingsData, props.dateRange, props.useFilter]);
+  }, [
+    svg,
+    props.withingsData,
+    props.dateRange,
+    props.useFilter,
+    props.datePicker,
+  ]);
 
   return (
     <div
