@@ -2,10 +2,8 @@ import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
 import moment from "moment";
-import { dayInMs } from "../utils";
+import { dayInMs, divideIntoMonths } from "../utils";
 import { sleepScoreColorScale, filterDates } from "../utils";
-
-const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
 
 export default function SleepScoreChartVis(props) {
   const d3Container = useRef(null);
@@ -41,11 +39,15 @@ export default function SleepScoreChartVis(props) {
     const [vMin, vMax] = d3.extent(data.map((d) => d.number));
     const [dateMin, dateMax] =
       props.datePicker === "quarter"
-        ? [0, 2]
+        ? [0, 5]
+        : props.datePicker === "year"
+        ? [0, 12]
         : [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
     const barWidth =
       props.datePicker === "quarter"
-        ? (width - leftMargin - rightMargin) / (1.5 * 3)
+        ? (width - leftMargin - rightMargin) / (1.5 * 5)
+        : props.datePicker === "year"
+        ? (width - leftMargin - rightMargin) / (1.5 * 12)
         : (width - leftMargin - rightMargin) /
           (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
     const xCorrection = 0; //Math.max(0, (viewWidth - data.length * barWidth) / 2);
@@ -75,35 +77,34 @@ export default function SleepScoreChartVis(props) {
       return entry;
     };
 
-    const getQuarterData = (data) => {
+    const getMonthlyData = (data, numMonths) => {
       const results = [];
-      const divideIntoMonths = (start, stop) =>
-        Array.from({ length: 3 }, (_, i) => ({
-          start: start + i * ((stop - start) / 3),
-          stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
-        }));
 
-      const quarters = divideIntoMonths(
+      // Divide the date range into single months
+      const months = divideIntoMonths(
         props.dateRange.start,
         props.dateRange.stop
       );
-      quarters.forEach(({ start, stop }, i) => {
+
+      // Process each month
+      months.forEach(({ start, stop, month }, i) => {
         const monthlyData = data.filter(
-          (d) => d.date >= start && d.date < stop
+          (d) => d.date >= start && d.date <= stop
         );
+
         if (monthlyData.length > 0) {
           const sum = monthlyData.reduce((acc, d) => acc + d.number, 0);
           const avg = sum / monthlyData.length;
-          // console.log(i, xScale(i));
-          const entry = {
+
+          results.push({
             timestamp: i,
             sleepScore: avg,
             height: yScale(avg),
             x: xScale(i),
             y: height - bottomMargin - yScale(avg),
             color: sleepScoreColorScale(avg),
-          };
-          results.push(entry);
+            month,
+          });
         }
       });
 
@@ -112,7 +113,9 @@ export default function SleepScoreChartVis(props) {
 
     const items =
       props.datePicker === "quarter"
-        ? getQuarterData(data)
+        ? getMonthlyData(data, 3)
+        : props.datePicker === "year"
+        ? getMonthlyData(data, 12)
         : data.map(makeItem);
 
     // console.log(items);
@@ -151,8 +154,8 @@ export default function SleepScoreChartVis(props) {
       .attr("y", height - bottomMargin / 2)
       .attr("font-size", 8)
       .text((d) =>
-        props.datePicker === "quarter"
-          ? quarterLabels[d.timestamp]
+        props.datePicker === "quarter" || props.datePicker === "year"
+          ? d.month
           : formatTime(new Date(d.timestamp))
       );
     timeLabels.exit().remove();

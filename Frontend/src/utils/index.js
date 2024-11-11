@@ -1,26 +1,32 @@
 import moment from "moment";
-import * as d3 from 'd3';
+import * as d3 from "d3";
 
-export function dayToTimestamp(v){
+export function dayToTimestamp(v) {
   return moment(v).unix() * 1000;
 }
 
 export const todayTimestamp = () => dayToTimestamp(moment().startOf("day"));
-export const nowTimestamp = () => dayToTimestamp(moment());//.unix() * 1000;
-export const weekAgoTimestamp = () => dayToTimestamp(moment().subtract(7, "days"));//.unix() * 1000;
-export const monthAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "months"));//.unix() * 1000;
-export const yearAgoTimestamp = () => dayToTimestamp(moment().subtract(1, "years"));//.unix() * 1000;
+export const nowTimestamp = () => dayToTimestamp(moment()); //.unix() * 1000;
+export const weekAgoTimestamp = () =>
+  dayToTimestamp(moment().subtract(7, "days")); //.unix() * 1000;
+export const monthAgoTimestamp = () =>
+  dayToTimestamp(moment().subtract(1, "months")); //.unix() * 1000;
+export const yearAgoTimestamp = () =>
+  dayToTimestamp(moment().subtract(1, "years")); //.unix() * 1000;
 
-export const dayInMs = dayToTimestamp(moment().startOf('day')) - dayToTimestamp(moment().startOf('day').add(-1,'days'));
+export const dayInMs =
+  dayToTimestamp(moment().startOf("day")) -
+  dayToTimestamp(moment().startOf("day").add(-1, "days"));
 
-export const sleepScoreColorScale = d3.scaleLinear().domain([60,100]).range(['white','green'])
+export const sleepScoreColorScale = d3
+  .scaleLinear()
+  .domain([60, 100])
+  .range(["white", "green"]);
 
-export function filterDates(d,start,stop,accessor='date'){
-  if (start !== null)
-      d= d.filter(d => d[accessor] >= start);
-  if (stop !== null)
-      d= d.filter(d => d[accessor] <= stop);
-  return d
+export function filterDates(d, start, stop, accessor = "date") {
+  if (start !== null) d = d.filter((d) => d[accessor] >= start);
+  if (stop !== null) d = d.filter((d) => d[accessor] <= stop);
+  return d;
 }
 
 export const drawRectangle = (
@@ -71,12 +77,15 @@ export const filterByCount = (dataArray, count) => {
   return dataArray.filter((_, index) => (index + 1) % Math.ceil(step) === 0);
 };
 
-export const convertTimestampToDateString = (timestamp, includeTime = false) => {
-  const date = new Date(timestamp *1000);
+export const convertTimestampToDateString = (
+  timestamp,
+  includeTime = false
+) => {
+  const date = new Date(timestamp * 1000);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-  if (!includeTime){
+  if (!includeTime) {
     return `${year}-${month}-${day}`;
   }
   const hours = String(date.getHours()).padStart(2, "0");
@@ -225,4 +234,44 @@ export const groupDataByPeriod = (
   }
 
   return groupedData;
+};
+
+// Helper function to get the last day of a given month and year,
+//or the end of the range
+const getEndOfMonth = (year, month, stopDate) => {
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  return stopDate < lastDayOfMonth ? stopDate : lastDayOfMonth;
+};
+
+// Function to divide the range into segments based on the given number of months
+export const divideIntoMonths = (start, stop) => {
+  const startDate = new Date(start);
+  const stopDate = new Date(stop);
+  const months = [];
+
+  let currentYear = startDate.getFullYear();
+  let currentMonth = startDate.getMonth();
+
+  while (
+    currentYear < stopDate.getFullYear() ||
+    (currentYear === stopDate.getFullYear() &&
+      currentMonth <= stopDate.getMonth())
+  ) {
+    const monthStart = new Date(currentYear, currentMonth, 1);
+    const monthStop = getEndOfMonth(currentYear, currentMonth, stopDate);
+
+    months.push({
+      start: monthStart.getTime(),
+      stop: monthStop.getTime(),
+      month: monthStart.toLocaleString("default", { month: "long" }),
+    });
+
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+  }
+
+  return months;
 };

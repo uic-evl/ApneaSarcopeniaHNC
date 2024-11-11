@@ -77,9 +77,15 @@ export default function DateSelector({
         start: dayToTimestamp(newStart),
         stop: dayToTimestamp(currStop),
       });
+    } else if (value === "year") {
+      const newStart = moment(currStop).subtract(1, "year");
+      setDateRange({
+        start: dayToTimestamp(newStart),
+        stop: dayToTimestamp(currStop),
+      });
     }
   }
-  const datePeriod = ["quarter", "month", "week"];
+  const datePeriod = ["year", "quarter", "month", "week"];
 
   function handleDatePeriodChange(e) {
     setDatePicker(e.target.value);

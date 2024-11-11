@@ -1,10 +1,8 @@
 import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
-import { dayInMs } from "../utils";
+import { dayInMs, divideIntoMonths } from "../utils";
 import { filterDates } from "../utils";
-
-const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
 
 const colorMap = {
   rem: "#b3cde3",
@@ -46,11 +44,15 @@ export default function SleepLevelChartVis(props) {
     const [vMin, vMax] = d3.extent(data.map((d) => d.timeInBed));
     const [dateMin, dateMax] =
       props.datePicker === "quarter"
-        ? [0, 2]
+        ? [0, 5]
+        : props.datePicker === "year"
+        ? [0, 12]
         : [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
     const barWidth =
       props.datePicker === "quarter"
-        ? (width - leftMargin - rightMargin) / (1.5 * 3)
+        ? (width - leftMargin - rightMargin) / (1.5 * 5)
+        : props.datePicker === "year"
+        ? (width - leftMargin - rightMargin) / (1.5 * 12)
         : (width - leftMargin - rightMargin) /
           (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
     const xCorrection = 0; //Math.max(0, (viewWidth - data.length * barWidth) / 2);
@@ -66,7 +68,7 @@ export default function SleepLevelChartVis(props) {
       .range([xCorrection + leftMargin, width - rightMargin - barWidth]);
 
     const items = [];
-    if (props.datePicker !== "quarter") {
+    if (props.datePicker === "month" || props.datePicker === "week") {
       for (const day of data) {
         if (!day.isMainSleep) {
           continue;
@@ -95,20 +97,13 @@ export default function SleepLevelChartVis(props) {
           items.push(entry);
         }
       }
-    } else {
-      const divideIntoMonths = (start, stop) =>
-        Array.from({ length: 3 }, (_, i) => ({
-          start: start + i * ((stop - start) / 3),
-          stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
-        }));
-
-      const quarters = divideIntoMonths(
+    } else if (props.datePicker === "year" || props.datePicker === "quarter") {
+      const months = divideIntoMonths(
         props.dateRange.start,
         props.dateRange.stop
       );
 
-      quarters.forEach(({ start, stop }, i) => {
-        // Filter data for the current month
+      months.forEach(({ start, stop, month }, i) => {
         const monthlyData = data.filter(
           (day) => day.date >= start && day.date < stop && day.isMainSleep
         );
@@ -140,6 +135,7 @@ export default function SleepLevelChartVis(props) {
             minutes: averageMinutes,
             x: xScale(i),
             color: colorMap[level] || "black",
+            month,
           };
 
           const h = yScale(averageMinutes);
@@ -191,8 +187,8 @@ export default function SleepLevelChartVis(props) {
       .attr("y", height - bottomMargin / 2)
       .attr("font-size", 8)
       .text((d) =>
-        props.datePicker === "quarter"
-          ? quarterLabels[d.date]
+        props.datePicker === "quarter" || props.datePicker === "year"
+          ? d.month
           : formatTime(new Date(d.dateString))
       );
     timeLabels.exit().remove();

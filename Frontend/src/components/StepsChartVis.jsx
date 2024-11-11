@@ -1,9 +1,8 @@
 import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
-import { filterDates, dayInMs } from "@src/utils";
+import { filterDates, dayInMs, divideIntoMonths } from "@src/utils";
 
-const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
 export default function StepsChartVis(props) {
   const d3Container = useRef(null);
   const [svg, height, width, tTip] = useSVGCanvas(d3Container);
@@ -45,11 +44,15 @@ export default function StepsChartVis(props) {
     const viewHeight = height - topMargin - bottomMargin;
     const [dateMin, dateMax] =
       props.datePicker === "quarter"
-        ? [0, 2]
+        ? [0, 5]
+        : props.datePicker === "year"
+        ? [0, 12]
         : [props.dateRange.start, props.dateRange.stop]; //d3.extent(data.map(d => d.date));
     const barWidth =
       props.datePicker === "quarter"
-        ? (width - leftMargin - rightMargin) / (1.5 * 3)
+        ? (width - leftMargin - rightMargin) / (1.5 * 5)
+        : props.datePicker === "year"
+        ? (width - leftMargin - rightMargin) / (1.5 * 12)
         : viewWidth / (1 + (dateMax - dateMin) / dayInMs); //Math.min(70, viewWidth / (data.length));
     const xCorrection = 0; //Math.max(0, (viewWidth - data.length * barWidth) / 2);
 
@@ -78,25 +81,24 @@ export default function StepsChartVis(props) {
       return entry;
     };
 
-    const getQuarterData = (data) => {
+    const getMonthlyData = (data) => {
       const results = [];
-      const divideIntoMonths = (start, stop) =>
-        Array.from({ length: 3 }, (_, i) => ({
-          start: start + i * ((stop - start) / 3),
-          stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
-        }));
 
-      const quarters = divideIntoMonths(
+      const months = divideIntoMonths(
         props.dateRange.start,
         props.dateRange.stop
       );
-      quarters.forEach(({ start, stop }, i) => {
+
+      // Process each month
+      months.forEach(({ start, stop, month }, i) => {
         const monthlyData = data.filter(
-          (d) => d.date >= start && d.date < stop
+          (d) => d.date >= start && d.date <= stop
         );
+
         if (monthlyData.length > 0) {
           const totalSteps = monthlyData.reduce((acc, d) => acc + d.number, 0);
           const avg = totalSteps / monthlyData.length;
+
           results.push({
             timestamp: i,
             steps: avg,
@@ -104,6 +106,7 @@ export default function StepsChartVis(props) {
             y: height - bottomMargin - yScale(avg),
             height: yScale(avg),
             color: colorScale(avg),
+            month,
           });
         }
       });
@@ -185,7 +188,9 @@ export default function StepsChartVis(props) {
 
     const items =
       props.datePicker === "quarter"
-        ? getQuarterData(data)
+        ? getMonthlyData(data, 3)
+        : props.datePicker === "year"
+        ? getMonthlyData(data, 12)
         : data.map(makeItem);
 
     // console.log(items);
@@ -211,7 +216,7 @@ export default function StepsChartVis(props) {
     const yval = height - bottomMargin - yScale(props.stepsGoal);
     svg
       .append("path")
-      .attr("class", ".goalLine")
+      .attr("class", "goalLine")
       .attr(
         "d",
         d3.line()([
@@ -251,8 +256,8 @@ export default function StepsChartVis(props) {
       .attr("y", height - bottomMargin / 2)
       .attr("font-size", 8)
       .text((d) =>
-        props.datePicker === "quarter"
-          ? quarterLabels[d.timestamp]
+        props.datePicker === "quarter" || props.datePicker === "year"
+          ? d.month
           : formatTime(new Date(d.timestamp))
       );
     timeLabels.exit().remove();

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import useSVGCanvas from "./useSVGCanvas";
-import { filterDates } from "@src/utils";
+import { divideIntoMonths, filterDates } from "@src/utils";
 import * as d3 from "d3";
-
-const quarterLabels = ["1st Month", "2nd Month", "3rd Month"];
 
 const accessors = {
   fat_mass_weight: "fatMassWeight",
@@ -56,7 +54,9 @@ export default function BodyCompVis(props) {
 
     const xDomain =
       props.datePicker === "quarter"
-        ? [0, 2]
+        ? [0, 4]
+        : props.datePicker === "year"
+        ? [0, 12]
         : useFilter
         ? [props.dateRange.start, props.dateRange.stop]
         : d3.extent(props.withingsData.weight.map((d) => d.date));
@@ -80,39 +80,6 @@ export default function BodyCompVis(props) {
 
     function drawLine(key) {
       //   console.log(key);
-      // draw the axes
-      svg.select(".x-axis").remove();
-      svg.select(".y-axis").remove();
-
-      const axisBottom = d3
-        .axisBottom(xScale)
-        .tickFormat(
-          // quarter do nothing else time format
-          props.datePicker === "quarter"
-            ? (d, i) => quarterLabels[i]
-            : d3.timeFormat("%m/%d")
-        )
-        .ticks(
-          props.datePicker === "quarter"
-            ? 2
-            : props.datePicker === "week"
-            ? 7
-            : 10
-        );
-
-      const axisLeft = d3.axisLeft(yScale);
-
-      svg
-        .append("g")
-        .attr("class", "x-axis")
-        .attr("transform", `translate(0,${height - bottomMargin})`)
-        .call(axisBottom);
-
-      svg
-        .append("g")
-        .attr("class", "y-axis")
-        .attr("transform", `translate(${leftMargin},0)`)
-        .call(axisLeft);
 
       const accessor = accessors[key];
       const data = useFilter
@@ -126,7 +93,7 @@ export default function BodyCompVis(props) {
       const color = colorDict[key] ? colorDict[key] : "black";
       const linePoints = [];
       const items = [];
-      if (props.datePicker !== "quarter") {
+      if (props.datePicker === "month" || props.datePicker === "week") {
         data.forEach((d) => {
           const tempX = xScale(d.date);
           const tempY = yScale(d[accessor] / hSquared);
@@ -139,28 +106,22 @@ export default function BodyCompVis(props) {
           items.push(entry);
           linePoints.push([tempX, tempY]);
         });
-      } else {
+      } else if (
+        props.datePicker === "year" ||
+        props.datePicker === "quarter"
+      ) {
         // Get three months from dateRange
-        const divideIntoMonths = (start, stop) =>
-          Array.from({ length: 3 }, (_, i) => ({
-            start: start + i * ((stop - start) / 3),
-            stop: i === 2 ? stop : start + (i + 1) * ((stop - start) / 3),
-          }));
-
-        const quarters = divideIntoMonths(
+        const months = divideIntoMonths(
           props.dateRange.start,
           props.dateRange.stop
         );
         // console.log(quarters);
 
-        // Loop over each month
-        quarters.forEach(({ start, stop }, i) => {
-          // console.log(i);
+        months.forEach(({ start, stop, month }, i) => {
           const monthlyData = data.filter(
-            (d) => d.date >= start && d.date < stop
+            (d) => d.date >= start && d.date <= stop
           );
 
-          // Calculate the average for the current month
           if (monthlyData.length > 0) {
             const sum = monthlyData.reduce((acc, d) => acc + d[accessor], 0);
             const average = sum / monthlyData.length;
@@ -169,10 +130,12 @@ export default function BodyCompVis(props) {
             const tempY = yScale(average / hSquared); // Scale the average value
 
             const entry = {
+              monthNumber: i,
               x: tempX,
               value: average / hSquared,
               y: tempY,
               date: i,
+              month,
             };
             items.push(entry);
             linePoints.push([tempX, tempY]);
@@ -221,11 +184,54 @@ export default function BodyCompVis(props) {
         .append("text")
         .attr("class", key + "text")
         .attr("x", width - rightMargin)
-        .attr("y", items[items.length - 1].y + 8)
+        .attr("y", items[items.length - 1]?.y + 8)
         .attr("text-anchor", "end")
         .attr("font-size", "10px")
         .attr("fill", color)
         .text(labelText[key]);
+
+      // draw the axes
+      svg.select(".x-axis").remove();
+      svg.select(".y-axis").remove();
+
+      // console.log(items);
+      const axisBottom = d3
+        .axisBottom(xScale)
+        .ticks(
+          props.datePicker === "quarter"
+            ? 3
+            : props.datePicker === "year"
+            ? 12
+            : props.datePicker === "week"
+            ? 7
+            : 10
+        )
+        .tickFormat(
+          // quarter do nothing else time format
+          props.datePicker === "quarter" || props.datePicker === "year"
+            ? (d, i) => {
+                // console.log(d, i);
+                const month =
+                  (items.find((item) => item.monthNumber === i) || {}).month ||
+                  null;
+                return month;
+              }
+            : d3.timeFormat("%m/%d")
+        );
+
+      const axisLeft = d3.axisLeft(yScale);
+
+      svg
+        .append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${height - bottomMargin})`)
+        .call(axisBottom);
+
+      svg
+        .append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${leftMargin},0)`)
+        .call(axisLeft);
     }
 
     plotVars.map(drawLine);
