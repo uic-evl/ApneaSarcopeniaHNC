@@ -93,13 +93,22 @@ function calcBMI(height, weight, heightUnit, weightUnit) {
   return BMI;
 }
 
+// function inchesToFeetString(height) {
+//   if (height === undefined || height === "") {
+//     return "0";
+//   }
+//   const ft = Math.round(height / 12);
+//   const inch = height - 12 * ft;
+//   return ft.toFixed() + "'" + inch.toFixed() + '"';
+// }
+
 function inchesToFeetString(height) {
   if (height === undefined || height === "") {
-    return "0";
+    return "0'";
   }
-  const ft = Math.round(height / 12);
-  const inch = height - 12 * ft;
-  return ft.toFixed() + "'" + inch.toFixed() + '"';
+  const ft = Math.floor(height / 12); // Get the full feet part
+  const inch = height % 12; // Remaining inches
+  return `${ft}'${Math.round(inch)}"`;
 }
 
 export default function Vis() {
@@ -499,7 +508,7 @@ export default function Vis() {
 
   useEffect(() => {
     if (fitbitProfile !== null) {
-      // console.log("profile", fitbitProfile);
+      console.log("profile", fitbitProfile);
       const height = fitbitProfile["height"];
       const weight = fitbitProfile["weight"];
       if (height && weight) {
@@ -707,7 +716,7 @@ export default function Vis() {
 
   return (
     <Row span={24} style={{ height: "100vh", width: "100vw" }}>
-      <Col className={"shadow mx-2 mt-4"} span={4}>
+      <Col className={"shadow mx-2 mt-1"} span={4}>
         <div />
         <Title level={3}>Patient Demographics</Title>
         <Title level={4}>{notUndefined(fitbitProfile, "fullName")}</Title>

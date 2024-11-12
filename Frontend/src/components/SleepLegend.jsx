@@ -124,7 +124,7 @@ export const SleepLegend = ({ plotVar }) => {
         height: "10%",
         width: "10%",
         position: "absolute",
-        top: "40%",
+        top: "43%",
         paddingLeft: "1%",
       }}
       ref={d3Container}

@@ -169,23 +169,26 @@ export default function DateSelector({
 
   //todo: update allowed dates dynamically?
   return (
-    <div className="mx-6 mt-3 shadow p-2" style={{ width: "100%" }}>
-      <Flex justify="center" className="gap-3 mb-4">
+    <div className="mx-6 mt-1 shadow p-2" style={{ width: "100%" }}>
+      {/* Date period buttons at the top with less bottom margin */}
+      <Flex justify="center" className="gap-2 mb-1">
         <Radio.Group
-          options={datePeriod.map((v) => {
-            return { label: v, value: v };
-          })}
+          options={datePeriod.map((v) => ({ label: v, value: v }))}
           onChange={handleDatePeriodChange}
           value={datePicker}
           optionType="button"
         />
+      </Flex>
+
+      {/* Navigation and date range controls below with less top margin */}
+      <Flex justify="center" className="gap-4 mt-1">
         <Button onClick={decrementWeek} disabled={!backwardEnabled}>
           <DoubleLeftOutlined />
         </Button>
         <Button onClick={decrementDay} disabled={!backwardEnabled}>
           <LeftOutlined />
         </Button>
-        <Button type={"text"}>
+        <Button type="text">
           {convertTimestampToDateString(dateRange.start / 1000) +
             " - " +
             convertTimestampToDateString(dateRange.stop / 1000)}
@@ -202,10 +205,7 @@ export default function DateSelector({
         <RangePicker
           onChange={handleRangePicker}
           disabledDate={disabledDates}
-          format={"YYYY-MM-DD"}
-          // defaultValue={[convertTimestampToDateString(dateRange.start), convertTimestampToDateString(dateRange.stop)]}
-          // maxDate={moment()}
-          // minDate={moment().subtract(3,'months').format('YYYY-MM-DD')}
+          format="YYYY-MM-DD"
         />
       </Flex>
     </div>
