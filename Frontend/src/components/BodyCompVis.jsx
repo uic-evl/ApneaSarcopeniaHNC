@@ -170,8 +170,8 @@ export default function BodyCompVis(props) {
         .attr("stroke-width", dotSize / 2)
         .append("title")
         .text((d) => {
-          return props.datePicker === "quarter"
-            ? `${d.date + 1} month: ${d.value.toFixed(2)}`
+          return props.datePicker === "quarter" || props.datePicker === "year"
+            ? `${d.month} : ${d.value.toFixed(2)}`
             : `${d.formattedDate}: ${d.value.toFixed(2)}`;
         })
         .transition(100);
