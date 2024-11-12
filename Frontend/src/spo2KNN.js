@@ -9,17 +9,27 @@ export function apneaKNN(inputData, refData, k) {
   const dists = [];
   const labels = [];
   let minDist = Infinity;
+
   for (const obj of refData) {
-    //data is 30s freqeuency, fitbit is 60s
-    const refSpo2 = obj.SpO2.filter((d, i) => i % 2 > 0);
+    // Convert refData SpO2 from 30s to 60s by averaging pairs of 30s intervals
+    const refSpo2 = [];
+    for (let i = 0; i < obj.SpO2.length; i += 2) {
+      const minuteAvg = (obj.SpO2[i] + (obj.SpO2[i + 1] || obj.SpO2[i])) / 2; // Handle last odd point if any
+      refSpo2.push(minuteAvg);
+    }
+
     const refLabel = obj.apnea;
+
+    // Calculate DTW distance between minute-level `data` and `refSpo2`
     const tempdist = DTW(data, refSpo2);
     dists.push(tempdist);
     labels.push(refLabel);
+
     if (tempdist < minDist) {
       minDist = tempdist;
     }
   }
+
   const order = argsort(dists);
   const sortedLabels = order.map((i) => labels[i]).slice(0, k);
   const sortedDists = order.map((i) => dists[i]).slice(0, k);
