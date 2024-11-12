@@ -114,10 +114,10 @@ export default function StepsChartVis(props) {
       return results;
     };
 
-    svg.selectAll(".legends").remove();
+    svg.selectAll(".activityLegends").remove();
 
     // Define gradients
-    const defs = svg.append("defs").attr("class", "legends");
+    const defs = svg.append("defs").attr("class", "activityLegends");
 
     const gradient1 = defs
       .append("linearGradient")
@@ -142,7 +142,7 @@ export default function StepsChartVis(props) {
     // Draw legend rectangles
     svg
       .append("rect")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - 130)
       .attr("y", 0)
       .attr("width", 50)
@@ -151,7 +151,7 @@ export default function StepsChartVis(props) {
 
     svg
       .append("rect")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - 80)
       .attr("y", 0)
       .attr("width", 50)
@@ -161,7 +161,7 @@ export default function StepsChartVis(props) {
     // Add labels
     svg
       .append("text")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - 145)
       .attr("y", 10)
       .attr("text-anchor", "middle")
@@ -170,7 +170,7 @@ export default function StepsChartVis(props) {
 
     svg
       .append("text")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - 80)
       .attr("y", 20)
       .attr("text-anchor", "middle")
@@ -179,7 +179,7 @@ export default function StepsChartVis(props) {
 
     svg
       .append("text")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - 10)
       .attr("y", 10)
       .attr("text-anchor", "middle")
@@ -194,11 +194,11 @@ export default function StepsChartVis(props) {
         : data.map(makeItem);
 
     // console.log(items);
-    const bars = svg.selectAll(".bars").data(items, (d) => d.timestamp);
+    const bars = svg.selectAll(".activityBars").data(items, (d) => d.timestamp);
     bars
       .enter()
       .append("rect")
-      .attr("class", "bars")
+      .attr("class", "activityBars")
       .merge(bars)
       .attr("width", barWidth)
       .attr("y", (d) => d.y)

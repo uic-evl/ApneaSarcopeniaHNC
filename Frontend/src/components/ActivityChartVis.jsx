@@ -123,14 +123,14 @@ export default function ActivityChartVis(props) {
 
     const colorScale = makeScale(vMax);
 
-    svg.selectAll(".legends").remove();
+    svg.selectAll(".activityLegends").remove();
 
     const colorDomains = colorScale.domain();
 
     // Define the gradient
     const gradient = svg
       .append("defs")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .append("linearGradient")
       .attr("id", "color-gradient")
       .attr("x1", "0%")
@@ -152,7 +152,7 @@ export default function ActivityChartVis(props) {
     // Draw the rectangle using the gradient
     svg
       .append("rect")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - rightMargin - 120)
       .attr("y", 0)
       .attr("width", 100)
@@ -162,7 +162,7 @@ export default function ActivityChartVis(props) {
     // Add labels for the legend
     svg
       .append("text")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - rightMargin - 130)
       .attr("y", 10)
       .attr("text-anchor", "end")
@@ -171,7 +171,7 @@ export default function ActivityChartVis(props) {
 
     svg
       .append("text")
-      .attr("class", "legends")
+      .attr("class", "activityLegends")
       .attr("x", viewWidth - rightMargin - 18)
       .attr("y", 10)
       .attr("text-anchor", "start")
@@ -234,11 +234,11 @@ export default function ActivityChartVis(props) {
         : data.map(makeItem);
 
     // console.log(items);
-    const bars = svg.selectAll(".bars").data(items, (d) => d.timestamp);
+    const bars = svg.selectAll(".activityBars").data(items, (d) => d.timestamp);
     bars
       .enter()
       .append("rect")
-      .attr("class", "bars")
+      .attr("class", "activityBars")
       .merge(bars)
       .attr("width", barWidth)
       .attr("y", (d) => d.y)

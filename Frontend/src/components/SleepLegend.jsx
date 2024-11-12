@@ -22,6 +22,7 @@ export const SleepLegend = ({ plotVar }) => {
     if (plotVar === undefined) {
       return;
     }
+    console.log(plotVar);
 
     d3.select(d3Container.current).selectAll("*").remove();
 
@@ -31,19 +32,19 @@ export const SleepLegend = ({ plotVar }) => {
       .attr("width", 80)
       .attr("height", 80);
 
-    svg.selectAll(".legends").remove();
+    svg.selectAll(".sleepLegends").remove();
 
     if (plotVar === "Efficiency") {
       //   console.log("removing sleep legend");
-      svg.selectAll(".sleep-legend").remove();
+      svg.selectAll(".sleepLegendBar").remove();
 
       const colorDomains = sleepScoreColorScale.domain();
 
       const gradient = svg
         .append("defs")
-        .attr("class", "sleep-legend")
+        .attr("class", "sleepLegendBar")
         .append("linearGradient")
-        .attr("id", "gradient")
+        .attr("id", "sleepGradient")
         .attr("x1", "0%")
         .attr("x2", "100%")
         .attr("y1", "0%")
@@ -63,17 +64,17 @@ export const SleepLegend = ({ plotVar }) => {
       // Draw the rectangle using the gradient
       svg
         .append("rect")
-        .attr("class", "legends")
+        .attr("class", "sleepLegends")
         .attr("x", 10)
         .attr("y", 20)
         .attr("width", 100)
         .attr("height", 10)
-        .style("fill", "url(#color-gradient)");
+        .style("fill", "url(#sleepGradient)");
 
       // Add labels for the legend
       svg
         .append("text")
-        .attr("class", "legends")
+        .attr("class", "sleepLegends")
         .attr("x", 10)
         .attr("y", 18)
         .attr("text-anchor", "end")
@@ -82,21 +83,21 @@ export const SleepLegend = ({ plotVar }) => {
 
       svg
         .append("text")
-        .attr("class", "legends")
+        .attr("class", "sleepLegends")
         .attr("x", 50)
         .attr("y", 18)
         .attr("text-anchor", "start")
         .style("font-size", "12px")
         .text(colorDomains[1]);
     } else {
-      svg.selectAll(".sleep-legend").remove();
+      svg.selectAll(".sleepLegendBar").remove();
 
       svg
-        .selectAll("sleep-legend")
+        .selectAll("sleepLegendBar")
         .data(Object.keys(sleepStageColorMap))
         .enter()
         .append("rect")
-        .attr("class", "sleep-legend")
+        .attr("class", "sleepLegendBar")
         .attr("x", 0)
         .attr("y", (d, i) => i * 15)
         .attr("width", 15)
@@ -105,11 +106,11 @@ export const SleepLegend = ({ plotVar }) => {
         .attr("opacity", plotVar === "Details" ? 0.5 : 1);
 
       svg
-        .selectAll("sleep-legend")
+        .selectAll("sleepLegendBar")
         .data(Object.keys(sleepStageColorMap))
         .enter()
         .append("text")
-        .attr("class", "sleep-legend")
+        .attr("class", "sleepLegendBar")
         .attr("x", 17)
         .attr("y", (d, i) => i * 15 + 10)
         .text((d) => d);

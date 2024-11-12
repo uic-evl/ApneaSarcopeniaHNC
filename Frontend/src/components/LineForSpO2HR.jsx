@@ -76,6 +76,7 @@ export default function LineForSpO2HR({
       svg?.selectAll(".line-point").remove();
       svg?.selectAll(".sleep-rect").remove();
       svg?.selectAll(".axis-label").remove();
+      svg?.selectAll("lineGradients").remove();
 
       return;
     }
@@ -219,7 +220,7 @@ export default function LineForSpO2HR({
       .attr("x2", viewWidth)
       .attr("y1", (d, i) => (i === 0 ? hrScale(d) : spoScale(d)))
       .attr("y2", (d, i) => (i === 0 ? hrScale(d) : spoScale(d)))
-      .attr("stroke", "red")
+      .attr("stroke", "black")
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "5,5");
 
@@ -232,7 +233,7 @@ export default function LineForSpO2HR({
       .attr("x", viewWidth - 100)
       .attr("y", (d, i) => (i === 0 ? hrScale(d) - 5 : spoScale(d) - 5))
       .text((d, i) => `${i === 0 ? "AVG HR" : "AVG SpO2"}: ${d}`)
-      .attr("fill", "red")
+      .attr("fill", "black")
       .attr("font-size", "12px");
 
     svg.selectAll(".line-minute").remove();
@@ -258,6 +259,27 @@ export default function LineForSpO2HR({
         timeToSeconds(d.time) >= timeToSeconds(timeDomain[0]) &&
         timeToSeconds(d.time) <= timeToSeconds(timeDomain[1])
     );
+    // console.log(spoFilteredData);
+
+    svg.selectAll("lineGradients").remove();
+    // Create the gradient with dynamic offset
+    const colorId = `gradient-${Math.random().toString(36).substring(2, 15)}`;
+    const gradient = vis
+      .append("defs")
+      .attr("class", "lineGradients")
+      .append("linearGradient")
+      .attr("id", colorId)
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", 0)
+      .attr("x2", viewWidth);
+
+    // Map each data point to a gradient stop
+    gradient
+      .selectAll("stop")
+      .data(spoFilteredData)
+      .join("stop")
+      .attr("offset", (d) => xScale(timeToSeconds(d.time)) / viewWidth) // Directly use normalized offset from 0 to 1
+      .attr("stop-color", (d) => (d.value < 91 ? "red" : "blue"));
 
     // Create the line path
     vis
@@ -265,7 +287,7 @@ export default function LineForSpO2HR({
       .datum(spoFilteredData)
       .attr("class", "line-minute")
       .attr("fill", "none")
-      .attr("stroke", "black")
+      .attr("stroke", `url(#${colorId})`)
       .attr("stroke-width", 2)
       .attr(
         "d",
@@ -288,7 +310,7 @@ export default function LineForSpO2HR({
       .datum(hrFilteredData)
       .attr("class", "line-minute")
       .attr("fill", "none")
-      .attr("stroke", "black")
+      .attr("stroke", "green")
       .attr("stroke-width", 2)
       .attr(
         "d",
