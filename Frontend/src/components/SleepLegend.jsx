@@ -7,8 +7,9 @@ const sleepStageColorMap = {
   rem: "#b3cde3",
   light: "#8c96c6",
   deep: "#88419d",
-  wake: "#fdbe85",
+  wake: "#ff4500",
 };
+
 export const SleepLegend = ({ plotVar }) => {
   const d3Container = useRef(null);
   //   const [svg, height, width, tTip] = useSVGCanvas(d3Container);

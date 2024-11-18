@@ -5,11 +5,18 @@ import { dayInMs } from "../utils";
 import { filterDates } from "../utils";
 
 const variables = ["hr", "spo2"];
+// const colorMap = {
+//   rem: "#b3cde3",
+//   light: "#8c96c6",
+//   deep: "#88419d",
+//   wake: "#fdbe85",
+// };
+
 const colorMap = {
   rem: "#b3cde3",
   light: "#8c96c6",
   deep: "#88419d",
-  wake: "#fdbe85",
+  wake: "#ff4500",
 };
 const orderedSleepLevels = ["deep", "light", "rem", "wake"];
 

@@ -9,8 +9,9 @@ const colorMap = {
   rem: "#b3cde3",
   light: "#8c96c6",
   deep: "#88419d",
-  wake: "#fdbe85",
+  wake: "#ff4500",
 };
+
 const orderedSleepLevels = ["deep", "light", "rem", "wake"];
 export default function SleepDetailsChartVis(props) {
   // console.log("sleep data", props.sleepData);
