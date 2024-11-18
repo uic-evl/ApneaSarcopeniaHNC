@@ -148,7 +148,7 @@ export default function SleepLevelChartVis(props) {
       });
     }
 
-    console.log(items);
+    // console.log(items);
     const bars = svg
       .selectAll(".sleepBars")
       .data(items, (d) => d.date + d.level);
