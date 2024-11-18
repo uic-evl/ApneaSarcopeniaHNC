@@ -210,7 +210,9 @@ export default function StepsChartVis(props) {
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)
       .attr("opacity", 0.8)
-      .attr("fill", (d) => d.color);
+      .attr("fill", (d) =>
+        d.timestamp === props.detailsDate ? "grey" : d.color
+      );
 
     svg.select(".goalLine").remove();
     const yval = height - bottomMargin - yScale(props.stepsGoal);
@@ -286,7 +288,14 @@ export default function StepsChartVis(props) {
       .attr("font-size", annotationSize)
       .text((d) => Math.round(d.steps));
     valueLabels.exit().remove();
-  }, [svg, props.stepsData, props.dateRange, colorScale, props.datePicker]);
+  }, [
+    svg,
+    props.stepsData,
+    props.dateRange,
+    colorScale,
+    props.datePicker,
+    props.detailsDate,
+  ]);
 
   return (
     <div

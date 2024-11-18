@@ -250,7 +250,9 @@ export default function ActivityChartVis(props) {
       .transition(100)
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)
-      .attr("fill", (d) => d.color);
+      .attr("fill", (d) =>
+        d.dateString === props.detailsDate ? "grey" : d.color
+      );
 
     bars.exit().remove();
 
@@ -299,7 +301,14 @@ export default function ActivityChartVis(props) {
       .attr("font-size", annotationSize)
       .text((d) => Math.round(d.activity));
     valueLabels.exit().remove();
-  }, [svg, formattedData, props.dateRange, props.plotVar, props.datePicker]);
+  }, [
+    svg,
+    formattedData,
+    props.dateRange,
+    props.plotVar,
+    props.datePicker,
+    props.detailsDate,
+  ]);
 
   return (
     <div

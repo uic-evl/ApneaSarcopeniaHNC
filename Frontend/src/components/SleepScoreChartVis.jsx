@@ -23,6 +23,8 @@ export default function SleepScoreChartVis(props) {
     }
 
     //temp
+    console.log(props.sleepData);
+    console.log(props.detailsDate);
 
     const data = filterDates(
       props.sleepData,
@@ -135,7 +137,9 @@ export default function SleepScoreChartVis(props) {
       .transition(100)
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)
-      .attr("fill", (d) => d.color);
+      .attr("fill", (d) =>
+        d.timestamp === props.detailsDate ? "grey" : d.color
+      );
 
     bars.exit().remove();
 
@@ -186,7 +190,13 @@ export default function SleepScoreChartVis(props) {
     valueLabels.exit().remove();
 
     svg.selectAll("text").raise();
-  }, [svg, props.sleepData, props.dateRange, props.datePicker]);
+  }, [
+    svg,
+    props.sleepData,
+    props.dateRange,
+    props.datePicker,
+    props.detailsDate,
+  ]);
 
   return (
     <div

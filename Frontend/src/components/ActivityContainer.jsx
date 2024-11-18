@@ -10,6 +10,7 @@ export default function ActivityContainer({
   stepsData,
   goalsDaily,
   datePicker,
+  detailsDate,
 }) {
   const [activityPlotVar, setActivityPlotVar] = useState("totalActivity");
 
@@ -63,6 +64,7 @@ export default function ActivityContainer({
               goalsDaily !== null && goalsDaily.steps ? goalsDaily.steps : 10000
             }
             datePicker={datePicker}
+            detailsDate={detailsDate}
           />
         ) : (
           <ActivityChartVis
@@ -70,6 +72,7 @@ export default function ActivityContainer({
             dateRange={dateRange}
             plotVar={activityPlotVar}
             datePicker={datePicker}
+            detailsDate={detailsDate}
           />
         )}
       </Flex>

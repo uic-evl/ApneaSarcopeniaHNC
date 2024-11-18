@@ -165,8 +165,12 @@ export default function BodyCompVis(props) {
         .attr("cy", (d) => d.y)
         .attr("cx", (d) => d.x)
         .attr("r", dotSize)
-        .attr("fill", color)
-        .attr("stroke", color)
+        .attr("fill", (d) =>
+          d.formattedDate === props.detailsDate ? "black" : color
+        )
+        .attr("stroke", (d) =>
+          d.formattedDate === props.detailsDate ? "black" : color
+        )
         .attr("stroke-width", dotSize / 2)
         .append("title")
         .text((d) => {
@@ -241,6 +245,7 @@ export default function BodyCompVis(props) {
     props.dateRange,
     props.useFilter,
     props.datePicker,
+    props.detailsDate,
   ]);
 
   return (

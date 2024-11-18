@@ -87,6 +87,7 @@ export default function SleepContainer({
             dateRange={dateRange}
             sleepData={sleepData}
             datePicker={datePicker}
+            detailsDate={detailsDate}
           />
         ) : plotVar === "Levels" ? (
           <SleepLevelChartVis

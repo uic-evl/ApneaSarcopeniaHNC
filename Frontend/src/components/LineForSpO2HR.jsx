@@ -60,13 +60,31 @@ export default function LineForSpO2HR({
       svg === undefined ||
       dateRange === undefined ||
       detailsDate === undefined ||
-      hrData === undefined || //hrData === null || hrData.length < 1 ||
-      spo2Data === undefined || //spo2Data === null || spo2Data.length < 1 ||
+      hrData === undefined ||
+      spo2Data === undefined ||
       spo2MinuteData === undefined ||
       hrMinuteData === undefined ||
       timeDomain === undefined
     ) {
-      console.log("something is undefined");
+      const undefinedVariables = [];
+
+      if (sleepData === null || sleepData === undefined)
+        undefinedVariables.push("sleepData");
+      if (svg === undefined) undefinedVariables.push("svg");
+      if (dateRange === undefined) undefinedVariables.push("dateRange");
+      if (detailsDate === undefined) undefinedVariables.push("detailsDate");
+      if (hrData === undefined) undefinedVariables.push("hrData");
+      if (spo2Data === undefined) undefinedVariables.push("spo2Data");
+      if (spo2MinuteData === undefined)
+        undefinedVariables.push("spo2MinuteData");
+      if (hrMinuteData === undefined) undefinedVariables.push("hrMinuteData");
+      if (timeDomain === undefined) undefinedVariables.push("timeDomain");
+
+      console.log(
+        "The following variables are undefined or null:",
+        undefinedVariables.join(", ")
+      );
+
       svg?.select(".x-axis-minute").remove();
       svg?.select(".y-axis-minute").remove();
       svg?.select(".y-axis-right").remove();
