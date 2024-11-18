@@ -21,6 +21,8 @@ export default function SleepDetailsChartVis(props) {
   // console.log("details date", props.detailsDate);
   // console.log("hr minute data", props.hrMinuteData);
   // console.log("spo2 minute data", props.spo2MinuteData);
+  // console.log("sleep data - data", props.sleepData[0].levels.data);
+  // console.log("sleep data - short data", props.sleepData[0].levels.shortData);
 
   return (
     <LineForSpO2HR

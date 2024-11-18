@@ -102,6 +102,7 @@ export default function LineForSpO2HR({
       svg?.selectAll(".sleep-rect").remove();
       svg?.selectAll(".axis-label").remove();
       svg?.selectAll("lineGradients").remove();
+      svg?.selectAll(".wake-rect").remove();
 
       return;
     }
@@ -164,6 +165,28 @@ export default function LineForSpO2HR({
         timeToSeconds(d.time) >= timeToSeconds(timeDomain[0]) &&
         timeToSeconds(d.time) + d.seconds <= timeToSeconds(timeDomain[1])
     );
+
+    const filteredAwakeSleepData = sleepData[0]?.levels.shortData
+      .filter(
+        (d) =>
+          timeToSeconds(new Date(d.dateTime).toTimeString().split(" ")[0]) >=
+            timeToSeconds(timeDomain[0]) &&
+          timeToSeconds(new Date(d.dateTime).toTimeString().split(" ")[0]) +
+            d.seconds <=
+            timeToSeconds(timeDomain[1])
+      )
+      .map((d) => {
+        const timeString = new Date(d.dateTime).toTimeString().split(" ")[0];
+        const timestamp = timeToSeconds(timeString);
+        return {
+          time: timeString,
+          seconds: d.seconds,
+          timestamp: timestamp,
+          level: "wake",
+        };
+      });
+
+    // console.log(filteredAwakeSleepData);
 
     // console.log(filteredSleepData);
     if (filteredSleepData === undefined || filteredSleepData?.length === 0)
@@ -229,6 +252,36 @@ export default function LineForSpO2HR({
       );
 
     bars.exit().remove();
+
+    svg.selectAll(".wake-rect").remove();
+
+    const wakeBars = vis.selectAll(".wake-rect").data(filteredAwakeSleepData);
+
+    wakeBars
+      .enter()
+      .append("rect")
+      .attr("class", "wake-rect")
+      .attr("x", (d) => xScale(timeToSeconds(d.time)))
+      .attr("y", 2.5)
+      .attr("width", (d) => {
+        // Calculate width by finding the end time and subtracting the start time
+        return (
+          xScale(timeToSeconds(d.time) + d.seconds) -
+          xScale(timeToSeconds(d.time))
+        );
+      })
+      .attr("height", viewHeight - 5)
+      .attr("fill", "grey") //(d) => colorMap[d.level])
+      .attr("opacity", 0.8)
+      //title
+      .append("title")
+      .text(
+        (d) => `Level: Briefly Awake
+        Start: ${d.time}
+        End: ${secondsToTimeString(timeToSeconds(d.time) + d.seconds)}`
+      );
+
+    wakeBars.exit().remove();
 
     svg.selectAll(".avg-line").remove();
     svg.selectAll(".avg-label").remove();
