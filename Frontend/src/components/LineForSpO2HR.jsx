@@ -159,6 +159,7 @@ export default function LineForSpO2HR({
       .attr("transform", `translate(${viewWidth},0)`)
       .call(axisRight);
 
+    // console.log(sleepData);
     // add background rectanlge based on sleep data level
     const filteredSleepData = sleepData[0]?.levels.data.filter(
       (d) =>

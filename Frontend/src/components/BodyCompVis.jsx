@@ -172,6 +172,12 @@ export default function BodyCompVis(props) {
           d.formattedDate === props.detailsDate ? "black" : color
         )
         .attr("stroke-width", dotSize / 2)
+        .on("click", (event, d) => {
+          // console.log(d, props.detailsDate);
+          if (props.datePicker === "month" || props.datePicker === "week") {
+            props.setDetailsDate(d.formattedDate);
+          }
+        })
         .append("title")
         .text((d) => {
           return props.datePicker === "quarter" || props.datePicker === "year"

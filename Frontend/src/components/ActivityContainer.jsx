@@ -11,6 +11,7 @@ export default function ActivityContainer({
   goalsDaily,
   datePicker,
   detailsDate,
+  setDetailsDate,
 }) {
   const [activityPlotVar, setActivityPlotVar] = useState("totalActivity");
 
@@ -65,6 +66,7 @@ export default function ActivityContainer({
             }
             datePicker={datePicker}
             detailsDate={detailsDate}
+            setDetailsDate={setDetailsDate}
           />
         ) : (
           <ActivityChartVis
@@ -73,6 +75,7 @@ export default function ActivityContainer({
             plotVar={activityPlotVar}
             datePicker={datePicker}
             detailsDate={detailsDate}
+            setDetailsDate={setDetailsDate}
           />
         )}
       </Flex>

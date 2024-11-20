@@ -23,8 +23,8 @@ export default function SleepScoreChartVis(props) {
     }
 
     //temp
-    console.log(props.sleepData);
-    console.log(props.detailsDate);
+    // console.log(props.sleepData);
+    // console.log(props.detailsDate);
 
     const data = filterDates(
       props.sleepData,
@@ -134,6 +134,12 @@ export default function SleepScoreChartVis(props) {
       .attr("rx", barWidth / 3)
       .attr("ry", barWidth / 3)
       .attr("opacity", 0.8)
+      .on("click", (event, d) => {
+        // console.log(d, props.detailsDate);
+        if (props.datePicker === "month" || props.datePicker === "week") {
+          props.setDetailsDate(d.timestamp);
+        }
+      })
       .transition(100)
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)

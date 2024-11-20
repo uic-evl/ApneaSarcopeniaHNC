@@ -164,6 +164,12 @@ export default function SleepLevelChartVis(props) {
       .attr("rx", barWidth / 6)
       .attr("ry", barWidth / 6)
       .attr("opacity", 0.8)
+      .on("click", (event, d) => {
+        // console.log(d, props.detailsDate);
+        if (props.datePicker === "month" || props.datePicker === "week") {
+          props.setDetailsDate(d.dateString);
+        }
+      })
       .transition(100)
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)

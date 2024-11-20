@@ -206,6 +206,12 @@ export default function StepsChartVis(props) {
       .attr("stroke-width", 1)
       .attr("rx", barWidth / 3)
       .attr("ry", barWidth / 3)
+      .on("click", (event, d) => {
+        // console.log(d, props.detailsDate);
+        if (props.datePicker === "month" || props.datePicker === "week") {
+          props.setDetailsDate(d.timestamp);
+        }
+      })
       .transition(1000)
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)

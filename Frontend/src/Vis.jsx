@@ -656,6 +656,7 @@ export default function Vis() {
       useFilter={useFilter}
       datePicker={datePicker}
       detailsDate={detailsDate}
+      setDetailsDate={setDetailsDate}
     />,
     <SleepContainer
       sleepData={sleepData}
@@ -680,6 +681,7 @@ export default function Vis() {
       goalsDaily={goalsDaily}
       datePicker={datePicker}
       detailsDate={detailsDate}
+      setDetailsDate={setDetailsDate}
     />,
   ];
   const rightChartTitles = ["Body Composition Over Time", "Sleep", "Activity"];
