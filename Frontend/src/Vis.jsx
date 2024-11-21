@@ -529,12 +529,14 @@ export default function Vis() {
   }, [fitbitProfile]);
 
   //calculate bmi, fmi and lmi (using nasibehs forumla so idk) with the withings data,
-  //returns a list of objects iwth bmi, fmi, and lmi, along with date: time since epoch in ms? and formattedDate: YYYY-MM-DD hh:mm:ss
+  //returns a list of objects with bmi, fmi, and lmi,
+  // along with date: time since epoch in ms? and formattedDate: YYYY-MM-DD hh:mm:ss
   //if times dont sync for a necessary variable, returns a -1
   const bodyCompData = useMemo(() => {
     if (withingsData === null) {
       return null;
     }
+    // console.log(withingsData);
     const height = withingsData.height; //meters;
     const timeDict = {};
     for (const key of Object.keys(withingsData)) {
@@ -573,6 +575,8 @@ export default function Vis() {
           : -1;
       tempData.push(entry);
     }
+
+    // console.log("body comp data", tempData);
     return tempData;
   }, [withingsData]);
 
