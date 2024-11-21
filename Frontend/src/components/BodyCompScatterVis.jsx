@@ -160,6 +160,44 @@ export default function BodyCompScatterVis(props) {
       .attr("font-size", 0.5 * sectionTitleSize)
       .text((d, i) => d);
 
+    // Add x-axis values for min and max LMI (numeric values)
+    const xValues = [
+      { value: xScale.domain()[0], position: xStart - 10 }, // Min LMI value
+      { value: xScale.domain()[1], position: xStart + sideLength + 10 }, // Max LMI value
+    ];
+
+    svg.selectAll(".xAxisValue").remove();
+    const xAxisValues = svg.selectAll(".xAxisValue").data(xValues);
+    xAxisValues
+      .enter()
+      .append("text")
+      .attr("class", "xAxisValue")
+      .merge(xAxisValues)
+      .attr("x", (d) => xScale(d.value)) // Position based on LMI scale
+      .attr("y", yScale(yScale.domain()[1] / 2 - 2.5)) // Position near the x-axis line
+      .attr("font-size", 0.5 * sectionTitleSize)
+      .attr("text-anchor", "middle")
+      .text((d) => d.value.toFixed(2)); // Only show the numeric value, formatted
+
+    // Add y-axis values for min and max FMI (numeric values)
+    const yValues = [
+      { value: yScale.domain()[0], position: yStart + 10 }, // Min FMI value
+      { value: yScale.domain()[1], position: yStart - sideLength - 10 }, // Max FMI value
+    ];
+
+    svg.selectAll(".yAxisValue").remove();
+    const yAxisValues = svg.selectAll(".yAxisValue").data(yValues);
+    yAxisValues
+      .enter()
+      .append("text")
+      .attr("class", "yAxisValue")
+      .merge(yAxisValues)
+      .attr("x", xScale(xScale.domain()[1] / 2 - 2.5)) // Position near the y-axis line
+      .attr("y", (d) => yScale(d.value) + 5) // Position based on FMI scale
+      .attr("font-size", 0.5 * sectionTitleSize)
+      .attr("text-anchor", "middle")
+      .text((d) => d.value.toFixed(2)); // Only show the numeric value, formatted
+
     //make sarcopenia range red
     const pos = [];
     const increment = 0.05;
