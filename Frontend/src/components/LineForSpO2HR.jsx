@@ -367,7 +367,7 @@ export default function LineForSpO2HR({
       .attr("class", "line-minute")
       .attr("fill", "none")
       .attr("stroke", `url(#${colorId})`)
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 2.5)
       .attr(
         "d",
         d3
@@ -390,7 +390,7 @@ export default function LineForSpO2HR({
       .attr("class", "line-minute")
       .attr("fill", "none")
       .attr("stroke", "green")
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 2.5)
       .attr(
         "d",
         d3

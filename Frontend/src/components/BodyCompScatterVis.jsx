@@ -145,7 +145,7 @@ export default function BodyCompScatterVis(props) {
       .attr("stroke-dasharray", 4);
 
     // add text for the thresholds
-    const threshText = ["LMI ", "FMI "];
+    const threshText = ["FMI ", "LMI"];
     svg.selectAll(".threshText").remove();
     const text = svg.selectAll(".threshText").data(threshText);
     text

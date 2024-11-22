@@ -59,6 +59,7 @@ import {
   convertTimestampToDateString,
   dayToTimestamp,
 } from "./utils/index.js";
+import { PatientReportedOutcomeSliders } from "./components/PatientReportedOutcomeSliders.jsx";
 
 function capitalizeFirstLetter(string) {
   string = string.toLowerCase();
@@ -744,6 +745,10 @@ export default function Vis() {
           "sleepTracking"
         )}`}</Title>
         <Title level={3}>Patient Reported Outcome</Title>
+        <Text>
+          {"Rate the following on a scale of 0-10. 0: Best, 10: Worst"}
+        </Text>
+        <PatientReportedOutcomeSliders />
         <Flex align="center" justify="center">
           <Button onClick={() => logOut()} danger>
             {"Log Out"}
