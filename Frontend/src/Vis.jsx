@@ -588,6 +588,16 @@ export default function Vis() {
     return obj[key] ? obj[key] : "Invalid Key";
   }
 
+  function notWithingsWeightUndefined(obj, key) {
+    if (obj === undefined || obj === null) {
+      return "Missing";
+    }
+    // console.log(obj);
+    const weight = obj[key] ? obj[key][0].weight : 0;
+    const weightInLb = weight * 2.20462;
+    return weightInLb === 0 ? "Missing" : weightInLb.toFixed(2) + " lb";
+  }
+
   function logOut() {
     fitbitAPI.resetToken();
     withingsAPI.resetToken();
@@ -725,35 +735,39 @@ export default function Vis() {
 
   return (
     <Row span={24} style={{ height: "100vh", width: "100vw" }}>
-      <Col className={"shadow mx-2 mt-1"} span={4}>
+      <Col className={"shadow mx-2 mt-1"} span={3}>
         <div />
-        <Title level={3}>Patient Demographics</Title>
+        <Title level={3}>Patient</Title>
         <Title level={4}>{notUndefined(fitbitProfile, "fullName")}</Title>
-        <Title level={5}>{`Gender: ${capitalizeFirstLetter(
+        {/* <Title level={5}>{`Gender: ${capitalizeFirstLetter(
           notUndefined(fitbitProfile, "gender")
-        )}`}</Title>
+        )}`}</Title> */}
         <Title level={5}>{`Age: ${notUndefined(fitbitProfile, "age")}`}</Title>
         <Title level={5}>{`Height: ${inchesToFeetString(
           notUndefined(fitbitProfile, "height")
         )}`}</Title>
-        <Title level={5}>{`Weight (Fitbit): ${
+        <Title level={5}>{`S-W: ${
           notUndefined(fitbitProfile, "weight") +
+          " " +
           weightUnitString(notUndefined(fitbitProfile, "weightUnit"))
         }`}</Title>
-        <Title level={5}>{`Sleep Tracking Setting: ${notUndefined(
+        <Title level={5}>{`C-W: ${notWithingsWeightUndefined(
+          withingsData,
+          "weight"
+        )}`}</Title>
+        {/* <Title level={5}>{`Sleep Tracking Setting: ${notUndefined(
           fitbitProfile,
           "sleepTracking"
-        )}`}</Title>
-        <Title level={3}>Patient Reported Outcome</Title>
-        <Text>
-          {"Rate the following on a scale of 0-10. 0: Best, 10: Worst"}
-        </Text>
-        <PatientReportedOutcomeSliders />
+        )}`}</Title> */}
+        <Title level={3}>PROs</Title>
+        <Text>{"Scale 0: Best, 10: Worst"}</Text>
+        <PatientReportedOutcomeSliders /> <br />
         <Flex align="center" justify="center">
           <Button onClick={() => logOut()} danger>
             {"Log Out"}
           </Button>
-        </Flex>
+        </Flex>{" "}
+        <br />
         <Flex align="center" justify="center">
           <Button
             onClick={() => reloadData(monthRange)}
@@ -764,7 +778,7 @@ export default function Vis() {
           </Button>
         </Flex>
       </Col>
-      <Col span={19}>
+      <Col span={20}>
         <Row span={24}>
           <Col span={24}>
             <DateSelector

@@ -26,16 +26,16 @@ export const PatientReportedOutcomeSliders = (props) => {
   return (
     <>
       <Row>
-        <Col span={6}> Sleep:</Col>
-        <Col span={12}>
+        <Col span={7}> Sleep:</Col>
+        {/* <Col span={12}>
           <Slider
             min={0}
             max={10}
             value={sleepInput}
             onChange={handleSleepChange}
           />
-        </Col>
-        <Col span={6}>
+        </Col> */}
+        <Col span={8}>
           <InputNumber
             min={0}
             max={10}
@@ -47,16 +47,16 @@ export const PatientReportedOutcomeSliders = (props) => {
       </Row>
 
       <Row>
-        <Col span={6}> Fatigue:</Col>
-        <Col span={12}>
+        <Col span={7}> Fatigue:</Col>
+        {/* <Col span={12}>
           <Slider
             min={0}
             max={10}
             value={fatigueInput}
             onChange={handleFatigueChange}
           />
-        </Col>
-        <Col span={6}>
+        </Col> */}
+        <Col span={8}>
           <InputNumber
             min={0}
             max={10}
@@ -68,16 +68,16 @@ export const PatientReportedOutcomeSliders = (props) => {
       </Row>
 
       <Row>
-        <Col span={6}> Pain:</Col>
-        <Col span={12}>
+        <Col span={7}> Pain:</Col>
+        {/* <Col span={12}>
           <Slider
             min={0}
             max={10}
             value={painInput}
             onChange={handlePainChange}
           />
-        </Col>
-        <Col span={6}>
+        </Col> */}
+        <Col span={8}>
           <InputNumber
             min={0}
             max={10}
@@ -88,16 +88,16 @@ export const PatientReportedOutcomeSliders = (props) => {
         </Col>
       </Row>
       <Row>
-        <Col span={6}> Drowsy:</Col>
-        <Col span={12}>
+        <Col span={7}> Drowsy:</Col>
+        {/* <Col span={12}>
           <Slider
             min={0}
             max={10}
             value={drowsinessInput}
             onChange={handleDrowsinessChange}
           />
-        </Col>
-        <Col span={6}>
+        </Col> */}
+        <Col span={8}>
           <InputNumber
             min={0}
             max={10}
