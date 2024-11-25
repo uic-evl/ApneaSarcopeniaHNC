@@ -85,7 +85,7 @@ export default function DateSelector({
       });
     }
   }
-  const datePeriod = ["year", "quarter", "month", "week"];
+  const datePeriod = ["week", "month", "quarter", "year"];
 
   function handleDatePeriodChange(e) {
     setDatePicker(e.target.value);
@@ -177,6 +177,7 @@ export default function DateSelector({
           onChange={handleDatePeriodChange}
           value={datePicker}
           optionType="button"
+          buttonStyle="solid"
         />
       </Flex>
 

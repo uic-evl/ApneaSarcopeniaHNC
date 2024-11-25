@@ -50,6 +50,7 @@ export default function ActivityContainer({
           onChange={handleActivityButtonChange}
           value={activityPlotVar}
           optionType="button"
+          buttonStyle="solid"
         />
       </Flex>
       <Flex

@@ -34,9 +34,10 @@ export default function SleepContainer({
     setDetailsDate(newDay.format("YYYY-MM-DD"));
   }
 
-  const [plotVar, setPlotVar] = useState("Details");
+  const [plotVar, setPlotVar] = useState("Efficiency");
 
-  const plotActivityOptions = ["Details", "Efficiency", "Levels"];
+  const plotActivityOptions = ["Efficiency", "Levels", "Details"];
+  const plotAcitivityTitles = ["Efficiency", "Levels", "SpO2/HR"];
   const handleButtonChange = ({ target: { value } }) => {
     setPlotVar(value);
   };
@@ -48,6 +49,16 @@ export default function SleepContainer({
         justify="center"
         style={{ width: "100%", margin: "0px", height: "2em" }}
       >
+        <Radio.Group
+          options={plotActivityOptions.map((v, i) => {
+            return { label: plotAcitivityTitles[i], value: v };
+          })}
+          onChange={handleButtonChange}
+          value={plotVar}
+          optionType="button"
+          buttonStyle="solid"
+        />
+
         {plotVar === "Details" ? (
           <div style={{ fontSize: "0.8em", color: "gray" }}>
             Current Date:
@@ -66,15 +77,6 @@ export default function SleepContainer({
             </Button>
           </div>
         ) : null}
-
-        <Radio.Group
-          options={plotActivityOptions.map((v) => {
-            return { label: v, value: v };
-          })}
-          onChange={handleButtonChange}
-          value={plotVar}
-          optionType="button"
-        />
       </Flex>
       <SleepLegend plotVar={plotVar} />
       <Flex
