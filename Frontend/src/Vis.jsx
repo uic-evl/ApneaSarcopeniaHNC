@@ -588,14 +588,33 @@ export default function Vis() {
     return obj[key] ? obj[key] : "Invalid Key";
   }
 
+  function notUndefinedFitbitInitialWeight(obj, key) {
+    if (obj === undefined || obj === null) {
+      return "Missing";
+    }
+    let weight = obj[key] ? obj[key] : 0;
+
+    let weightUnit = obj["weightUnit"];
+
+    if (weightUnit === "en_US") {
+      //this is in lbs, convert to kg
+      weight = weight * 0.453592;
+    } else if (weightUnit === "en_GB") {
+      //this is in stone, convert to kg
+      weight = weight * 6.35029;
+    }
+    return weight === 0 ? "Missing" : weight.toFixed(2) + " kg";
+    // console.log(obj);
+  }
+
   function notWithingsWeightUndefined(obj, key) {
     if (obj === undefined || obj === null) {
       return "Missing";
     }
     // console.log(obj);
     const weight = obj[key] ? obj[key][0].weight : 0;
-    const weightInLb = weight * 2.20462;
-    return weightInLb === 0 ? "Missing" : weightInLb.toFixed(2) + " lb";
+    // const weightInLb = weight * 2.20462;
+    return weight === 0 ? "Missing" : weight.toFixed(2) + " kg";
   }
 
   function logOut() {
@@ -752,14 +771,14 @@ export default function Vis() {
           notUndefined(fitbitProfile, "gender")
         )}`}</Title> */}
         <Title level={5}>{`Age: ${notUndefined(fitbitProfile, "age")}`}</Title>
-        <Title level={5}>{`Height: ${inchesToFeetString(
-          notUndefined(fitbitProfile, "height")
+        <Title level={5}>{`Height: ${notUndefined(
+          withingsData,
+          "height"
+        )} m`}</Title>
+        <Title level={5}>{`S-W: ${notUndefinedFitbitInitialWeight(
+          fitbitProfile,
+          "weight"
         )}`}</Title>
-        <Title level={5}>{`S-W: ${
-          notUndefined(fitbitProfile, "weight") +
-          " " +
-          weightUnitString(notUndefined(fitbitProfile, "weightUnit"))
-        }`}</Title>
         <Title level={5}>{`C-W: ${notWithingsWeightUndefined(
           withingsData,
           "weight"
