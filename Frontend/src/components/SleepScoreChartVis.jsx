@@ -138,6 +138,7 @@ export default function SleepScoreChartVis(props) {
         // console.log(d, props.detailsDate);
         if (props.datePicker === "month" || props.datePicker === "week") {
           props.setDetailsDate(d.timestamp);
+          props.setPlotVar("Details");
         }
       })
       .transition(100)

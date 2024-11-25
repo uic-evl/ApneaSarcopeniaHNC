@@ -738,7 +738,7 @@ export default function Vis() {
 
   const leftChartTitles = [
     "Body Composition",
-    "Apnea Risk",
+    "Sleep Quality",
     "Activity Goal Completion",
   ];
 
