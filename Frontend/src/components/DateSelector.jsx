@@ -190,7 +190,7 @@ export default function DateSelector({
         </Button>
         <Button type="text">
           {convertTimestampToDateString(dateRange.start / 1000) +
-            " - " +
+            " : " +
             convertTimestampToDateString(dateRange.stop / 1000)}
         </Button>
         <Button onClick={incrementDay} disabled={!forwardEnabled}>

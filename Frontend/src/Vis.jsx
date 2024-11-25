@@ -639,7 +639,10 @@ export default function Vis() {
         >
           <div
             className="shadow m-0 p-0 border-h-2"
-            style={{ width: "20vw", height: "100%" }}
+            style={{
+              width: leftTitle === "Body Composition" ? "45vw" : "20vw",
+              height: "100%",
+            }}
           >
             <div className="m-0 p-0 border-b-2 text-center" style={titleStyle}>
               {leftTitle}
@@ -650,7 +653,13 @@ export default function Vis() {
           </div>
           <div
             className="shadow m-0 p-0"
-            style={{ width: "calc(100% - 20vw)", height: "100%" }}
+            style={{
+              width:
+                rightTitle === "Body Composition Over Time"
+                  ? "calc(100% - 45vw)"
+                  : "calc(100% - 20vw)",
+              height: "100%",
+            }}
           >
             <div className="m-0 p-0 border-b-2 text-center" style={titleStyle}>
               {rightTitle}
