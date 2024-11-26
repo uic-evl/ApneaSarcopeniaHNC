@@ -60,6 +60,7 @@ import {
   dayToTimestamp,
 } from "./utils/index.js";
 import { PatientReportedOutcomeSliders } from "./components/PatientReportedOutcomeSliders.jsx";
+import BodyCompWeightMuscleFatRatios from "./components/BodyCompWeightMuscleFatRatios.jsx";
 
 function capitalizeFirstLetter(string) {
   string = string.toLowerCase();
@@ -509,7 +510,7 @@ export default function Vis() {
 
   useEffect(() => {
     if (fitbitProfile !== null) {
-      console.log("profile", fitbitProfile);
+      // console.log("profile", fitbitProfile);
       const height = fitbitProfile["height"];
       const weight = fitbitProfile["weight"];
       if (height && weight) {
@@ -659,7 +660,7 @@ export default function Vis() {
           <div
             className="shadow m-0 p-0 border-h-2"
             style={{
-              width: leftTitle === "Body Composition" ? "45vw" : "20vw",
+              width: leftTitle === "Body Composition" ? "35vw" : "20vw",
               height: "100%",
             }}
           >
@@ -675,7 +676,7 @@ export default function Vis() {
             style={{
               width:
                 rightTitle === "Body Composition Over Time"
-                  ? "calc(100% - 45vw)"
+                  ? "calc(100% - 35vw)"
                   : "calc(100% - 20vw)",
               height: "100%",
             }}
@@ -692,7 +693,16 @@ export default function Vis() {
     );
   }
   const rightCharts = [
-    <BodyCompVis
+    // <BodyCompVis
+    //   gender={fitbitProfile ? fitbitProfile["gender"] : null}
+    //   withingsData={withingsData}
+    //   dateRange={dateRange}
+    //   useFilter={useFilter}
+    //   datePicker={datePicker}
+    //   detailsDate={detailsDate}
+    //   setDetailsDate={setDetailsDate}
+    // />,
+    <BodyCompWeightMuscleFatRatios
       gender={fitbitProfile ? fitbitProfile["gender"] : null}
       withingsData={withingsData}
       dateRange={dateRange}
@@ -701,6 +711,7 @@ export default function Vis() {
       detailsDate={detailsDate}
       setDetailsDate={setDetailsDate}
     />,
+
     <SleepContainer
       sleepData={sleepData}
       stepsData={stepsData}
