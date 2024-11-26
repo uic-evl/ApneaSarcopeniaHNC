@@ -100,29 +100,6 @@ export const SleepLegend = ({ plotVar }) => {
     } else {
       svg.selectAll(".sleepLegendBar").remove();
 
-      // svg
-      //   .selectAll("sleepLegendBar")
-      //   .data(Object.keys(sleepStageColorMap))
-      //   .enter()
-      //   .append("rect")
-      //   .attr("class", "sleepLegendBar")
-      //   .attr("x", 0)
-      //   .attr("y", (d, i) => i * 15)
-      //   .attr("width", 15)
-      //   .attr("height", 15)
-      //   .attr("fill", (d) => sleepStageColorMap[d])
-      //   .attr("opacity", plotVar === "Details" ? 0.5 : 1);
-
-      // svg
-      //   .selectAll("sleepLegendBar")
-      //   .data(Object.keys(sleepStageColorMap))
-      //   .enter()
-      //   .append("text")
-      //   .attr("class", "sleepLegendBar")
-      //   .attr("x", 17)
-      //   .attr("y", (d, i) => i * 15 + 10)
-      //   .text((d) => d);
-
       svg
         .selectAll("sleepLegendBar")
         .data(Object.keys(sleepStageColorMap))

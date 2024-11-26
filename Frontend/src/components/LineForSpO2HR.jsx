@@ -20,6 +20,9 @@ const colorMap = {
 };
 const orderedSleepLevels = ["deep", "light", "rem", "wake"];
 
+const spo2Colors = ["#b2182b", "#08306b", "#9ecae1"]; // <91, <avg, the rest
+const spo2Opacity = [1, 0.85, 0.75];
+
 // Convert "HH:MM:SS" to total seconds from midnight
 const timeToSeconds = (timeStr) => {
   if (timeStr === undefined) {
@@ -318,20 +321,6 @@ export default function LineForSpO2HR({
     svg.selectAll(".line-minute").remove();
     svg.selectAll(".axis-label").remove();
 
-    //add a text near axisleft
-    vis
-      .append("text")
-      .attr("class", "axis-label")
-      .attr("x", 0)
-      .attr("y", 0)
-      .text("SpO2");
-    vis
-      .append("text")
-      .attr("class", "axis-label")
-      .attr("x", viewWidth - 20)
-      .attr("y", 0)
-      .text("HR");
-
     // Filter the data based on the time domain
     const spoFilteredData = spo2MinuteData.filter(
       (d) =>
@@ -358,7 +347,21 @@ export default function LineForSpO2HR({
       .data(spoFilteredData)
       .join("stop")
       .attr("offset", (d) => xScale(timeToSeconds(d.time)) / viewWidth) // Directly use normalized offset from 0 to 1
-      .attr("stop-color", (d) => (d.value < 91 ? "red" : "blue"));
+      // .attr("stop-color", (d) => (d.value < 91 ? "red" : "#1b9e77"))
+      .attr("stop-color", (d) =>
+        d.value < 91
+          ? spo2Colors[0]
+          : d.value < avg[1]
+          ? spo2Colors[1]
+          : spo2Colors[2]
+      )
+      .attr("stop-opacity", (d) =>
+        d.value < 91
+          ? spo2Opacity[0]
+          : d.value < avg[1]
+          ? spo2Opacity[1]
+          : spo2Opacity[2]
+      );
 
     // Create the line path
     vis
@@ -389,7 +392,7 @@ export default function LineForSpO2HR({
       .datum(hrFilteredData)
       .attr("class", "line-minute")
       .attr("fill", "none")
-      .attr("stroke", "green")
+      .attr("stroke", "black")
       .attr("stroke-width", 2.5)
       .attr(
         "d",
@@ -398,6 +401,77 @@ export default function LineForSpO2HR({
           .x((d) => xScale(timeToSeconds(d.time)))
           .y((d) => hrScale(d.value))
       );
+
+    // adding axes label and color legends
+    // rest color
+    vis
+      .append("rect")
+      .attr("class", "axis-label")
+      .attr("x", 0)
+      .attr("y", -15)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", spo2Colors[2])
+      .attr("opacity", spo2Opacity[2]);
+
+    //add a text near axisleft
+    vis
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", 20)
+      .attr("y", 0)
+      .text("SpO2");
+
+    vis
+      .append("rect")
+      .attr("class", "axis-label")
+      .attr("x", 65)
+      .attr("y", -15)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", spo2Colors[1])
+      .attr("opacity", spo2Opacity[1]);
+
+    vis
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", 82)
+      .attr("y", 0)
+      .text(`<${avg[1]}(avg)`);
+
+    vis
+      .append("rect")
+      .attr("class", "axis-label")
+      .attr("x", 160)
+      .attr("y", -15)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", spo2Colors[0])
+      .attr("opacity", spo2Opacity[0]);
+
+    // legend and label for HR
+    vis
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", 178)
+      .attr("y", 0)
+      .text("<91");
+
+    vis
+      .append("text")
+      .attr("class", "axis-label")
+      .attr("x", viewWidth - 40)
+      .attr("y", 0)
+      .text("HR");
+
+    vis
+      .append("rect")
+      .attr("class", "axis-label")
+      .attr("x", viewWidth - 18)
+      .attr("y", -15)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", "black");
   }, [
     svg,
     sleepData,
