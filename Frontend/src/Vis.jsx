@@ -693,15 +693,6 @@ export default function Vis() {
     );
   }
   const rightCharts = [
-    // <BodyCompVis
-    //   gender={fitbitProfile ? fitbitProfile["gender"] : null}
-    //   withingsData={withingsData}
-    //   dateRange={dateRange}
-    //   useFilter={useFilter}
-    //   datePicker={datePicker}
-    //   detailsDate={detailsDate}
-    //   setDetailsDate={setDetailsDate}
-    // />,
     <BodyCompWeightMuscleFatRatios
       gender={fitbitProfile ? fitbitProfile["gender"] : null}
       withingsData={withingsData}
