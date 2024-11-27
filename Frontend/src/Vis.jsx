@@ -61,6 +61,7 @@ import {
 } from "./utils/index.js";
 import { PatientReportedOutcomeSliders } from "./components/PatientReportedOutcomeSliders.jsx";
 import BodyCompWeightMuscleFatRatios from "./components/BodyCompWeightMuscleFatRatios.jsx";
+import BodyCompScatterVisWithoutSidelength from "./components/BodyCompScatterVisWithoutSidelength.jsx";
 
 function capitalizeFirstLetter(string) {
   string = string.toLowerCase();
@@ -732,7 +733,13 @@ export default function Vis() {
   const rightChartTitles = ["Body Composition Over Time", "Sleep", "Activity"];
 
   const leftCharts = [
-    <BodyCompScatterVis
+    // <BodyCompScatterVis
+    //   gender={fitbitProfile ? fitbitProfile["gender"] : null}
+    //   bodyCompData={bodyCompData}
+    //   dateRange={dateRange}
+    //   useFilter={useFilter}
+    // />,
+    <BodyCompScatterVisWithoutSidelength
       gender={fitbitProfile ? fitbitProfile["gender"] : null}
       bodyCompData={bodyCompData}
       dateRange={dateRange}
