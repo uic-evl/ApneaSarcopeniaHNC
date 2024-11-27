@@ -115,17 +115,17 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     const threshPoints = [
       // Horizontal line for FMI threshold
       [
-        [leftMargin, yScale(fmiThreshold)], // Start at the left margin
-        [xScale.range()[1], yScale(fmiThreshold)], // End at the right edge of the chart
+        [leftMargin * 6.5, yScale(fmiThreshold)], // Start at the left margin
+        [xScale.range()[1] / 1.01, yScale(fmiThreshold)], // End at the right edge of the chart
       ],
       // Vertical line for LMI threshold
       [
-        [xScale(lmiThreshold), yScale.range()[0]], // Start at the bottom of the chart
+        [xScale(lmiThreshold), yScale.range()[0] / 1.03], // Start at the bottom of the chart
         [xScale(lmiThreshold), topMargin], // End at the top margin
       ],
     ];
 
-    console.log(threshPoints);
+    // console.log(threshPoints);
 
     svg.selectAll(".thresholdLine").remove();
     const threshLines = svg.selectAll(".thresholdLine").data(threshPoints);
@@ -167,17 +167,17 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .append("text")
       .attr("class", "threshText")
       .attr("x", xScale(lmiThreshold) - 5) // Position at the threshold line
-      .attr("y", height / 1.2) // Adjust for the middle bottom of the chart
+      .attr("y", height / 1.13) // Adjust for the middle bottom of the chart
       .attr("font-size", 0.5 * sectionTitleSize)
       .text(threshText[1])
       .attr("text-anchor", "middle"); // Text anchor set to "middle" for centering the text
 
     // Add x-axis values for min and max LMI (numeric values)
     const xValues = [
-      { value: xScale.domain()[0] },
-      { value: lmiThreshold },
-      { value: xScale.domain()[1] },
-    ];
+      lmiThreshold - (xScale.domain()[1] - xScale.domain()[0]) / 4,
+      lmiThreshold,
+      lmiThreshold + (xScale.domain()[1] - xScale.domain()[0]) / 4,
+    ].map((value) => ({ value }));
 
     svg.selectAll(".xAxisValue").remove();
     const xAxisValues = svg.selectAll(".xAxisValue").data(xValues);
@@ -187,17 +187,17 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("class", "xAxisValue")
       .merge(xAxisValues)
       .attr("x", (d, i) => xScale(d.value) - i * 5)
-      .attr("y", yScale(yScale.domain()[0]) - 5)
+      .attr("y", yScale(yScale.domain()[0]) + bottomMargin / 4)
       .attr("font-size", 0.5 * sectionTitleSize)
       .attr("text-anchor", "middle")
       .text((d) => d.value.toFixed(1)); // Only show the numeric value, formatted
 
     // Add y-axis values for min and max FMI (numeric values)
     const yValues = [
-      { value: yScale.domain()[0] },
-      { value: fmiThreshold },
-      { value: yScale.domain()[1] },
-    ];
+      fmiThreshold - (yScale.domain()[1] - yScale.domain()[0]) / 4,
+      fmiThreshold,
+      fmiThreshold + (yScale.domain()[1] - yScale.domain()[0]) / 4,
+    ].map((value) => ({ value }));
 
     svg.selectAll(".yAxisValue").remove();
     const yAxisValues = svg.selectAll(".yAxisValue").data(yValues);
@@ -206,8 +206,8 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .append("text")
       .attr("class", "yAxisValue")
       .merge(yAxisValues)
-      .attr("x", xScale(xScale.domain()[0]) + 8) // Position near the y-axis line
-      .attr("y", (d) => yScale(d.value) + 5) // Position based on FMI scale
+      .attr("x", xScale(xScale.domain()[0]) + leftMargin * 6) // Position near the y-axis line
+      .attr("y", (d) => yScale(d.value) + 2) // Position based on FMI scale
       .attr("font-size", 0.5 * sectionTitleSize)
       .attr("text-anchor", "middle")
       .text((d) => d.value.toFixed(1)); // Only show the numeric value, formatted
@@ -223,20 +223,20 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     }
 
     //coloring the bad zones
-    svg.selectAll(".colorFill").remove();
+    // svg.selectAll(".colorFill").remove();
 
-    svg
-      .selectAll(".colorFill")
-      .data(pos)
-      .enter()
-      .append("rect")
-      .attr("class", "colorFill")
-      .attr("x", leftMargin)
-      .attr("y", topMargin)
-      .attr("width", badZoneWidth)
-      .attr("height", height - topMargin - bottomMargin)
-      .attr("fill", "red")
-      .attr("opacity", (g) => 0.1 * (1 - g ** 4));
+    // svg
+    //   .selectAll(".colorFill")
+    //   .data(pos)
+    //   .enter()
+    //   .append("rect")
+    //   .attr("class", "colorFill")
+    //   .attr("x", leftMargin)
+    //   .attr("y", topMargin)
+    //   .attr("width", badZoneWidth)
+    //   .attr("height", height - topMargin - bottomMargin)
+    //   .attr("fill", "red")
+    //   .attr("opacity", (g) => 0.1 * (1 - g ** 4));
 
     //draw a ling for the trajectory
     const dotSize = Math.max(4, Math.min(8, width / (10 * data.length)));
@@ -276,31 +276,31 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     const annotationText = [
       {
         x: leftMargin + badZoneWidth / 2,
-        y: topMargin - 2,
+        y: topMargin + bottomMargin / 6,
         text: "Sarcopenic Obese",
         size: 0.7 * sectionTitleSize,
         length: badZoneWidth / 2,
       },
       {
         x: leftMargin + badZoneWidth / 2,
-        y: yScale(fmiThreshold) + badZoneHeight * 1.2,
+        y: yScale(fmiThreshold) + badZoneHeight * 0.9,
         text: "Low Lean Mass",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 2,
+        length: badZoneWidth / 4,
       },
       {
         x: xScale(lmiThreshold) + badZoneWidth / 2.5,
-        y: yScale(fmiThreshold) + badZoneHeight * 1.2,
+        y: yScale(fmiThreshold) + badZoneHeight * 0.9,
         text: "High Lean Mass",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 2,
+        length: badZoneWidth / 4,
       },
       {
         x: xScale(lmiThreshold) + badZoneWidth / 2.5,
-        y: topMargin - 2,
+        y: topMargin + bottomMargin / 6,
         text: "Obesity",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 2,
+        length: badZoneWidth / 6,
       },
       {
         x: width / 2,
