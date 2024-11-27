@@ -62,9 +62,14 @@ export default function BodyCompWeightMuscleFatRatios(props) {
       .domain(xDomain)
       .range([leftMargin, width - rightMargin]);
 
-    const plotVars = props.plotVars
-      ? props.plotVars
-      : ["fat_ratio", "muscle_mass", "weight"];
+    const plotVars =
+      props.bodyCompToShow === "weight"
+        ? ["weight"]
+        : ["fat_ratio", "muscle_mass"];
+
+    const svgRemove = ["weight", "fat_ratio", "muscle_mass"];
+
+    // console.log(plotVars);
 
     const weightMax = d3.max(props.withingsData.weight.map((d) => d.weight));
     const yScale = d3
@@ -75,7 +80,7 @@ export default function BodyCompWeightMuscleFatRatios(props) {
     function drawLine(key) {
       //   console.log(key);
       const accessor = accessors[key];
-      console.log(accessor);
+      // console.log(accessor);
 
       let data = useFilter
         ? filterDates(
@@ -173,7 +178,14 @@ export default function BodyCompWeightMuscleFatRatios(props) {
         });
       }
 
-      svg.select("." + key + "path").remove();
+      // svg.select("." + key + "path").remove();
+      // console.log(svgRemove);
+      // svgRemove.forEach((key) => {
+      //   svg.selectAll("." + key + "path").remove();
+      //   svg.selectAll(".dots" + key).remove();
+      //   svg.selectAll("." + key + "text").remove();
+      // });
+
       svg
         .append("path")
         .attr("class", key + "path")
@@ -212,16 +224,16 @@ export default function BodyCompWeightMuscleFatRatios(props) {
             : `${d.formattedDate}: ${d.value.toFixed(2)}`;
         })
         .transition(100);
-      dots.exit().remove();
+      // dots.exit().remove();
 
       // console.log(items);
       //adding the name of the variable to the plot near the lines
-      svg.select("." + key + "text").remove();
+      // svg.select("." + key + "text").remove();
       svg
         .append("text")
         .attr("class", key + "text")
         .attr("x", width - rightMargin)
-        .attr("y", items[items.length - 1]?.y + 8)
+        .attr("y", items[items.length - 1]?.y + 15)
         .attr("text-anchor", "end")
         .attr("font-size", "10px")
         .attr("fill", color)
@@ -271,6 +283,12 @@ export default function BodyCompWeightMuscleFatRatios(props) {
         .call(axisLeft);
     }
 
+    svgRemove.forEach((key) => {
+      svg.selectAll("." + key + "path").remove();
+      svg.selectAll(".dots" + key).remove();
+      svg.selectAll("." + key + "text").remove();
+    });
+
     plotVars.map(drawLine);
   }, [
     svg,
@@ -280,6 +298,7 @@ export default function BodyCompWeightMuscleFatRatios(props) {
     props.plotVars,
     props.useFilter,
     props.detailsDate,
+    props.bodyCompToShow,
   ]);
 
   return (

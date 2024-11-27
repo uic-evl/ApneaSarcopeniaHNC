@@ -115,6 +115,12 @@ function inchesToFeetString(height) {
   return `${ft}'${Math.round(inch)}"`;
 }
 
+const bodyCompOverTimeButton = [
+  { label: "Weight", value: "weight" },
+  { label: "Muscle/Fat", value: "muscle_fat" },
+];
+
+const backgroundGroupColor = ["#f7f2f2", "#fafcf6", "#f7f2f2"];
 export default function Vis() {
   const fitbitAPI = new FitbitAPI("fitbit-token");
   const withingsAPI = new WithingsAPI("whithings-token");
@@ -184,9 +190,15 @@ export default function Vis() {
 
   const [bodyCompTrend, setBodyCompTrend] = useState(false);
 
+  const [bodyCompToShow, setBodyCompToShow] = useState("weight");
+
   function onBodyCompSwitchChange(checked) {
     // console.log(checked);
     setBodyCompTrend(checked);
+  }
+
+  function handleBodyCompToShowChange(e) {
+    setBodyCompToShow(e.target.value);
   }
 
   function savetoSession(item, name) {
@@ -638,7 +650,8 @@ export default function Vis() {
     rightElement,
     leftTitle = "",
     rightTitle = "",
-    height = "10em"
+    height = "10em",
+    order
   ) {
     const titleStyle = {
       width: "100%",
@@ -664,6 +677,7 @@ export default function Vis() {
             width: "100%",
             margin: "0px",
             padding: "0px",
+            backgroundColor: backgroundGroupColor[order],
           }}
         >
           <div
@@ -717,9 +731,38 @@ export default function Vis() {
               height: "100%",
             }}
           >
-            <div className="m-0 p-0 border-b-2 text-center" style={titleStyle}>
-              {rightTitle}
-            </div>
+            {rightTitle === "Body Composition Over Time" ? (
+              <div
+                className="m-0 p-0 border-b-2"
+                style={{
+                  ...titleStyle,
+                  display: "flex", // Use Flexbox
+                  justifyContent: "center", // Distribute items with space
+                  alignItems: "center", // Center items vertically
+                  gap: "1rem", // Add space between elements
+                }}
+              >
+                <span>{rightTitle}</span>
+                <Radio.Group
+                  block
+                  size="small"
+                  options={bodyCompOverTimeButton}
+                  value={bodyCompToShow}
+                  onChange={handleBodyCompToShowChange}
+                  optionType="button"
+                  buttonStyle="solid"
+                  style={{ fontWeight: "normal" }}
+                />
+              </div>
+            ) : (
+              <div
+                className="m-0 p-0 border-b-2 text-center"
+                style={titleStyle}
+              >
+                {rightTitle}
+              </div>
+            )}
+
             <div className="m-0 p-0" style={rightStyle}>
               {rightElement}
             </div>
@@ -737,6 +780,7 @@ export default function Vis() {
       datePicker={datePicker}
       detailsDate={detailsDate}
       setDetailsDate={setDetailsDate}
+      bodyCompToShow={bodyCompToShow}
     />,
 
     <SleepContainer
@@ -861,7 +905,8 @@ export default function Vis() {
                 c,
                 leftChartTitles[i],
                 rightChartTitles[i],
-                chartHeights[i]
+                chartHeights[i],
+                i
               )
             )}
             {/* <SleepLogsCharts
