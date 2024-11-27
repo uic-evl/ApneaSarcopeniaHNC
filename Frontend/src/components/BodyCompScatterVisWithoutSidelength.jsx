@@ -27,6 +27,8 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     ) {
       return;
     }
+
+    // console.log(props.bodyCompTrend);
     //https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7542899/
     const lmiThreshold =
       props.gender === null
@@ -104,11 +106,17 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       plotData.push(entry);
     });
 
-    plotData = plotData.filter(
-      (d, i) => i === 0 || i === data.length - 1 || i % 7 === 0
-    );
+    let trendData = [];
+    if (props.bodyCompTrend === true) {
+      trendData = plotData.filter(
+        (d, i) => i === 0 || i === data.length - 1 || i % 7 === 0
+      );
+    } else {
+      trendData = plotData.filter((d, i) => i === data.length - 1);
+    }
+    console.log(trendData);
     const pathPoints = [];
-    plotData.forEach((d) => {
+    trendData.forEach((d) => {
       pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);
     });
 
@@ -214,13 +222,13 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
 
     //make sarcopenia range red
 
-    const pos = [];
-    const increment = 0.5;
-    var currpos = 0;
-    while (currpos <= 1) {
-      pos.push(currpos);
-      currpos += increment;
-    }
+    // const pos = [];
+    // const increment = 0.5;
+    // var currpos = 0;
+    // while (currpos <= 1) {
+    //   pos.push(currpos);
+    //   currpos += increment;
+    // }
 
     //coloring the bad zones
     // svg.selectAll(".colorFill").remove();
@@ -250,7 +258,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("stroke-width", dotSize / 4);
 
     //draw bmi for timepoints
-    const points = svg.selectAll(".points").data(plotData, (d, i) => i);
+    const points = svg.selectAll(".points").data(trendData, (d, i) => i);
     points
       .enter()
       .append("circle")
@@ -323,7 +331,14 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("textLength", (d) => d.length)
       .attr("lengthAdjust", "spacingAndGlyphs")
       .text((d) => d.text);
-  }, [svg, props.bodyCompData, props.dateRange, props.useFilter, props.gender]);
+  }, [
+    svg,
+    props.bodyCompData,
+    props.dateRange,
+    props.useFilter,
+    props.gender,
+    props.bodyCompTrend,
+  ]);
   return (
     <div
       className={"d3-component"}

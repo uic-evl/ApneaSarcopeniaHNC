@@ -9,6 +9,7 @@ import {
   Flex,
   Radio,
   Typography,
+  Switch,
 } from "antd";
 
 import tw from "tailwind-styled-components";
@@ -180,6 +181,13 @@ export default function Vis() {
   );
 
   const [useFilter, setUseFilter] = useState(true);
+
+  const [bodyCompTrend, setBodyCompTrend] = useState(false);
+
+  function onBodyCompSwitchChange(checked) {
+    // console.log(checked);
+    setBodyCompTrend(checked);
+  }
 
   function savetoSession(item, name) {
     if (item !== undefined && item !== null) {
@@ -665,9 +673,36 @@ export default function Vis() {
               height: "100%",
             }}
           >
-            <div className="m-0 p-0 border-b-2 text-center" style={titleStyle}>
-              {leftTitle}
+            <div
+              className="m-0 p-0 border-b-2 text-center"
+              style={{
+                ...titleStyle,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative", // Needed to allow positioning of children if required
+              }}
+            >
+              <span>{leftTitle}</span>
+              {leftTitle === "Body Composition" ? (
+                <>
+                  <span
+                    style={{
+                      fontSize: "0.8em",
+                      fontWeight: "normal",
+                      marginLeft: "10px", // Add margin to space "See trend" from the title
+                    }}
+                  >
+                    See trend:
+                  </span>
+                  <Switch
+                    style={{ marginLeft: "5px" }}
+                    onChange={onBodyCompSwitchChange}
+                  />
+                </>
+              ) : null}
             </div>
+
             <div className="m-0 p-0" style={leftStyle}>
               {leftElement}
             </div>
@@ -733,17 +768,12 @@ export default function Vis() {
   const rightChartTitles = ["Body Composition Over Time", "Sleep", "Activity"];
 
   const leftCharts = [
-    // <BodyCompScatterVis
-    //   gender={fitbitProfile ? fitbitProfile["gender"] : null}
-    //   bodyCompData={bodyCompData}
-    //   dateRange={dateRange}
-    //   useFilter={useFilter}
-    // />,
     <BodyCompScatterVisWithoutSidelength
       gender={fitbitProfile ? fitbitProfile["gender"] : null}
       bodyCompData={bodyCompData}
       dateRange={dateRange}
       useFilter={useFilter}
+      bodyCompTrend={bodyCompTrend}
     />,
     <SleepScoreVis
       apneaScore={apneaScore}
