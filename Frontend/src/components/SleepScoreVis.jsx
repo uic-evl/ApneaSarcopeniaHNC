@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
-import { filterDates } from "@src/utils";
+import { filterDates, sleepScoreColorScale } from "@src/utils";
 import GaugeChart from "./GaugeChart";
 import moment from "moment";
 
@@ -19,13 +19,14 @@ export default function SleepScoreVis({ apneaScore, sleepData, dateRange }) {
     }
 
     const data = filterDates(sleepData, dateRange.start, dateRange.stop);
+    // console.log(data);
     function getScore(d) {
       return d.efficiency / 100;
     }
 
     var totalScore = 0;
     var scoreCount = 0;
-    sleepData.forEach((d) => {
+    data.forEach((d) => {
       const s = getScore(d);
       if (s > 0) {
         totalScore += s;
@@ -42,11 +43,8 @@ export default function SleepScoreVis({ apneaScore, sleepData, dateRange }) {
     <div style={{ height: "100%", width: "100%" }}>
       {/* <GaugeChart score={avgScore} /> */}
       <GaugeChart
-        score={apneaScore ? 1 - apneaScore.totalScore : 0}
-        colorScale={d3
-          .scaleLinear()
-          .domain([0, 0.5, 1])
-          .range(["#99000d", "#fb6a4a", "#fee0d2"])}
+        score={avgScore}
+        colorScale={d3.scaleLinear().domain([0, 1]).range(["white", "green"])}
       />
     </div>
   );

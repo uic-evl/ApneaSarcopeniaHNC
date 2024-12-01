@@ -114,7 +114,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     } else {
       trendData = plotData.filter((d, i) => i === data.length - 1);
     }
-    console.log(trendData);
+    // console.log(trendData);
     const pathPoints = [];
     trendData.forEach((d) => {
       pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);

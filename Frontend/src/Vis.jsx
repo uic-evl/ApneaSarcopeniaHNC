@@ -120,7 +120,7 @@ const bodyCompOverTimeButton = [
   { label: "Muscle/Fat", value: "muscle_fat" },
 ];
 
-const backgroundGroupColor = ["#f7f2f2", "#fafcf6", "#f7f2f2"];
+const backgroundGroupColor = ["#FAFAFA", "#fafcf6", "#FAFAFA"];
 export default function Vis() {
   const fitbitAPI = new FitbitAPI("fitbit-token");
   const withingsAPI = new WithingsAPI("whithings-token");

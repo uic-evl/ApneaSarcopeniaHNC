@@ -3,7 +3,7 @@ import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
 
 export default function GaugeChart({ score, colorScale }) {
-  //   console.log(score);
+  // console.log(score);
   const d3Container = useRef(null);
   const [svg, height, width, tTip] = useSVGCanvas(d3Container);
 
