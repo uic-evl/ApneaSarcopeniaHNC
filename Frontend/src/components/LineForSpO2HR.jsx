@@ -20,7 +20,7 @@ const colorMap = {
 };
 const orderedSleepLevels = ["deep", "light", "rem", "wake"];
 
-const spo2Colors = ["#b2182b", "#08306b", "#9ecae1"]; // <91, <avg, the rest
+const spo2Colors = ["#b2182b", "#2d4e80", "#9ecae1"]; // <91, <avg, the rest
 const spo2Opacity = [1, 0.85, 0.75];
 
 // Convert "HH:MM:SS" to total seconds from midnight
