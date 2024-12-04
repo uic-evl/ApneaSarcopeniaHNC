@@ -258,20 +258,22 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("stroke-width", dotSize / 4);
 
     //draw bmi for timepoints
-    const points = svg.selectAll(".points").data(trendData, (d, i) => i);
+    svg.selectAll(".sarcopeniaPoints").remove();
+    const points = svg
+      .selectAll(".sarcopeniaPoints")
+      .data(trendData, (d, i) => i);
     points
       .enter()
       .append("circle")
-      .attr("class", "points")
+      .attr("class", "sarcopeniaPoints")
       .merge(points)
-
       .attr("cx", (d) => xScale(d.lmi))
       .attr("cy", (d) => yScale(d.fmi))
       .attr("r", dotSize)
       .attr("fill", (d) => colorScale(d.date))
       .append("title")
       .text((d) => {
-        // console.log(d);
+        // console.log(moment(d.date).format("YYYY-MM-DD"), d.lmi, d.fmi, d.bmi);
         return `Date: ${moment(d.date).format("YYYY-MM-DD")}
         LMI: ${d.lmi.toFixed(2)}
         FMI: ${d.fmi.toFixed(2)}
