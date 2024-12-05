@@ -83,20 +83,20 @@ export const SleepLegend = ({ plotVar }) => {
       svg
         .append("text")
         .attr("class", "sleepLegends")
-        .attr("x", 10)
+        .attr("x", 20)
         .attr("y", 18)
         .attr("text-anchor", "end")
         .style("font-size", "12px")
-        .text("0");
+        .text("0%");
 
       svg
         .append("text")
         .attr("class", "sleepLegends")
-        .attr("x", 50)
+        .attr("x", 100)
         .attr("y", 18)
         .attr("text-anchor", "start")
         .style("font-size", "12px")
-        .text(colorDomains[1]);
+        .text(`${colorDomains[1]}%`);
     } else {
       svg.selectAll(".sleepLegendBar").remove();
 

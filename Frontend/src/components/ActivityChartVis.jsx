@@ -153,7 +153,7 @@ export default function ActivityChartVis(props) {
     svg
       .append("rect")
       .attr("class", "activityLegends")
-      .attr("x", viewWidth - rightMargin - 120)
+      .attr("x", viewWidth - rightMargin - 150)
       .attr("y", 0)
       .attr("width", 100)
       .attr("height", 10)
@@ -163,20 +163,24 @@ export default function ActivityChartVis(props) {
     svg
       .append("text")
       .attr("class", "activityLegends")
-      .attr("x", viewWidth - rightMargin - 130)
+      .attr("x", viewWidth - rightMargin - 150)
       .attr("y", 10)
       .attr("text-anchor", "end")
       .style("font-size", "12px")
-      .text("0");
+      .text(plotVar == "activityCalories" ? "0" : "0 min");
 
     svg
       .append("text")
       .attr("class", "activityLegends")
-      .attr("x", viewWidth - rightMargin - 18)
+      .attr("x", viewWidth - rightMargin - 48)
       .attr("y", 10)
       .attr("text-anchor", "start")
       .style("font-size", "12px")
-      .text(colorDomains[1]);
+      .text(
+        plotVar == "activityCalories"
+          ? colorDomains[1]
+          : `${colorDomains[1]} min`
+      );
 
     const makeItem = (d, idx) => {
       const h = yScale(d.number);

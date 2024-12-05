@@ -175,7 +175,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .append("text")
       .attr("class", "threshText")
       .attr("x", xScale(lmiThreshold) - 5) // Position at the threshold line
-      .attr("y", height / 1.13) // Adjust for the middle bottom of the chart
+      .attr("y", height / 1.09) // Adjust for the middle bottom of the chart
       .attr("font-size", 0.5 * sectionTitleSize)
       .text(threshText[1])
       .attr("text-anchor", "middle"); // Text anchor set to "middle" for centering the text
