@@ -744,7 +744,6 @@ export default function Vis() {
               >
                 <span>{rightTitle}</span>
                 <Radio.Group
-                  block
                   size="small"
                   options={bodyCompOverTimeButton}
                   value={bodyCompToShow}
