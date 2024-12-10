@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
-import { dayInMs, divideIntoMonths } from "../utils";
+import { dayInMs, divideIntoMonths, formatTimeString } from "../utils";
 import { filterDates } from "../utils";
 
 const colorMap = {
@@ -195,7 +195,7 @@ export default function SleepLevelChartVis(props) {
       .text((d) =>
         props.datePicker === "quarter" || props.datePicker === "year"
           ? d.month
-          : formatTime(new Date(d.dateString))
+          : formatTimeString(d.dateString)
       );
     timeLabels.exit().remove();
 

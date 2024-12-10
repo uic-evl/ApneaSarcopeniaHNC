@@ -29,6 +29,11 @@ export function filterDates(d, start, stop, accessor = "date") {
   return d;
 }
 
+export const formatTimeString = (dateString) => {
+  const [year, month, day] = dateString.split("-");
+  return `${month}/${day}`; // Rearrange to MM/DD
+};
+
 export const drawRectangle = (
   width,
   height,

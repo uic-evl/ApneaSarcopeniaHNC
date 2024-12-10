@@ -1,7 +1,12 @@
 import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
-import { filterDates, dayInMs, divideIntoMonths } from "@src/utils";
+import {
+  filterDates,
+  dayInMs,
+  divideIntoMonths,
+  formatTimeString,
+} from "@src/utils";
 
 function makeScale(targetMinutes) {
   return d3.scaleLinear().domain([0, targetMinutes]).range(["white", "green"]);
@@ -283,7 +288,7 @@ export default function ActivityChartVis(props) {
       .text((d) =>
         props.datePicker === "quarter" || props.datePicker === "year"
           ? d.month
-          : formatTime(new Date(d.dateString))
+          : formatTimeString(d.dateString)
       );
     timeLabels.exit().remove();
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
 import moment from "moment";
-import { dayInMs, divideIntoMonths } from "../utils";
+import { dayInMs, divideIntoMonths, formatTimeString } from "../utils";
 import { sleepScoreColorScale, filterDates } from "../utils";
 
 export default function SleepScoreChartVis(props) {
@@ -24,8 +24,8 @@ export default function SleepScoreChartVis(props) {
 
     //temp
     // console.log(props.sleepData);
+    // console.log(props.dateRange);
     // console.log(props.detailsDate);
-
     const data = filterDates(
       props.sleepData,
       props.dateRange.start,
@@ -35,7 +35,8 @@ export default function SleepScoreChartVis(props) {
     if (data.length < 1) return;
 
     // console.log(data);
-
+    // const dateDomain = d3.extent(data.map((d) => d.date));
+    // console.log(dateDomain);
     const viewWidth = width - leftMargin - rightMargin;
 
     const [vMin, vMax] = d3.extent(data.map((d) => d.number));
@@ -137,20 +138,22 @@ export default function SleepScoreChartVis(props) {
       .on("click", (event, d) => {
         // console.log(d, props.detailsDate);
         if (props.datePicker === "month" || props.datePicker === "week") {
+          // console.log(d.timestamp);
           props.setDetailsDate(d.timestamp);
           props.setPlotVar("Details");
         }
       })
-      .transition(100)
+      // .transition(100)
       .attr("x", (d) => d.x)
       .attr("height", (d) => d.height)
       .attr("fill", (d) =>
         d.timestamp === props.detailsDate ? "grey" : d.color
-      );
+      )
+      .append("title")
+      .text((d) => d.timestamp);
 
     bars.exit().remove();
 
-    const formatTime = d3.timeFormat("%m/%d");
     const timeLabels = svg
       .selectAll(".timeLabel")
       .data(items, (d) => d.timestamp);
@@ -167,7 +170,7 @@ export default function SleepScoreChartVis(props) {
       .text((d) =>
         props.datePicker === "quarter" || props.datePicker === "year"
           ? d.month
-          : formatTime(new Date(d.timestamp))
+          : formatTimeString(d.timestamp)
       );
     timeLabels.exit().remove();
 

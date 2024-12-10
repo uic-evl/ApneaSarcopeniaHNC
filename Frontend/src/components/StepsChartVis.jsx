@@ -1,7 +1,12 @@
 import { useEffect, useRef, useMemo } from "react";
 import useSVGCanvas from "./useSVGCanvas";
 import * as d3 from "d3";
-import { filterDates, dayInMs, divideIntoMonths } from "@src/utils";
+import {
+  filterDates,
+  dayInMs,
+  divideIntoMonths,
+  formatTimeString,
+} from "@src/utils";
 
 export default function StepsChartVis(props) {
   const d3Container = useRef(null);
@@ -266,7 +271,7 @@ export default function StepsChartVis(props) {
       .text((d) =>
         props.datePicker === "quarter" || props.datePicker === "year"
           ? d.month
-          : formatTime(new Date(d.timestamp))
+          : formatTimeString(d.timestamp)
       );
     timeLabels.exit().remove();
 
