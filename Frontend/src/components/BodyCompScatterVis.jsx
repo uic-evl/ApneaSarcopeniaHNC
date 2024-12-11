@@ -41,7 +41,7 @@ export default function BodyCompScatterVis(props) {
       props.gender === null
         ? 8.1
         : props.gender.toLowerCase() === "male"
-        ? 6.6
+        ? 16.6
         : 9.5;
 
     const useFilter = props.useFilter ? props.useFilter : true;

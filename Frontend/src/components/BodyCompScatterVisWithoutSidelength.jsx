@@ -8,17 +8,18 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
   const d3Container = useRef(null);
   const [svg, height, width, tTip] = useSVGCanvas(d3Container);
 
-  const bottomTitleSize = 20;
+  const bottomTitleSize = 25;
   const sectionTitleSize = 20;
   const leftMargin = 4;
   const rightMargin = 4;
   const topMargin = sectionTitleSize;
   const bottomMargin = sectionTitleSize + bottomTitleSize;
 
+  const minKgDiffToPlot = .1;
   //default x scale, unless they go out-of-bounds
   const defaultLmiExtents = [10, 30];
   //default y scale, unless they go out-of-bounds
-  const defaultFmiExtents = [1, 15];
+  const defaultFmiExtents = [3, 15];
   useEffect(() => {
     if (
       props.bodyCompData === null ||
@@ -34,21 +35,21 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       props.gender === null
         ? 15.25
         : props.gender.toLowerCase() === "male"
-        ? 16.7
-        : 13.8;
+          ? 16.7
+          : 13.8;
 
     //https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2929934/
     const fmiThreshold =
       props.gender === null
         ? 8.1
         : props.gender.toLowerCase() === "male"
-        ? 6.6
-        : 9.5;
+          ? 6.6
+          : 9.5;
 
     const useFilter = props.useFilter ? props.useFilter : true;
 
-    const lmiExtents = d3.extent(props.bodyCompData.map((d) => d.lmi));
-    const fmiExtents = d3.extent(props.bodyCompData.map((d) => d.fmi));
+    const lmiExtents = d3.extent(props.bodyCompData.filter(d => d.lmi > 0).map((d) => d.lmi));
+    const fmiExtents = d3.extent(props.bodyCompData.filter(d => d.fmi > 0).map((d) => d.fmi));
 
     const viewHeight = height - topMargin - bottomMargin;
     const viewWidth = width - leftMargin - rightMargin;
@@ -72,13 +73,16 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     const badZoneWidth = xScale(lmiThreshold) - leftMargin;
     const badZoneHeight = yScale(fmiThreshold) - topMargin;
 
+    const dateRangeDays = (props.dateRange.stop-props.dateRange.start)/(1000*60*24*60);
+
     const data = useFilter
       ? filterDates(
-          props.bodyCompData,
-          props.dateRange.start,
-          props.dateRange.stop
-        )
+        props.bodyCompData,
+        props.dateRange.start,
+        props.dateRange.stop
+      )
       : props.bodyCompData.map((d) => d);
+    
     data.sort((a, b) => a.date - b.date);
 
     const colorScale = d3
@@ -87,7 +91,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .range(["pink", "black"]);
 
     var plotData = [];
-    const windowSize = 3;
+    const windowSize = dateRangeDays > 89? 7 : dateRangeDays > 28? 5 : 3;
     data.forEach((d, i) => {
       const window = data.slice(
         Math.max(0, i - windowSize),
@@ -106,18 +110,46 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       plotData.push(entry);
     });
 
+
+    //calculate changes in values
+    let maxChange = 0;
+    let minChange = Infinity;
+    const compChanges = plotData.filter(d=>d.lmi > 0).filter(d => d.fmi > 0).map((d,i) => {
+      const d2 = plotData[Math.min(i+1,plotData.length-1)];
+      const compChange = (d.lmi - d2.lmi)**2 + (d.fmi - d2.fmi)**2;
+      const thing = Object.assign({},d);
+      thing.compChange = compChange;
+      maxChange = Math.max(compChange,maxChange);
+      minChange = Math.min(compChange,minChange);
+      return thing;
+    })
+
+    console.log(maxChange,minChange)
+    const kgPlotThreshold = Math.min(1,Math.max(minKgDiffToPlot, (maxChange)/4));
     let trendData = [];
     if (props.bodyCompTrend === true) {
-      trendData = plotData.filter(
-        (d, i) => i === 0 || i === data.length - 1 || i % 7 === 0
-      );
+      trendData.push(plotData[0]);
+      let currval = plotData[0];
+      for (const i in compChanges) {
+        const val = compChanges[+i];
+        if ((val.compChange >= kgPlotThreshold) || +i === data.length - 1 || i === 0) {
+          trendData.push(val);
+          currval = val;
+        }
+      }
+      // trendData = plotData.filter(
+      //   (d, i) => i === 0 || i === data.length - 1 || i % 7 === 0
+      // );
     } else {
       trendData = plotData.filter((d, i) => i === data.length - 1);
     }
     // console.log(trendData);
+
+    const filterWindowSize = dateRangeDays > 89? 7 : dateRangeDays >= 28? 3 : 1;
     const pathPoints = [];
-    trendData.forEach((d) => {
-      pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);
+    trendData.forEach((d, i) => {
+      // if (i === 0 || i === data.length - 1 || i % filterWindowSize === 0)
+        pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);
     });
 
     const threshPoints = [
@@ -164,10 +196,10 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr(
         "transform",
         "rotate(-90, " +
-          (leftMargin - 10) +
-          ", " +
-          (yScale(fmiThreshold) - 10) +
-          ")"
+        (leftMargin - 10) +
+        ", " +
+        (yScale(fmiThreshold) - 10) +
+        ")"
       ); // Rotate around the text position
 
     // Position for LMI text (on the bottom, centered under the threshold line)
@@ -247,12 +279,13 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     //   .attr("opacity", (g) => 0.1 * (1 - g ** 4));
 
     //draw a ling for the trajectory
-    const dotSize = Math.max(4, Math.min(8, width / (10 * data.length)));
+    const dotSize = Math.min(width,height)/50//Math.max(1, Math.min(4, width / (3 * trendData.length)));
+    const curveFunc = d3.line().curve(d3.curveCardinal)
     svg.selectAll(".linePath").remove();
     svg
       .append("path")
       .attr("class", "linePath")
-      .attr("d", d3.line()(pathPoints))
+      .attr("d", curveFunc(pathPoints))
       .attr("fill", "none")
       .attr("stroke", "teal")
       .attr("stroke-width", dotSize / 4);
@@ -269,7 +302,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .merge(points)
       .attr("cx", (d) => xScale(d.lmi))
       .attr("cy", (d) => yScale(d.fmi))
-      .attr("r", dotSize)
+      .attr("r", (d,i) => (((1+i)/(trendData.length))**.25)*dotSize)
       .attr("fill", (d) => colorScale(d.date))
       .append("title")
       .text((d) => {
@@ -289,28 +322,28 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
         y: topMargin + bottomMargin / 6,
         text: "Sarcopenic Obese",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 2,
+        length: '',
       },
       {
         x: leftMargin + badZoneWidth / 2,
         y: yScale(fmiThreshold) + badZoneHeight * 0.9,
         text: "Low Lean Mass",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 4,
+        length: '',
       },
       {
         x: xScale(lmiThreshold) + badZoneWidth / 2.5,
         y: yScale(fmiThreshold) + badZoneHeight * 0.9,
         text: "High Lean Mass",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 4,
+        length: '',
       },
       {
         x: xScale(lmiThreshold) + badZoneWidth / 2.5,
         y: topMargin + bottomMargin / 6,
         text: "Obesity",
         size: 0.7 * sectionTitleSize,
-        length: badZoneWidth / 6,
+        length: '',
       },
       {
         x: width / 2,
@@ -330,7 +363,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("y", (d) => d.y)
       .attr("font-size", (d) => d.size)
       .attr("text-anchor", "middle")
-      .attr("textLength", (d) => d.length)
+      .attr("textLength", (d) => d.text.length * d.size > width / 2 ? width / 3 : d.length)
       .attr("lengthAdjust", "spacingAndGlyphs")
       .text((d) => d.text);
   }, [
