@@ -8,7 +8,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
   const d3Container = useRef(null);
   const [svg, height, width, tTip] = useSVGCanvas(d3Container);
 
-  const bottomTitleSize = 25;
+  const bottomTitleSize = 15;
   const sectionTitleSize = 20;
   const leftMargin = 4;
   const rightMargin = 4;
@@ -180,7 +180,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("stroke-dasharray", 4);
 
     // Add text for the thresholds
-    const threshText = ["FMI (kg/m^2)", "LMI (kg/m^2)"];
+    const threshText = ["Fat Mass Index (kg/m²)", "Lean Mass Index (kg/m²)"];
 
     svg.selectAll(".threshText").remove();
 
@@ -188,27 +188,24 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     svg
       .append("text")
       .attr("class", "threshText")
-      .attr("x", badZoneHeight / 1.2) // Slightly offset to the left of the threshold line
-      .attr("y", yScale(fmiThreshold) + 10) // Slightly above the threshold line
-      .attr("font-size", 0.5 * sectionTitleSize)
+      .attr("x", 0) // Slightly offset to the left of the threshold line
+      .attr("y", 0) // Slightly above the threshold line
+      .attr("font-size", bottomTitleSize)
       .text(threshText[0])
-      .attr("text-anchor", "end") // Text anchor set to "end" for right-aligned text
+      .attr("text-anchor", "middle") // Text anchor set to "end" for right-aligned text
       .attr(
         "transform",
-        "rotate(-90, " +
-        (leftMargin - 10) +
-        ", " +
-        (yScale(fmiThreshold) - 10) +
-        ")"
+        `translate(${leftMargin+10},${height/2})rotate(-90)`
       ); // Rotate around the text position
 
     // Position for LMI text (on the bottom, centered under the threshold line)
     svg
       .append("text")
       .attr("class", "threshText")
-      .attr("x", xScale(lmiThreshold) - 5) // Position at the threshold line
-      .attr("y", height / 1.09) // Adjust for the middle bottom of the chart
-      .attr("font-size", 0.5 * sectionTitleSize)
+      .attr('x', width/2)
+      // .attr("x", xScale(lmiThreshold) - 5) // Position at the threshold line
+      .attr("y", height - 2) // Adjust for the middle bottom of the chart
+      .attr("font-size", bottomTitleSize)
       .text(threshText[1])
       .attr("text-anchor", "middle"); // Text anchor set to "middle" for centering the text
 
@@ -323,35 +320,39 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
         text: "Sarcopenic Obese",
         size: 0.7 * sectionTitleSize,
         length: '',
+        opacity: .7,
       },
       {
         x: leftMargin + badZoneWidth / 2,
-        y: yScale(fmiThreshold) + badZoneHeight * 0.9,
+        y: height-bottomMargin - 5,//height - bottomTitleSize,
         text: "Low Lean Mass",
         size: 0.7 * sectionTitleSize,
         length: '',
+        opacity: .7,
       },
       {
-        x: xScale(lmiThreshold) + badZoneWidth / 2.5,
-        y: yScale(fmiThreshold) + badZoneHeight * 0.9,
+        x: width - rightMargin - ((width - xScale(lmiThreshold)) / 2.5),
+        y: height-bottomMargin - 5,//height - bottomTitleSize,
         text: "High Lean Mass",
         size: 0.7 * sectionTitleSize,
         length: '',
+        opacity: .7,
       },
       {
-        x: xScale(lmiThreshold) + badZoneWidth / 2.5,
+        x: width - rightMargin - ((width - xScale(lmiThreshold)) / 2.5),
         y: topMargin + bottomMargin / 6,
         text: "Obesity",
         size: 0.7 * sectionTitleSize,
         length: '',
+        opacity: .7,
       },
-      {
-        x: width / 2,
-        y: height - 5,
-        text: "Lean Mass Index vs Fat Mass Index",
-        size: 0.6 * bottomTitleSize,
-        length: "",
-      },
+      // {
+      //   x: width / 2,
+      //   y: height - 2,
+      //   text: "Lean Mass Index vs Fat Mass Index",
+      //   size: 0.6 * bottomTitleSize,
+      //   length: "",
+      // },
     ];
     const annotations = svg.selectAll(".anno").data(annotationText);
     annotations
@@ -365,6 +366,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .attr("text-anchor", "middle")
       .attr("textLength", (d) => d.text.length * d.size > width / 2 ? width / 3 : d.length)
       .attr("lengthAdjust", "spacingAndGlyphs")
+      .attr('opacity',d=>d.opacity)
       .text((d) => d.text);
   }, [
     svg,
