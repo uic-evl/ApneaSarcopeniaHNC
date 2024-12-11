@@ -124,7 +124,8 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       return thing;
     })
 
-    console.log(maxChange,minChange)
+    //filter out values that have a too small change (excluding the first and last point)
+    //may need to tweak this
     const kgPlotThreshold = Math.min(1,Math.max(minKgDiffToPlot, (maxChange)/4));
     let trendData = [];
     if (props.bodyCompTrend === true) {
@@ -145,7 +146,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     }
     // console.log(trendData);
 
-    const filterWindowSize = dateRangeDays > 89? 7 : dateRangeDays >= 28? 3 : 1;
+    // const filterWindowSize = dateRangeDays > 89? 7 : dateRangeDays >= 28? 3 : 1;
     const pathPoints = [];
     trendData.forEach((d, i) => {
       // if (i === 0 || i === data.length - 1 || i % filterWindowSize === 0)
