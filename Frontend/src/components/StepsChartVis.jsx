@@ -26,7 +26,7 @@ export default function StepsChartVis(props) {
     const scale2 = d3
       .scaleLinear()
       .domain([props.stepsGoal, 1.5 * props.stepsGoal])
-      .range(["white", "green"]);
+      .range(["#f2f0f7", "#6a51a3"]);
     return (v) => (v < props.stepsGoal ? scale1(v) : scale2(v));
   }, [props.stepsGoal]);
 
@@ -141,8 +141,8 @@ export default function StepsChartVis(props) {
       .attr("x2", "100%")
       .attr("y1", "0%")
       .attr("y2", "0%");
-    gradient2.append("stop").attr("offset", "0%").attr("stop-color", "white");
-    gradient2.append("stop").attr("offset", "100%").attr("stop-color", "green");
+    gradient2.append("stop").attr("offset", "0%").attr("stop-color", "#f2f0f7");
+    gradient2.append("stop").attr("offset", "100%").attr("stop-color", "#6a51a3");
 
     // Draw legend rectangles
     svg

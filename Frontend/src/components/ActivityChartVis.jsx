@@ -9,7 +9,7 @@ import {
 } from "@src/utils";
 
 function makeScale(targetMinutes) {
-  return d3.scaleLinear().domain([0, targetMinutes]).range(["white", "green"]);
+  return d3.scaleLinear().domain([0, targetMinutes]).range(["#f2f0f7", "#6a51a3"]);
 }
 
 const activityColorScales = {

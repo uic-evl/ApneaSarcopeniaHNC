@@ -190,7 +190,7 @@ export default function Vis() {
 
   const [bodyCompTrend, setBodyCompTrend] = useState(false);
 
-  const [bodyCompToShow, setBodyCompToShow] = useState("weight");
+  const [bodyCompToShow, setBodyCompToShow] = useState("muscle_fat");
 
   function onBodyCompSwitchChange(checked) {
     // console.log(checked);

@@ -116,7 +116,7 @@ export default function ActivityScoreVis({
     <div style={{ height: "100%", width: "100%" }}>
       <GaugeChart
         score={avgScore}
-        colorScale={d3.scaleLinear().domain([0, 1]).range(["white", "green"])}
+        colorScale={d3.scaleLinear().domain([0, 1]).range(["#f2f0f7", "#6a51a3"])}
       />
     </div>
   );

@@ -15,6 +15,8 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
   const topMargin = sectionTitleSize;
   const bottomMargin = sectionTitleSize + bottomTitleSize;
 
+  const minKgDiffToPlot = .1;
+
   //default x scale, unless they go out-of-bounds
   const defaultLmiExtents = [10, 30];
   //default y scale, unless they go out-of-bounds
@@ -72,13 +74,16 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     const badZoneWidth = xScale(lmiThreshold) - leftMargin;
     const badZoneHeight = yScale(fmiThreshold) - topMargin;
 
+    const dateRangeDays = (props.dateRange.stop-props.dateRange.start)/(1000*60*24*60);
+
     const data = useFilter
       ? filterDates(
-          props.bodyCompData,
-          props.dateRange.start,
-          props.dateRange.stop
-        )
+        props.bodyCompData,
+        props.dateRange.start,
+        props.dateRange.stop
+      )
       : props.bodyCompData.map((d) => d);
+    
     data.sort((a, b) => a.date - b.date);
 
     const colorScale = d3
@@ -86,39 +91,68 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
       .domain(d3.extent(data.map((d) => d.date)))
       .range(["pink", "black"]);
 
-    var plotData = [];
-    const windowSize = 3;
-    data.forEach((d, i) => {
-      const window = data.slice(
-        Math.max(0, i - windowSize),
-        Math.min(data.length - 1, i + windowSize)
-      );
-      const entry = {};
-      for (const obj of window) {
-        for (const [key, value] of Object.entries(obj)) {
-          if (key === "formattedDate") {
-            continue;
+      var plotData = [];
+      const windowSize = dateRangeDays > 89? 7 : dateRangeDays > 28? 5 : 3;
+      data.forEach((d, i) => {
+        const window = data.slice(
+          Math.max(0, i - windowSize),
+          Math.min(data.length - 1, i + windowSize)
+        );
+        const entry = {};
+        for (const obj of window) {
+          for (const [key, value] of Object.entries(obj)) {
+            if (key === "formattedDate") {
+              continue;
+            }
+            const currVal = entry[key] ? entry[key] : 0;
+            entry[key] = currVal + value / window.length;
           }
-          const currVal = entry[key] ? entry[key] : 0;
-          entry[key] = currVal + value / window.length;
         }
+        plotData.push(entry);
+      });
+  
+  
+      //calculate changes in values
+      let maxChange = 0;
+      let minChange = Infinity;
+      const compChanges = plotData.filter(d=>d.lmi > 0).filter(d => d.fmi > 0).map((d,i) => {
+        const d2 = plotData[Math.min(i+1,plotData.length-1)];
+        const compChange = (d.lmi - d2.lmi)**2 + (d.fmi - d2.fmi)**2;
+        const thing = Object.assign({},d);
+        thing.compChange = compChange;
+        maxChange = Math.max(compChange,maxChange);
+        minChange = Math.min(compChange,minChange);
+        return thing;
+      })
+  
+      //filter out values that have a too small change (excluding the first and last point)
+      //may need to tweak this
+      const kgPlotThreshold = Math.min(1,Math.max(minKgDiffToPlot, (maxChange)/4));
+      let trendData = [];
+      if (props.bodyCompTrend === true) {
+        trendData.push(plotData[0]);
+        let currval = plotData[0];
+        for (const i in compChanges) {
+          const val = compChanges[+i];
+          if ((val.compChange >= kgPlotThreshold) || +i === data.length - 1 || i === 0) {
+            trendData.push(val);
+            currval = val;
+          }
+        }
+        // trendData = plotData.filter(
+        //   (d, i) => i === 0 || i === data.length - 1 || i % 7 === 0
+        // );
+      } else {
+        trendData = plotData.filter((d, i) => i === data.length - 1);
       }
-      plotData.push(entry);
-    });
-
-    let trendData = [];
-    if (props.bodyCompTrend === true) {
-      trendData = plotData.filter(
-        (d, i) => i === 0 || i === data.length - 1 || i % 7 === 0
-      );
-    } else {
-      trendData = plotData.filter((d, i) => i === data.length - 1);
-    }
-    // console.log(trendData);
-    const pathPoints = [];
-    trendData.forEach((d) => {
-      pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);
-    });
+      // console.log(trendData);
+  
+      // const filterWindowSize = dateRangeDays > 89? 7 : dateRangeDays >= 28? 3 : 1;
+      const pathPoints = [];
+      trendData.forEach((d, i) => {
+        // if (i === 0 || i === data.length - 1 || i % filterWindowSize === 0)
+          pathPoints.push([xScale(d.lmi), yScale(d.fmi)]);
+      });
 
     const threshPoints = [
       // Horizontal line for FMI threshold

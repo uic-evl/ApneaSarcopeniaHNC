@@ -33,13 +33,21 @@ const timeToSeconds = (timeStr) => {
 };
 
 const secondsToTimeString = (totalSeconds) => {
-  const hours = Math.floor(totalSeconds / 3600)
-    .toString()
-    .padStart(2, "0");
+  // Convert total seconds to hours and minutes
+  const hours24 = Math.floor(totalSeconds / 3600); // 24-hour format hour
   const minutes = Math.floor((totalSeconds % 3600) / 60)
     .toString()
     .padStart(2, "0");
-  return `${hours}:${minutes}`;
+
+  // Convert to 12-hour format and determine AM/PM
+  const hours12 = hours24 % 12 || 12; // Convert 0 hours to 12 for AM
+  const ampm = hours24 >= 12 ? "PM" : "AM"; // AM/PM determination
+
+  // Format hours to ensure 2 digits
+  const formattedHours = hours12.toString().padStart(2, "0");
+
+  // Return time string in 12-hour format with AM/PM
+  return `${formattedHours}:${minutes} ${ampm}`;
 };
 
 export default function LineForSpO2HR({
@@ -126,15 +134,34 @@ export default function LineForSpO2HR({
       .domain([timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1])])
       .range([0, viewWidth]);
 
+
+     // Function to generate X-axis labels with a specific increment
+     function createXAxisLabels(start, end, increment) {
+      let result = [];
+      for (let i = start; i <= end; i += increment) {
+        result.push(i);
+      }
+      // Ensure the end time is included if it's within the range and not already added
+      if (result[result.length - 1] !== end) {
+        result.push(end);
+      }
+      return result;
+    }
+    
+    // Example usage
+    let xLabels = createXAxisLabels(timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1]), 7200); // 7200 seconds = 2 hours
+    // console.log(timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1]));
+    // console.log(xLabels);
+  
+
     const spoScale = d3.scaleLinear().domain(spoDomain).range([viewHeight, 0]);
     const hrScale = d3.scaleLinear().domain(hrDomain).range([viewHeight, 0]);
 
-    const axisBottom = d3
-      .axisBottom(xScale)
-      .ticks(10)
-      .tickFormat((d) => {
-        return secondsToTimeString(d);
-      });
+    const axisBottom = d3.axisBottom(xScale)
+  .tickValues(xLabels)  // Use xLabels array for the tick values
+  .tickFormat((d) => {
+    return secondsToTimeString(d); // Format the tick labels as time strings
+  });
     const axisLeft = d3.axisLeft(spoScale).ticks(5);
 
     const axisRight = d3.axisRight(hrScale).ticks(5);
@@ -162,7 +189,7 @@ export default function LineForSpO2HR({
       .attr("transform", `translate(${viewWidth},0)`)
       .call(axisRight);
 
-    console.log(sleepData);
+    // console.log(sleepData);
     // add background rectanlge based on sleep data level
     const filteredSleepData = sleepData[0]?.levels.data.filter(
       (d) =>
