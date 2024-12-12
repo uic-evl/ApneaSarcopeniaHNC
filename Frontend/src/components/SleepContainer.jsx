@@ -36,8 +36,8 @@ export default function SleepContainer({
 
   const [plotVar, setPlotVar] = useState("Details");
 
-  const plotActivityOptions = ["Efficiency", "Levels", "Details"];
-  const plotAcitivityTitles = ["Efficiency", "Levels", "SpO2/HR"];
+  const plotActivityOptions = ["Efficiency", "Stages", "Details"];
+  const plotAcitivityTitles = ["Efficiency", "Stages", "SpO2/HR"];
   const handleButtonChange = ({ target: { value } }) => {
     setPlotVar(value);
   };
@@ -93,7 +93,7 @@ export default function SleepContainer({
             setDetailsDate={setDetailsDate}
             setPlotVar={setPlotVar}
           />
-        ) : plotVar === "Levels" ? (
+        ) : plotVar === "Stages" ? (
           <SleepLevelChartVis
             sleepData={sleepData}
             dateRange={dateRange}
