@@ -17,7 +17,7 @@ const labelText = {
 
 const colorDict = {
   fat_ratio: "#c46ffc",
-  weight: "#377eb8",
+  weight: "green",
   muscle_mass: "#0bb3a5",
 };
 

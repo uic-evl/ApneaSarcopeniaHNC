@@ -13,10 +13,10 @@ const variables = ["hr", "spo2"];
 // };
 
 const colorMap = {
-  rem: "#b3cde3",
+  rem: "#98d6ed",
   light: "#8c96c6",
-  deep: "#88419d",
-  wake: "#ff4500",
+  deep: "#1f78b4",
+  wake: "#b3cde3",
 };
 const orderedSleepLevels = ["deep", "light", "rem", "wake"];
 

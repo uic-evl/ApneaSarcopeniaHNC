@@ -20,7 +20,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
   // //default x scale, unless they go out-of-bounds
   // const defaultLmiExtents = [6, 30];
   // //default y scale, unless they go out-of-bounds
-  const defaultFmiExtents = [1, 15];
+  // const defaultFmiExtents = [1, 15];
   useEffect(() => {
     if (
       props.bodyCompData === null ||
@@ -39,21 +39,21 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
         ? 16.7
         : 13.8;
 
-    //https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2929934/
+    //https://bmcgeriatr.biomedcentral.com/articles/10.1186/s12877-020-01578-9
     const fmiThreshold =
       props.gender === null
-        ? 8.1
+        ? 10.8
         : props.gender.toLowerCase() === "male"
-        ? 6.6
-        : 9.5;
+        ? 9
+        : 12.6;
 
     const useFilter = props.useFilter ? props.useFilter : true;
 
     // const lmiExtents = d3.extent(props.bodyCompData.map((d) => d.lmi));
-    const fmiExtents = d3.extent(props.bodyCompData.map((d) => d.fmi));
+    // const fmiExtents = d3.extent(props.bodyCompData.map((d) => d.fmi));
 
     const lmiExtents = [lmiThreshold - 12, lmiThreshold + 12];
-    // const fmiExtents = [fmiThreshold - 5, fmiThreshold + 5];
+    const fmiExtents = [fmiThreshold - 9, fmiThreshold + 9];
 
     const viewHeight = height - topMargin - bottomMargin;
     const viewWidth = width - leftMargin - rightMargin;
@@ -69,11 +69,11 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
 
     const yScale = d3
       .scaleLinear()
-      .domain([
-        Math.min(fmiExtents[0], defaultFmiExtents[0]),
-        Math.max(fmiExtents[1], defaultFmiExtents[1]),
-      ])
-      // .domain(fmiExtents)
+      // .domain([
+      //   Math.min(fmiExtents[0], defaultFmiExtents[0]),
+      //   Math.max(fmiExtents[1], defaultFmiExtents[1]),
+      // ])
+      .domain(fmiExtents)
       .range([height - bottomMargin, topMargin]);
 
     const badZoneWidth = xScale(lmiThreshold) - leftMargin;
@@ -95,7 +95,7 @@ export default function BodyCompScatterVisWithoutSidelength(props) {
     const colorScale = d3
       .scaleLinear()
       .domain(d3.extent(data.map((d) => d.date)))
-      .range(["pink", "black"]);
+      .range(["#c7e9c0", "#00441b"]);
 
     var plotData = [];
     const windowSize = dateRangeDays > 89 ? 7 : dateRangeDays > 28 ? 5 : 3;

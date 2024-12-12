@@ -21,7 +21,7 @@ export const dayInMs =
 export const sleepScoreColorScale = d3
   .scaleLinear()
   .domain([60, 100])
-  .range(["white", "green"]);
+  .range(["#ece7f2", "#045a8d"]);
 
 export function filterDates(d, start, stop, accessor = "date") {
   if (start !== null) d = d.filter((d) => d[accessor] >= start);

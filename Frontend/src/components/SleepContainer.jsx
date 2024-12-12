@@ -34,7 +34,7 @@ export default function SleepContainer({
     setDetailsDate(newDay.format("YYYY-MM-DD"));
   }
 
-  const [plotVar, setPlotVar] = useState("Efficiency");
+  const [plotVar, setPlotVar] = useState("Details");
 
   const plotActivityOptions = ["Efficiency", "Levels", "Details"];
   const plotAcitivityTitles = ["Efficiency", "Levels", "SpO2/HR"];

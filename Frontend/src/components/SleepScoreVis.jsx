@@ -44,7 +44,10 @@ export default function SleepScoreVis({ apneaScore, sleepData, dateRange }) {
       {/* <GaugeChart score={avgScore} /> */}
       <GaugeChart
         score={avgScore}
-        colorScale={d3.scaleLinear().domain([0, 1]).range(["white", "green"])}
+        colorScale={d3
+          .scaleLinear()
+          .domain([0, 1])
+          .range(["#ece7f2", "#045a8d"])}
       />
     </div>
   );

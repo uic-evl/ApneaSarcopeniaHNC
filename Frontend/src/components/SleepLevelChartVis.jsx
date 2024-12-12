@@ -5,10 +5,10 @@ import { dayInMs, divideIntoMonths, formatTimeString } from "../utils";
 import { filterDates } from "../utils";
 
 const colorMap = {
-  rem: "#b3cde3",
+  rem: "#98d6ed",
   light: "#8c96c6",
-  deep: "#88419d",
-  wake: "#fdbe85",
+  deep: "#1f78b4",
+  wake: "#b3cde3",
 };
 const orderedSleepLevels = ["deep", "light", "rem", "wake"];
 export default function SleepLevelChartVis(props) {
