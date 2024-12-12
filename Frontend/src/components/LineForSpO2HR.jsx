@@ -134,34 +134,36 @@ export default function LineForSpO2HR({
       .domain([timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1])])
       .range([0, viewWidth]);
 
-
-     // Function to generate X-axis labels with a specific increment
-     function createXAxisLabels(start, end, increment) {
+    // Function to generate X-axis labels with a specific increment
+    function createXAxisLabels(start, end, increment) {
       let result = [];
       for (let i = start; i <= end; i += increment) {
         result.push(i);
       }
-      // Ensure the end time is included if it's within the range and not already added
+
       if (result[result.length - 1] !== end) {
         result.push(end);
       }
       return result;
     }
-    
-    // Example usage
-    let xLabels = createXAxisLabels(timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1]), 7200); // 7200 seconds = 2 hours
+
+    let xLabels = createXAxisLabels(
+      timeToSeconds(timeDomain[0]),
+      timeToSeconds(timeDomain[1]),
+      7200
+    ); // 7200 seconds = 2 hours
     // console.log(timeToSeconds(timeDomain[0]), timeToSeconds(timeDomain[1]));
     // console.log(xLabels);
-  
 
     const spoScale = d3.scaleLinear().domain(spoDomain).range([viewHeight, 0]);
     const hrScale = d3.scaleLinear().domain(hrDomain).range([viewHeight, 0]);
 
-    const axisBottom = d3.axisBottom(xScale)
-  .tickValues(xLabels)  // Use xLabels array for the tick values
-  .tickFormat((d) => {
-    return secondsToTimeString(d); // Format the tick labels as time strings
-  });
+    const axisBottom = d3
+      .axisBottom(xScale)
+      .tickValues(xLabels)
+      .tickFormat((d) => {
+        return secondsToTimeString(d); // Format the tick labels as time strings
+      });
     const axisLeft = d3.axisLeft(spoScale).ticks(5);
 
     const axisRight = d3.axisRight(hrScale).ticks(5);
