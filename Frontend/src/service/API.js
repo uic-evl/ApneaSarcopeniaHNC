@@ -85,14 +85,31 @@ class BaseAPI {
     return sessionStorage.getItem(this.refreshName);
   }
 
+  // isExpired() {
+  //   const currTime = new Date().getTime() / 1000;
+  //   const expireTime = this.getExpireTime();
+  //   if (expireTime === null) {
+  //     return true;
+  //   }
+  //   // return (Math.abs(currTime - Number(expireTime)) > 5)
+  //   return currTime >= Number(expireTime) - 1;
+  // }
   isExpired() {
     const currTime = new Date().getTime() / 1000;
     const expireTime = this.getExpireTime();
+
     if (expireTime === null) {
+      console.log("[Fitbit] No expire time set. Treating token as expired.");
       return true;
     }
-    // return (Math.abs(currTime - Number(expireTime)) > 5)
-    return currTime >= Number(expireTime) - 1;
+
+    const expired = currTime >= Number(expireTime) - 1;
+    if (expired) {
+      console.log(
+        `[Fitbit] Token expired. Now: ${currTime}, Expiry: ${expireTime}`
+      );
+    }
+    return expired;
   }
 
   //todo: figure out refresh tokens
@@ -694,52 +711,108 @@ export class FitbitAPI extends BaseAPI {
     return null;
   }
 
+  // async refreshFitbitToken() {
+  //   if (!this.isExpired()) {
+  //     console.log("[Fitbit] Token is NOT expired. No need to refresh.");
+  //     return;
+  //   }
+  //   if (this.isRefreshing()) {
+  //     console.log("[Fitbit] Refresh is already in progress. Waiting...");
+  //     await this.waitForRefresh();
+  //     return;
+  //   }
+  //   const token = localStorage.getItem(this.cookieName + "-refresh");
+  //   sessionStorage.setItem(this.refreshName, true);
+  //   const body = new URLSearchParams();
+  //   body.append("client_id", env.FITBIT_CLIENT_ID);
+  //   body.append("grant_type", "refresh_token");
+  //   body.append("code_verifier", env.VERIFIER);
+  //   body.append("refresh_token", token);
+  //   const tokenUrl = "https://api.fitbit.com/oauth2/token";
+  //   console.log("refreshing");
+  //   // console.log('body',body.toString())
+  //   fetch(tokenUrl, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/x-www-form-urlencoded",
+  //     },
+  //     body: body.toString(), // The body must be URL-encoded
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       if (data.access_token) {
+  //         console.log("Fitbit refresh Access Token:", data);
+  //         // TODO: Store the access token in the local storage as well
+
+  //         this.setToken(data.access_token);
+  //         this.setRefreshToken(data.refresh_token);
+
+  //         this.setExpiresFrom(data.expires_in);
+  //         this.setRefreshing(false);
+  //       } else {
+  //         console.error("Error fetching refresh access token:", data);
+  //         this.setRefreshing(false);
+  //         //   this.resetFitbitToken();
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error during fitibt token refresh:", error);
+  //       this.setRefreshing(false);
+  //       // this.resetFitbitToken();
+  //     });
+  // }
+
   async refreshFitbitToken() {
     if (!this.isExpired()) {
+      console.log("[Fitbit] Token is NOT expired. No need to refresh.");
       return;
     }
+
     if (this.isRefreshing()) {
+      console.log("[Fitbit] Refresh is already in progress. Waiting...");
       await this.waitForRefresh();
       return;
     }
+
     const token = localStorage.getItem(this.cookieName + "-refresh");
     sessionStorage.setItem(this.refreshName, true);
+
+    console.log("[Fitbit] Token is EXPIRED. Starting refresh flow...");
     const body = new URLSearchParams();
     body.append("client_id", env.FITBIT_CLIENT_ID);
     body.append("grant_type", "refresh_token");
     body.append("code_verifier", env.VERIFIER);
     body.append("refresh_token", token);
+
     const tokenUrl = "https://api.fitbit.com/oauth2/token";
-    console.log("refreshing");
-    // console.log('body',body.toString())
+
     fetch(tokenUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: body.toString(), // The body must be URL-encoded
+      body: body.toString(),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.access_token) {
-          console.log("Fitbit refresh Access Token:", data);
-          // TODO: Store the access token in the local storage as well
+          console.log(
+            "[Fitbit] Refresh succeeded. New token:",
+            data.access_token
+          );
 
           this.setToken(data.access_token);
           this.setRefreshToken(data.refresh_token);
-
           this.setExpiresFrom(data.expires_in);
           this.setRefreshing(false);
         } else {
-          console.error("Error fetching refresh access token:", data);
+          console.error("[Fitbit] Refresh failed. Error response:", data);
           this.setRefreshing(false);
-          //   this.resetFitbitToken();
         }
       })
       .catch((error) => {
-        console.error("Error during fitibt token refresh:", error);
+        console.error("[Fitbit] Error during token refresh:", error);
         this.setRefreshing(false);
-        // this.resetFitbitToken();
       });
   }
 }

@@ -42,10 +42,23 @@ export default function ActivityChartVis(props) {
       return;
     }
     const timeDict = {};
+    // for (let key of Object.keys(props.activityData)) {
+    //   let vals = props.activityData[key];
+    //   if (vals === undefined) {
+    //     console.log("missing", key, "from activity");
+    //     continue;
+    //   }
+    //   for (const val of vals) {
+    //     const date = val.date;
+    //     const entry = timeDict[date] ? timeDict[date] : {};
+    //     entry[key] = val;
+    //     timeDict[date] = entry;
+    //   }
+    // }
     for (let key of Object.keys(props.activityData)) {
-      let vals = props.activityData[key];
-      if (vals === undefined) {
-        console.log("missing", key, "from activity");
+      const vals = props.activityData[key];
+      if (!Array.isArray(vals)) {
+        console.warn("Expected array for", key, "but got", vals);
         continue;
       }
       for (const val of vals) {
@@ -55,22 +68,46 @@ export default function ActivityChartVis(props) {
         timeDict[date] = entry;
       }
     }
+
     let data = [];
+    // for (const [key, val] of Object.entries(timeDict)) {
+    //   const ref = val.minutesFairlyActive;
+    //   const entry = {
+    //     date: ref.date,
+    //     dateTime: ref.dateTime,
+    //     formattedDate: ref.formattedDate,
+    //   };
+    //   let totalActivity = 0;
+    //   for (const [key2, val2] of Object.entries(val)) {
+    //     entry[key2] = val2.number;
+    //     if (activityLevels.indexOf(key2) >= 0) totalActivity += val2.number;
+    //   }
+    //   entry["totalActivity"] = totalActivity;
+    //   data.push(entry);
+    // }
     for (const [key, val] of Object.entries(timeDict)) {
-      const ref = val.minutesFairlyActive;
+      const ref = val.minutesFairlyActive || Object.values(val)[0]; // fallback to any existing entry
+
+      if (!ref || ref.date === undefined) {
+        console.warn("Invalid entry for", key, val);
+        continue;
+      }
+
       const entry = {
         date: ref.date,
         dateTime: ref.dateTime,
         formattedDate: ref.formattedDate,
       };
+
       let totalActivity = 0;
       for (const [key2, val2] of Object.entries(val)) {
         entry[key2] = val2.number;
-        if (activityLevels.indexOf(key2) >= 0) totalActivity += val2.number;
+        if (activityLevels.includes(key2)) totalActivity += val2.number;
       }
       entry["totalActivity"] = totalActivity;
       data.push(entry);
     }
+
     return data;
   }, [props.activityData]);
 

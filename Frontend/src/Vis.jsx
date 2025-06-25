@@ -179,11 +179,18 @@ export default function Vis() {
     stop: nowTimestamp(),
     start: dayToTimestamp(moment().subtract(4, "weeks")),
   });
+  // const [dateRange, setDateRange] = useState({
+  //   start: dayToTimestamp(moment("2024-11-02")),
+  //   stop: dayToTimestamp(moment("2024-12-02")),
+  // });
+
+  console.log("date range", dateRange);
 
   const [datePicker, setDatePicker] = useState("month");
 
   const [detailsDate, setDetailsDate] = useState(
     convertTimestampToDateString(nowTimestamp() / 1000)
+    // dayToTimestamp(moment("2024-12-02"))
   );
 
   const [useFilter, setUseFilter] = useState(true);
