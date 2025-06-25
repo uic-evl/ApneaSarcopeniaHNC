@@ -2,9 +2,25 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import * as env from "../env.js";
 
+// function getTimeIntervalSinceToday(months) {
+//   const today = moment().format("YYYY-MM-DD");
+//   const startDate = moment().subtract(months, "months").format("YYYY-MM-DD");
+//   console.log("inside timeinterval since today", today, startDate);
+//   return [startDate, today];
+// }
+
 function getTimeIntervalSinceToday(months) {
-  const today = moment().format("YYYY-MM-DD");
-  const startDate = moment().subtract(months, "months").format("YYYY-MM-DD");
+  // base moment pinned to Dec 10, 2024
+  const base = moment("2024-12-10", "YYYY-MM-DD");
+
+  // format both as YYYY-MM-DD strings
+  const today = base.format("YYYY-MM-DD");
+  const startDate = base
+    .clone()
+    .subtract(months, "months")
+    .format("YYYY-MM-DD");
+
+  console.log("inside timeInterval:", startDate, "→", today);
   return [startDate, today];
 }
 
@@ -468,7 +484,7 @@ export class FitbitAPI extends BaseAPI {
   }
 
   async fetchFitbitProfile() {
-    return this.makeFitbitQuery("https://api.fitbit.com/1/user/-/profile.json");
+    return this.makeFitbitQuery("/api/fitbit/1/user/-/profile.json");
   }
 
   async fetchStepsGoal(period = "daily") {
@@ -478,7 +494,7 @@ export class FitbitAPI extends BaseAPI {
       );
     }
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/activities/goals/${period}.json`
+      `/api/fitbit/1/user/-/activities/goals/${period}.json`
     );
   }
 
@@ -489,53 +505,50 @@ export class FitbitAPI extends BaseAPI {
       limit: 100,
       offset: 0,
     };
-    return this.makeFitbitQuery(
-      "https://api.fitbit.com/1.2/user/-/sleep/list.json",
-      args
-    );
+    return this.makeFitbitQuery("/api/fitbit/1.2/user/-/sleep/list.json", args);
   }
 
   async fetchFitbitHeartRate(start, end) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/activities/heart/date/${start}/${end}.json`
+      `/api/fitbit/1/user/-/activities/heart/date/${start}/${end}.json`
     );
   }
 
   async fetchFitbitSpO2(start, end) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/spo2/date/${start}/${end}.json`
+      `/api/fitbit/1/user/-/spo2/date/${start}/${end}.json`
     );
   }
 
   async fetchFitbitSpO2Minute(date) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/spo2/date/${date}/all.json`
+      `/api/fitbit/1/user/-/spo2/date/${date}/all.json`
       // `https://api.fitbit.com/1/user/-/spo2/date/2024-10-23/all.json`
     );
   }
 
   async fetchFitbitHRMinute(date) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/activities/heart/date/${date}/1d/1min.json`
+      `/api/fitbit/1/user/-/activities/heart/date/${date}/1d/1min.json`
       // `https://api.fitbit.com/1/user/-/activities/heart/date/2019-01-01/1d/1min.json`
     );
   }
 
   async fetchFitbitSleepLogRange(start, end) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1.2/user/-/sleep/date/${start}/${end}.json`
+      `/api/fitbit/1.2/user/-/sleep/date/${start}/${end}.json`
     );
   }
 
   async fetchFitbitStepsRange(start, end) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/activities/steps/date/${start}/${end}.json`
+      `/api/fitbit/1/user/-/activities/steps/date/${start}/${end}.json`
     );
   }
 
   async fetchFitbitSleepLogByDate(date) {
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1.2/user/-/sleep/date/${date}.json`
+      `/api/fitbit/1.2/user/-/sleep/date/${date}.json`
     );
   }
 
@@ -545,7 +558,7 @@ export class FitbitAPI extends BaseAPI {
         "Invalid Activity " + activity + " passed to fetchFitbitActivityRange"
       );
     return this.makeFitbitQuery(
-      `https://api.fitbit.com/1/user/-/activities/${activity}/date/${start}/${end}.json`
+      `/api/fitbit/1/user/-/activities/${activity}/date/${start}/${end}.json`
     );
   }
 
