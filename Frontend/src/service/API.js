@@ -11,10 +11,11 @@ import * as env from "../env.js";
 
 function getTimeIntervalSinceToday(months) {
   // base moment pinned to Dec 10, 2024
-  const base = moment("2024-12-10", "YYYY-MM-DD");
+  // const base = moment("2024-12-10", "YYYY-MM-DD");
+  // // format both as YYYY-MM-DD strings
+  // const today = base.format("YYYY-MM-DD");
 
-  // format both as YYYY-MM-DD strings
-  const today = base.format("YYYY-MM-DD");
+  const today = moment().format("YYYY-MM-DD");
   const startDate = base
     .clone()
     .subtract(months, "months")

@@ -175,18 +175,18 @@ export default function Vis() {
   const [hrError, setHRError] = useState();
   const [hrMinuteError, setHRMinuteError] = useState();
 
-  // const [dateRange, setDateRange] = useState({
-  //   stop: nowTimestamp(),
-  //   start: dayToTimestamp(moment().subtract(4, "weeks")),
-  // });
-  const endMoment = moment("2024-12-10", "YYYY-MM-DD");
-  const startMoment = moment(endMoment).subtract(3.1, "months");
-
   const [dateRange, setDateRange] = useState({
-    // ms timestamps so your d3 & selectors still work
-    start: dayToTimestamp(moment("2024-11-10", "YYYY-MM-DD")),
-    stop: endMoment.valueOf(),
+    stop: nowTimestamp(),
+    start: dayToTimestamp(moment().subtract(4, "weeks")),
   });
+  // const endMoment = moment("2024-12-10", "YYYY-MM-DD");
+  // const startMoment = moment(endMoment).subtract(3.1, "months");
+
+  // const [dateRange, setDateRange] = useState({
+  //   // ms timestamps so your d3 & selectors still work
+  //   start: dayToTimestamp(moment("2024-11-10", "YYYY-MM-DD")),
+  //   stop: endMoment.valueOf(),
+  // });
 
   // console.log("date range", dateRange);
 
