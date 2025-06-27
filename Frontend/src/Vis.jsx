@@ -188,7 +188,7 @@ export default function Vis() {
     stop: endMoment.valueOf(),
   });
 
-  console.log("date range", dateRange);
+  // console.log("date range", dateRange);
 
   const [datePicker, setDatePicker] = useState("month");
 
