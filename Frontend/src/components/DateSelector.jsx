@@ -93,8 +93,12 @@ export default function DateSelector({
   }
 
   const forwardEnabled = dateRange.stop < moment().unix() * 1000;
-  const backwardEnabled =
-    dateRange.start >= moment().subtract(100, "days").unix() * 1000;
+  // const backwardEnabled =
+  //   dateRange.start >= moment().subtract(100, "days").unix() * 1000;
+  const earliestAllowed = moment("2024-12-10", "YYYY-MM-DD")
+    .subtract(3.1, "months")
+    .valueOf();
+  const backwardEnabled = dateRange.start > earliestAllowed;
 
   function incrementDay() {
     shiftDateRange(1);
