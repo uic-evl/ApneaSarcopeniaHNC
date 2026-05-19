@@ -1,6 +1,6 @@
 ## mEnergy
 
-> This work has been **accepted for publication** at the **47th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC 2025)**, Copenhagen, Denmark.
+> This work has been **accepted for publication** at the **47th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC 2025)**, Copenhagen, Denmark. 
 
 ## How to Cite
 
