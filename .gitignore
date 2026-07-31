@@ -38,3 +38,5 @@ Backend/heshmati_heds_wordpress_credential.txt
 
 *.env
 Frontend/src/env.js
+evl.crt
+evl.key

@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apnea-sarcopenia-hnc-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - app
+
+  proxy:
+    image: nginx:1.25.4-alpine3.18
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - type: bind
+        source: ./evl.key
+        target: /etc/nginx/certs/evl.key
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./evl.crt
+        target: /etc/nginx/certs/evl.crt
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./docker/proxy/https-forwarding.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
